@@ -7,11 +7,11 @@ from aiogram.types import TelegramObject, Update
 
 class CustomI18nMiddleware(SimpleI18nMiddleware):
     def __init__(self, domain: str, path: str):
-        self.i18n = I18n(path=path, default_locale="en", domain=domain)
+        self.i18n = I18n(path=path, default_locale='en', domain=domain)
         super().__init__(self.i18n)
 
     async def get_locale(self, event: TelegramObject, data: dict[str, Any]) -> str:
-        db: Database = data.get("db")
+        db: Database = data.get('db')
         user_id: Optional[int] = None
 
         if isinstance(event, Update):
