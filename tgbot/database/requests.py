@@ -14,3 +14,16 @@ class Database:
             user = User(**user_data)
             self.session.add(user)
         await self.session.commit()
+
+    async def get_user_language(self, user_id: int) -> str:
+        user = await self.session.get(User, user_id)
+        if user:
+            return user.language_code
+        return None
+
+    async def update_user_language(self, user_id: int, selected_language_code: str) -> None:
+        user = await self.session.get(User, user_id)
+        if user:
+            if user.language_code != selected_language_code:
+                user.language_code = selected_language_code
+                await self.session.commit()
