@@ -14,7 +14,7 @@ router = Router()
 async def handle_start_command(message: Message, db: Database) -> Message:
     await message.answer(
         text=_('Hello, <b>{first_name}</b>!👋').format(first_name=message.from_user.first_name),
-        reply_markup= await get_main_menu_kb()
+        reply_markup=get_main_menu_kb()
     )
     user = message.from_user
     user_data = {

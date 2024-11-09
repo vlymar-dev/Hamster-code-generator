@@ -8,5 +8,5 @@ async def send_main_menu(message: Message) -> None:
     await message.delete()
     await message.answer(
         text=_('Main menu 👑'),
-        reply_markup=await get_main_menu_kb()
+        reply_markup=get_main_menu_kb()
     )
