@@ -3,11 +3,17 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.i18n import gettext as _
 
 from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
+from tgbot.services.referral import REFERRAL_LINKS
 
 
-def get_settings_kb() -> InlineKeyboardMarkup:
+def referral_links_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=_('Change language 🌍'), callback_data='change_language'))
+    for game_name, game_url in REFERRAL_LINKS.items():
+        builder.button(
+            text=game_name,
+            url=game_url,
+        )
+    builder.adjust(2)
     builder.row(back_to_main_menu_button())
     return builder.as_markup()

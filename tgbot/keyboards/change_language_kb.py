@@ -15,5 +15,4 @@ def get_change_language_kb() -> InlineKeyboardMarkup:
         )
     builder.adjust(2)
     builder.row(back_to_main_menu_button())
-
     return builder.as_markup()
