@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from tgbot.config import config
 from tgbot.handlers import register_handlers
 from tgbot.middlewares.db import DatabaseMiddleware
-from tgbot.middlewares.i18n_middleware import DatabaseI18nMiddleware
+from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ async def main():
     session = async_sessionmaker(bind=engine, expire_on_commit=False)
 
     dp.update.outer_middleware(DatabaseMiddleware(session=session))
-    dp.update.outer_middleware(DatabaseI18nMiddleware(domain='messages', path='locales'))
+    dp.update.outer_middleware(CustomI18nMiddleware(domain='messages', path='tgbot/locales'))
 
     register_handlers(dp)
 
