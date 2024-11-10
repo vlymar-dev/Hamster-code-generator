@@ -1,12 +1,12 @@
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
 from tgbot.database import Database
 from tgbot.handlers.messages import send_main_menu
 from tgbot.keyboards.change_language_kb import get_change_language_kb
+from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
-from tgbot.keyboards.payment_kb import get_payment_kb
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings_kb import get_settings_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
@@ -33,7 +33,7 @@ async def user_info_handler(callback_query: CallbackQuery) -> None:
     await callback_query.answer()
     await callback_query.message.answer(
         text=_('Bot info'),
-        reply_markup=await get_payment_kb()
+        reply_markup=await get_donation_kb()
     )
 
 
