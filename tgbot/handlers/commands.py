@@ -11,17 +11,34 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def handle_start_command(message: Message, db: Database) -> Message:
-    await message.answer(
-        text=_('Hello, <b>{first_name}</b>!👋\n\n'
-               '🌊 Join the adventure with us — pick an action below and start playing! 🚀 \n'
-               '🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for active players.\n'
-               '🏆 Play, progress, and unlock new rewards with every step! \n\n'
-               '📖 <i>Terms of use are available in the <b>Info</b> section.</i>').format(
-            first_name=message.from_user.first_name,
-        ),
-        reply_markup=get_main_menu_kb()
-    )
+async def handle_start_command(message: Message, db: Database) -> None:
+    args = message.text.split(maxsplit=1)
+    welcome_message = _('👋 Hello, <b>{first_name}</b>!\n'
+                   '🛳️ <i>Welcome aboard!</i>\n\n'
+                   '🌊 Join the adventure with us — pick an action below and start playing! 🚀 \n'
+                   '🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for active players.\n'
+                   '🏆 Play, progress, and unlock new rewards with every step! \n\n'
+                   '📖 <i>Terms of use are available in the <b>Info</b> section.</i>').format(
+                first_name=message.from_user.first_name,
+            )
+    if len(args) > 1 and args[1].isdigit():
+        referrer_id = int(args[1])
+        if referrer_id != message.from_user.id:
+            referrer_message=_(
+                '🎉 You’ve joined through the referral link of user ID <b>{referrer_id}</b>!\n\n'
+            ).format(
+                referrer_id=referrer_id
+            )
+            await message.answer(text=referrer_message + welcome_message)
+        else:
+            await message.answer(text=_(
+                'Oops! 🚫 You can’t use your own referral link!'
+            ))
+    else:
+        await message.answer(
+            text=welcome_message,
+            reply_markup=get_main_menu_kb()
+        )
     user = message.from_user
     user_data = {
         'id': user.id,
