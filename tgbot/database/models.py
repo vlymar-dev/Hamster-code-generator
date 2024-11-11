@@ -28,7 +28,7 @@ class User(Base):
 
     # Referral info
     referred_by: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id'), nullable=True)
-    referrals: Mapped[list[int]] = mapped_column(ARRAY(BigInteger), default=[])
+    referrals: Mapped[list[int]] = mapped_column(ARRAY(BigInteger), default=list)
 
     # Activity
     total_keys_generated: Mapped[int] = mapped_column(Integer, default=0)

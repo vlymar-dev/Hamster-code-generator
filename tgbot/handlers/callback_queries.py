@@ -70,7 +70,8 @@ async def change_language_handler(callback_query: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == 'user_progress')
-async def user_progress_handler(callback_query: CallbackQuery) -> None:
+async def user_progress_handler(callback_query: CallbackQuery, db: Database) -> None:
+    user_data = await db.get_user_progress(user_id=callback_query.from_user.id)
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
@@ -81,8 +82,8 @@ async def user_progress_handler(callback_query: CallbackQuery) -> None:
                '🤝 <b><i>Referrals:</i></b> <i>{referrals}</i>\n\n'
                '🚀 <b>Invite friends, earn keys, and reach new heights with us!</b> 🌍').format(
             achievement_name='text',
-            keys_total='1',  # TODO: logic keys count
-            referrals='1',  # TODO: logic refs count
+            keys_total=user_data['total_keys_generated'],
+            referrals=user_data['referrals'],
         ),
         reply_markup=get_back_to_main_menu_keyboard()
     )

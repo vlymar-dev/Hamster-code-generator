@@ -1,5 +1,6 @@
-from typing import Any
+from typing import Any, Optional
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tgbot.database.models import User
@@ -44,3 +45,22 @@ class Database:
         if referrer_user:
             referrer_user.referrals = referrer_user.referrals + [user_id]
             await self.session.commit()
+
+    async def get_user_progress(self, user_id: int)-> Optional[dict[str, any]]:
+        result = await self.session.execute(
+            select(
+                User.referrals,
+                User.registration_date,
+                User.total_keys_generated
+            ).where(User.id == user_id)
+        )
+        user_data = result.one_or_none()
+        if user_data:
+            referrals, registration_date, total_keys_generated = user_data
+            return {
+                "referrals": len(referrals) if referrals else 0,
+                "registration_date": registration_date,
+                "total_keys_generated": total_keys_generated,
+            }
+        return None
+
