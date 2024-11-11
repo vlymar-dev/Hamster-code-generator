@@ -16,10 +16,25 @@ class DbConfig:
     def db_url(self) -> str:
         return f'postgresql+asyncpg://{self.user}:{self.password}@:{self.port}/{self.database}'
 
+@dataclass
+class BotInfo:
+    username: str
+    support_link: str
+
+    def generate_referral_link(self, user_id: int) -> str:
+        return f'https://t.me/{self.username}?start={user_id}'
+
+
+@dataclass
+class Wallets:
+    trc_wallet: str
+    ton_wallet: str
 
 @dataclass
 class TgBot:
     token: str
+    bot_info: BotInfo
+    wallets: Wallets
 
 
 @dataclass
@@ -33,6 +48,14 @@ def load_config(path: str = None) -> Config:
     return Config(
         tg_bot=TgBot(
             token=os.getenv('BOT_TOKEN', 'token'),
+            bot_info=BotInfo(
+                username=os.getenv('BOT_USERNAME', 'bot_username'),
+                support_link=os.getenv('SUPPORT_LINK', 'support_link'),
+            ),
+            wallets=Wallets(
+                trc_wallet=os.getenv('TRC_WALLET', 'wallet_address'),
+                ton_wallet=os.getenv('TON_WALLET', 'wallet_address')
+            )
         ),
         db=DbConfig(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
