@@ -16,14 +16,14 @@ def get_random_referral_buttons() -> list[InlineKeyboardButton]:
 def get_main_menu_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('🔥 My Projects'), callback_data='referral_links'))
+    builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('🎰 GAMECENTER'), callback_data='referral_links'))
 
     random_buttons = get_random_referral_buttons()
     builder.row(random_buttons[0])
     builder.row(random_buttons[1], random_buttons[2])
     builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('🔑 GET Keys'), callback_data='get_keys'))
     builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('⚙️ Settings'), callback_data='settings_menu'),
-                InlineKeyboardButton(text=aiogram.utils.i18n.gettext('📊 My Stats'), callback_data='user_stats'))
+                InlineKeyboardButton(text=aiogram.utils.i18n.gettext('📊 Check Progress'), callback_data='user_progress'))
     builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('ℹ Info'), callback_data='user_info'))
     return builder.as_markup()
 

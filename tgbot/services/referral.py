@@ -7,7 +7,7 @@ REFERRAL_LINKS = {
     'Binance Moonbix 🟠': 't.me/Binance_Moonbix_bot/start?startapp=ref_452792586&startApp=ref_452792586',
     '🥠 Hrum': 't.me/hrummebot/game?startapp=ref452792586',
     '🏠 CITY Holder': 't.me/cityholder/game?startapp=452792586',
-    '🎰 GAMECENTER': 'https://t.me/catizenbot/gamecenter?startapp=p_4704153',
+    '🎳 CatiGames': 'https://t.me/catizenbot/gamecenter?startapp=p_4704153',
     '🖲️ CEX.IO Power Tap': 'https://t.me/cexio_tap_bot?startapp=1716399236183636',
     '🪙 Blum': 'https://t.me/blum/app?startapp=ref_8U6nYohQav',
     '🐸 Frog Trader': 'https://t.me/xkucoinbot/kucoinminiapp?startapp'
