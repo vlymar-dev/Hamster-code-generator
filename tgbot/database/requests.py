@@ -1,8 +1,10 @@
-from tgbot.database.models import User
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from typing import Any
+from tgbot.database.models import User
+from tgbot.exceptions.exceptions import SelfReferralException, UserAlreadyExistsException
+
 
 class Database:
     def __init__(self, session: AsyncSession):
@@ -18,8 +20,8 @@ class Database:
     async def get_user_language(self, user_id: int) -> str:
         user = await self.session.get(User, user_id)
         if user:
-            return user.language_code
-        return None
+            return str(user.language_code)
+        return 'en'
 
     async def update_user_language(self, user_id: int, selected_language_code: str) -> None:
         user = await self.session.get(User, user_id)
@@ -27,3 +29,18 @@ class Database:
             if user.language_code != selected_language_code:
                 user.language_code = selected_language_code
                 await self.session.commit()
+
+    async def add_referral(self, user_id: int, referral_id: int):
+        if user_id == referral_id:
+            print(f'Пользователь с ID {user_id} использует свою же реферальную ссылку.')  # noqa
+            raise SelfReferralException()
+
+        existing_user = await self.session.get(User, user_id)
+        if existing_user:
+            print(f'Пользователь с ID {user_id} уже существует.')   # noqa
+            raise UserAlreadyExistsException()
+
+        referrer_user = await self.session.get(User, referral_id)
+        if referrer_user:
+            referrer_user.referrals = referrer_user.referrals + [user_id]
+            await self.session.commit()
