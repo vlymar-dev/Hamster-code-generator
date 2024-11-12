@@ -10,9 +10,11 @@ from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings_kb import get_settings_kb
-from tgbot.keyboards.unsubscribe_notifications_kb import unsubscribe_notifications_kb
+from tgbot.keyboards.manage_notifications_kb import unsubscribe_notifications_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
-from tgbot.services.user_progress import generate_user_progress
+from tgbot.services.language_service import LanguageService
+from tgbot.services.user_progress_service import UserProgressService
+from tgbot.services.user_notifications_service import UserService
 
 router = Router()
 
@@ -21,11 +23,14 @@ router = Router()
 async def update_language_handler(callback_query: CallbackQuery, db: Database, i18n: CustomI18nMiddleware) -> None:
     selected_language_code = callback_query.data.split(':')[1]
     user_id = callback_query.from_user.id
+    response_text = await LanguageService.update_language(
+        user_id=user_id,
+        language_code=selected_language_code,
+        i18n=i18n,
+        db=db
+    )
 
-    await db.update_user_language(user_id, selected_language_code)
-    await callback_query.answer(text=_('Language updated!'))  # TODO: logic keys count
-
-    i18n.ctx_locale.set(selected_language_code)
+    await callback_query.answer(text=response_text)
 
     await send_main_menu(callback_query.message)
 
@@ -88,9 +93,20 @@ async def unsubscribe_notifications_handler(callback_query: CallbackQuery) -> No
         reply_markup=unsubscribe_notifications_kb()
     )
 
+
+@router.callback_query(F.data == 'unsubscribe_confirmation')
+async def unsubscribe_confirmation_handler(callback_query: CallbackQuery, db: Database) -> None:
+    await callback_query.message.delete()
+    await callback_query.answer()
+    response_text = await UserService.unsubscribe_user(user_id=callback_query.from_user.id, db=db)
+    await callback_query.message.answer(
+        text=response_text,
+        reply_markup=get_back_to_main_menu_keyboard()
+    )
+
 @router.callback_query(F.data == 'user_progress')
 async def user_progress_handler(callback_query: CallbackQuery, db: Database) -> None:
-    user_stats = await generate_user_progress(user_id=callback_query.from_user.id, db=db)
+    user_stats = await UserProgressService.generate_user_progress(user_id=callback_query.from_user.id, db=db)
     if not user_stats:
         await callback_query.answer(text="User data not found.", show_alert=True)
         return

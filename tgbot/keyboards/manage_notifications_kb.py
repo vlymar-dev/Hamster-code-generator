@@ -8,6 +8,7 @@ from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
 def unsubscribe_notifications_kb():
     builder = InlineKeyboardBuilder()
 
+    builder.row(InlineKeyboardButton(text=_('🔔 On Notifications'), callback_data='subscription_confirmation'))
     builder.row(InlineKeyboardButton(text=_('🔕 Stop Notifications'), callback_data='unsubscribe_confirmation'))
     builder.row(back_to_main_menu_button())
     return builder.as_markup()

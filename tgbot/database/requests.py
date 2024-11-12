@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -55,12 +55,12 @@ class Database:
     async def add_referral(self, user_id: int, referral_id: int):
         try:
             if user_id == referral_id:
-                print(f'Пользователь с ID {user_id} использует свою же реферальную ссылку.')  # noqa
+                logger.warning(f'The user with ID {user_id} uses their own referral link.')
                 raise SelfReferralException()
 
             existing_user = await self.session.get(User, user_id)
             if existing_user:
-                print(f'Пользователь с ID {user_id} уже существует.')   # noqa
+                logger.warning(f'The user with ID {user_id} already exists.')
                 raise UserAlreadyExistsException()
 
             referrer_user = await self.session.get(User, referral_id)
@@ -96,3 +96,19 @@ class Database:
             logger.error(f"Database error occurred while retrieving progress for user_id={user_id}: {e}")
             return None
 
+    async def unsubscribe_notifications(self, user_id: int) -> str :
+        try:
+            user = await self.session.get(User, user_id)
+            if user:
+                count_referrals = await self.session.scalar(
+                    select(func.cardinality(User.referrals)).where(User.id == user_id)
+                )
+                if count_referrals < 10:
+                    logger.warning(f'The user with ID {user_id} uses their own referral link.')
+                    return 'conditions_not_met'
+                user.is_subscribed = False
+                await self.session.commit()
+                return 'Unsubscribe successful'
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while trying to unsubscribe for user_id={user_id}: {e}")
+            return 'error'
