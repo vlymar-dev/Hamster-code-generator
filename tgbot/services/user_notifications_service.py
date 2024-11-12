@@ -3,7 +3,7 @@ from aiogram.utils.i18n import gettext as _
 from tgbot.database import Database
 
 
-class UserService:
+class UserNotificationsService:
 
     @staticmethod
     async def unsubscribe_user(user_id: int, db: Database) -> str:
@@ -18,3 +18,11 @@ class UserService:
             return _("An error occurred while trying to unsubscribe. Please try again later.")
         else:
             return _("You do not meet the requirements to unsubscribe from notifications.")
+
+    @staticmethod
+    async def subscribe_user(user_id: int, db: Database) -> str:
+        """
+        Handles the logic for subscribing a user and return message.
+        """
+        await db.subscribe_notifications(user_id)
+        return _("You have successfully Subscribed for notifications.")

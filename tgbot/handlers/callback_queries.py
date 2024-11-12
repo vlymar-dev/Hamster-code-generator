@@ -8,13 +8,13 @@ from tgbot.handlers.messages import send_main_menu
 from tgbot.keyboards.change_language_kb import get_change_language_kb
 from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
+from tgbot.keyboards.manage_notifications_kb import unsubscribe_notifications_kb
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings_kb import get_settings_kb
-from tgbot.keyboards.manage_notifications_kb import unsubscribe_notifications_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
 from tgbot.services.language_service import LanguageService
+from tgbot.services.user_notifications_service import UserNotificationsService
 from tgbot.services.user_progress_service import UserProgressService
-from tgbot.services.user_notifications_service import UserService
 
 router = Router()
 
@@ -94,11 +94,21 @@ async def unsubscribe_notifications_handler(callback_query: CallbackQuery) -> No
     )
 
 
+@router.callback_query(F.data == 'subscription_confirmation')
+async def subscription_confirmation_handler(callback_query: CallbackQuery, db: Database) -> None:
+    await callback_query.message.delete()
+    await callback_query.answer()
+    response_text = await UserNotificationsService.subscribe_user(user_id=callback_query.from_user.id, db=db)
+    await callback_query.message.answer(
+        text=response_text,
+        reply_markup=get_back_to_main_menu_keyboard()
+    )
+
 @router.callback_query(F.data == 'unsubscribe_confirmation')
 async def unsubscribe_confirmation_handler(callback_query: CallbackQuery, db: Database) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
-    response_text = await UserService.unsubscribe_user(user_id=callback_query.from_user.id, db=db)
+    response_text = await UserNotificationsService.unsubscribe_user(user_id=callback_query.from_user.id, db=db)
     await callback_query.message.answer(
         text=response_text,
         reply_markup=get_back_to_main_menu_keyboard()

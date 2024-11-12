@@ -112,3 +112,13 @@ class Database:
         except DatabaseError as e:
             logger.error(f"Database error occurred while trying to unsubscribe for user_id={user_id}: {e}")
             return 'error'
+
+    async def subscribe_notifications(self, user_id: int) -> str :
+        try:
+            user = await self.session.get(User, user_id)
+            if user:
+                user.is_subscribed = True
+                await self.session.commit()
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while trying to subscribe for user_id={user_id}: {e}")
+            return 'error'
