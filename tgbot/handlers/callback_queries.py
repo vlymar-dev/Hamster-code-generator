@@ -8,7 +8,7 @@ from tgbot.handlers.messages import send_main_menu
 from tgbot.keyboards.change_language_kb import get_change_language_kb
 from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
-from tgbot.keyboards.manage_notifications_kb import unsubscribe_notifications_kb
+from tgbot.keyboards.manage_notifications_kb import manage_notifications_kb
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings_kb import get_settings_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
@@ -84,13 +84,17 @@ async def change_language_handler(callback_query: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(F.data == 'unsubscribe_notifications')
-async def unsubscribe_notifications_handler(callback_query: CallbackQuery) -> None:
+@router.callback_query(F.data == 'manage_notifications')
+async def manage_notifications_handler(callback_query: CallbackQuery, db: Database) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
+    text, status = await UserNotificationsService.get_subscription_status(
+        user_id=callback_query.from_user.id,
+        db=db
+    )
     await callback_query.message.answer(
-        text=_('<i>Are you sure you want to unsubscribe from notifications?</i> 🥹'),
-        reply_markup=unsubscribe_notifications_kb()
+        text=text,
+        reply_markup=manage_notifications_kb(status)
     )
 
 

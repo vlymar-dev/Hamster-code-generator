@@ -1,3 +1,5 @@
+from cgitb import reset
+
 from aiogram.utils.i18n import gettext as _
 
 from tgbot.database import Database
@@ -13,11 +15,11 @@ class UserNotificationsService:
         result = await db.unsubscribe_notifications(user_id)
 
         if result == 'Unsubscribe successful':
-            return _("You have successfully unsubscribed from notifications.")
+            return _('You have successfully unsubscribed from notifications.')
         elif result == 'error':
-            return _("An error occurred while trying to unsubscribe. Please try again later.")
+            return _('An error occurred while trying to unsubscribe. Please try again later.')
         else:
-            return _("You do not meet the requirements to unsubscribe from notifications.")
+            return _('You do not meet the requirements to unsubscribe from notifications.')
 
     @staticmethod
     async def subscribe_user(user_id: int, db: Database) -> str:
@@ -25,4 +27,15 @@ class UserNotificationsService:
         Handles the logic for subscribing a user and return message.
         """
         await db.subscribe_notifications(user_id)
-        return _("You have successfully Subscribed for notifications.")
+        return _('You have successfully Subscribed for notifications.')
+
+    @staticmethod
+    async def get_subscription_status(user_id: int, db: Database) -> tuple[str, bool]:
+        """
+        Returns a message about the subscription status
+        """
+        is_subscribed = await db.get_subscription_status(user_id)
+        if is_subscribed:
+            return _('Your subscription status: Subscribed'), is_subscribed
+        else:
+            return _('Your subscription status: Unsubscribed'), is_subscribed

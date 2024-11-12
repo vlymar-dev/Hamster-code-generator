@@ -4,7 +4,7 @@ import aiogram.utils.i18n
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.services.referral import REFERRAL_LINKS
+from tgbot.common.referral import REFERRAL_LINKS
 
 
 def get_random_referral_buttons() -> list[InlineKeyboardButton]:

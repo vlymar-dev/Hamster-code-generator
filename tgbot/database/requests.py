@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -96,6 +96,16 @@ class Database:
             logger.error(f"Database error occurred while retrieving progress for user_id={user_id}: {e}")
             return None
 
+    async def get_subscription_status(self, user_id: int) -> bool:
+        try:
+            user = await self.session.get(User, user_id)
+            if user.is_subscribed:
+                return True
+            return False
+        except DatabaseError as e:
+            logger.error(f'Database error occurred while trying to get subscription status for user_id={user_id}: {e}')
+            return False
+
     async def unsubscribe_notifications(self, user_id: int) -> str :
         try:
             user = await self.session.get(User, user_id)
@@ -110,7 +120,7 @@ class Database:
                 await self.session.commit()
                 return 'Unsubscribe successful'
         except DatabaseError as e:
-            logger.error(f"Database error occurred while trying to unsubscribe for user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while trying to unsubscribe for user_id={user_id}: {e}')
             return 'error'
 
     async def subscribe_notifications(self, user_id: int) -> str :
@@ -120,5 +130,5 @@ class Database:
                 user.is_subscribed = True
                 await self.session.commit()
         except DatabaseError as e:
-            logger.error(f"Database error occurred while trying to subscribe for user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while trying to subscribe for user_id={user_id}: {e}')
             return 'error'

@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from tgbot.common.staticdata import LANGUAGES_DICT
 from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
-from tgbot.services.staticdata import LANGUAGES_DICT
 
 
 def get_change_language_kb() -> InlineKeyboardMarkup:

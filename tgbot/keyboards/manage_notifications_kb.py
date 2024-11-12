@@ -1,14 +1,15 @@
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
 
 
-def unsubscribe_notifications_kb():
+def manage_notifications_kb(status: bool) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-
-    builder.row(InlineKeyboardButton(text=_('🔔 On Notifications'), callback_data='subscription_confirmation'))
-    builder.row(InlineKeyboardButton(text=_('🔕 Stop Notifications'), callback_data='unsubscribe_confirmation'))
+    if status:
+        builder.row(InlineKeyboardButton(text=_('🔕 Stop Notifications'), callback_data='unsubscribe_confirmation'))
+    else:
+        builder.row(InlineKeyboardButton(text=_('🔔 On Notifications'), callback_data='subscription_confirmation'))
     builder.row(back_to_main_menu_button())
     return builder.as_markup()
