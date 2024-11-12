@@ -10,6 +10,7 @@ from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings_kb import get_settings_kb
+from tgbot.keyboards.unsubscribe_notifications_kb import unsubscribe_notifications_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
 from tgbot.services.user_progress import generate_user_progress
 
@@ -34,7 +35,8 @@ async def user_info_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=_('<b>Hello!</b> Explore crypto games and bonuses with our bot — stay ahead and earn more! 💪\n\n'
+        text=_('<b>ℹ️ Info</b>\n\n'
+               '<i>Explore crypto games and bonuses with our bot — stay ahead and earn more! </i>💪\n\n'
                '📊 <b>Check Progress:</b>\n'
                '• Track your achievements. 🎯\n'
                '• Raise your status and unlock new privileges! 🚀\n\n'
@@ -59,16 +61,32 @@ async def settings_menu_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=_('Settings menu here'),
+        text=_('⚙️ <b>Settings</b>\n\n'
+               '🎮 <i>Adjust the bot to fit your preferences! Choose an option below to customize your experience:</i>\n\n'
+               '🌐 <b>Change Language</b> — Switch to your preferred language for a smoother experience.\n'
+               '🔕 <b>Unsubscribe from Notifications</b> — Manage your subscriptions and stay in control of what you receive.\n\n'
+               '🎨 Personalize to make your time here more enjoyable and tailored just for you!'),
         reply_markup=get_settings_kb()
     )
 
 @router.callback_query(F.data == 'change_language')
 async def change_language_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
-    await callback_query.answer(text=_('Select a language from the available languages'))
-    await callback_query.message.answer(text=_('Please choose a language:'), reply_markup= get_change_language_kb())
+    await callback_query.answer()
+    await callback_query.message.answer(
+        text=_('Select a language from the available languages'),
+        reply_markup= get_change_language_kb()
+    )
 
+
+@router.callback_query(F.data == 'unsubscribe_notifications')
+async def unsubscribe_notifications_handler(callback_query: CallbackQuery) -> None:
+    await callback_query.message.delete()
+    await callback_query.answer()
+    await callback_query.message.answer(
+        text=_('<i>Are you sure you want to unsubscribe from notifications?</i> 🥹'),
+        reply_markup=unsubscribe_notifications_kb()
+    )
 
 @router.callback_query(F.data == 'user_progress')
 async def user_progress_handler(callback_query: CallbackQuery, db: Database) -> None:
@@ -112,7 +130,13 @@ async def referral_links_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=_('Best projects 💣'),
+        text=_('💎 <b>Join now and unlock exclusive bonuses!</b> '
+               'Be among the first to explore new projects and opportunities.\n'
+               '🚀 <i>These platforms are trusted and tested</i> — '
+               'I’m already using them successfully to earn, and now it’s your turn!\n\n'
+               '🏁 <b>Ready to start?</b> Tap the links below to seize these early-bird advantages.\n'
+               '🗓️ <i>The sooner you join, the sooner you can start earning!</i>\n\n'
+               '🌐 <i><b>Projects that inspire! Open to everyone:</b></i>'),
         reply_markup=referral_links_kb(),
     )
 

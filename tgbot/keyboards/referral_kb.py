@@ -1,6 +1,5 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.utils.i18n import gettext as _
 
 from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
 from tgbot.services.referral import REFERRAL_LINKS
