@@ -11,6 +11,7 @@ from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_mai
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings_kb import get_settings_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
+from tgbot.services.user_progress import generate_user_progress
 
 router = Router()
 
@@ -71,19 +72,26 @@ async def change_language_handler(callback_query: CallbackQuery) -> None:
 
 @router.callback_query(F.data == 'user_progress')
 async def user_progress_handler(callback_query: CallbackQuery, db: Database) -> None:
-    user_data = await db.get_user_progress(user_id=callback_query.from_user.id)
+    user_stats = await generate_user_progress(user_id=callback_query.from_user.id, db=db)
+    if not user_stats:
+        await callback_query.answer(text="User data not found.", show_alert=True)
+        return
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
         text=_('📊 <b>Progress:</b>\n\n'
                '🏆 <b><u>Level:</u></b>\n'
-               '<i>{achievement_name}</i> — You\'re moving up! Keep going for exclusive rewards! 💥\n\n'
+               '<i>{achievement_name}</i>\nYou\'re moving up! Keep going for exclusive rewards! 💥\n\n'
                '🔑 <b><i>Total Keys Generated:</i></b> <i>{keys_total}</i>\n'
-               '🤝 <b><i>Referrals:</i></b> <i>{referrals}</i>\n\n'
-               '🚀 <b>Invite friends, earn keys, and reach new heights with us!</b> 🌍').format(
-            achievement_name='text',
-            keys_total=user_data['total_keys_generated'],
-            referrals=user_data['referrals'],
+               '📨 <b><i>Referrals:</i></b> <i>{referrals}</i>\n\n'
+               '🥇 <b><u>Your status:</u></b>\n'
+               '<i>{user_status}</i>\n'
+               '🤩 The higher the status, the more bonuses you get!\n\n'
+               '🎳 <b>Invite friends, earn keys, and reach new heights with us!</b> 🌍').format(
+            achievement_name=user_stats['achievement_name'],
+            keys_total=user_stats['keys_total'],
+            referrals=user_stats['referrals'],
+            user_status=user_stats['user_status'],
         ),
         reply_markup=get_back_to_main_menu_keyboard()
     )

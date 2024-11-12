@@ -51,16 +51,18 @@ class Database:
             select(
                 User.referrals,
                 User.registration_date,
+                User.user_status,
                 User.total_keys_generated
             ).where(User.id == user_id)
         )
         user_data = result.one_or_none()
         if user_data:
-            referrals, registration_date, total_keys_generated = user_data
+            referrals, registration_date, user_status, total_keys_generated = user_data
             return {
-                "referrals": len(referrals) if referrals else 0,
-                "registration_date": registration_date,
-                "total_keys_generated": total_keys_generated,
+                'referrals': len(referrals) if referrals else 0,
+                'registration_date': registration_date,
+                'user_status': user_status,
+                'total_keys_generated': total_keys_generated,
             }
         return None
 
