@@ -9,6 +9,7 @@ from tgbot.filters.admin_filter import AdminFilter
 from tgbot.keyboards.admin_panel_kb import admin_panel_kb
 from tgbot.keyboards.change_language_kb import get_change_language_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
+from tgbot.services.admin_panel_service import AdminPanelService
 
 router = Router()
 
@@ -75,10 +76,7 @@ async def paysupport_command(message: Message) -> None:
 
 @router.message(Command('admin'), AdminFilter())
 async def admin_command(message: Message) -> None:
-    await message.answer(
-        text=_('👨‍💼💼 Admin Panel. Time to wield the power! (But shh... keep it secret!)'),
-        reply_markup=admin_panel_kb()
-    )
+    await AdminPanelService.show_admin_panel(message)
 
 
 def register_commands_handler(dp) -> None:

@@ -1,5 +1,3 @@
-from cgitb import reset
-
 from aiogram.utils.i18n import gettext as _
 
 from tgbot.database import Database

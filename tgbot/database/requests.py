@@ -174,3 +174,12 @@ class Database:
             await self.session.rollback()
             logger.error(f"Database error occurred while creating user role for user_id={user_id}: {e}")
             return False
+
+    async def get_users_count(self) -> int:
+        try:
+            result = await self.session.execute(select(func.count()).select_from(User))
+            users_count = result.scalar_one()
+            return users_count
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while counting users: {e}")
+            return 0

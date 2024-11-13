@@ -1,7 +1,7 @@
 import random
 
-import aiogram.utils.i18n
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from tgbot.common.referral import REFERRAL_LINKS
@@ -16,15 +16,15 @@ def get_random_referral_buttons() -> list[InlineKeyboardButton]:
 def get_main_menu_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('🎰 GAMECENTER'), callback_data='referral_links'))
+    builder.row(InlineKeyboardButton(text=_('🎰 GAMECENTER'), callback_data='referral_links'))
 
     random_buttons = get_random_referral_buttons()
     builder.row(random_buttons[0])
     builder.row(random_buttons[1], random_buttons[2])
-    builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('🔑 GET Keys'), callback_data='get_keys'))
-    builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('⚙️ Settings'), callback_data='settings_menu'),
-                InlineKeyboardButton(text=aiogram.utils.i18n.gettext('📊 Check Progress'), callback_data='user_progress'))
-    builder.row(InlineKeyboardButton(text=aiogram.utils.i18n.gettext('ℹ Info'), callback_data='user_info'))
+    builder.row(InlineKeyboardButton(text=_('🔑 GET Keys'), callback_data='get_keys'))
+    builder.row(InlineKeyboardButton(text=_('⚙️ Settings'), callback_data='settings_menu'),
+                InlineKeyboardButton(text=_('📊 Check Progress'), callback_data='user_progress'))
+    builder.row(InlineKeyboardButton(text=_('ℹ Info'), callback_data='user_info'))
     return builder.as_markup()
 
 
@@ -33,4 +33,4 @@ def get_back_to_main_menu_keyboard() -> InlineKeyboardMarkup:
 
 
 def back_to_main_menu_button() -> InlineKeyboardButton:
-    return InlineKeyboardButton(text=aiogram.utils.i18n.gettext('🔙 Back to main menu'), callback_data='back_to_main_menu')
+    return InlineKeyboardButton(text=_('🔙 Back to main menu'), callback_data='back_to_main_menu')
