@@ -5,6 +5,8 @@ from aiogram.utils.i18n import gettext as _
 
 from tgbot.database import Database
 from tgbot.exceptions.exceptions import SelfReferralException, UserAlreadyExistsException
+from tgbot.filters.admin_filter import AdminFilter
+from tgbot.keyboards.admin_panel_kb import admin_panel_kb
 from tgbot.keyboards.change_language_kb import get_change_language_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 
@@ -28,17 +30,11 @@ async def handle_start_command(message: Message, db: Database) -> None:
             await db.add_referral(user_id=message.from_user.id, referral_id=referrer_id)
             referrer_message=_(
                 '🎉 You’ve joined through the referral link of user ID <b>{referrer_id}</b>!\n\n'
-            ).format(
-                referrer_id=referrer_id
-            )
+            ).format(referrer_id=referrer_id)
             await message.answer(
-                text=referrer_message + welcome_message,
-                reply_markup=get_main_menu_kb()
-            )
+                text=referrer_message + welcome_message, reply_markup=get_main_menu_kb())
         except SelfReferralException:
-                await message.answer(text=_(
-                    'Oops! 🚫 You can’t use your own referral link!'
-                ))
+                await message.answer(text=_('Oops! 🚫 You can’t use your own referral link!'))
         except UserAlreadyExistsException:
             await message.answer(
                 text=welcome_message,
@@ -74,6 +70,14 @@ async def paysupport_command(message: Message) -> None:
                '<i>Please note that donations are voluntary and non-refundable.</i>\n'
                'If you have any questions, contact us. 📞'),
         reply_markup=get_back_to_main_menu_keyboard()
+    )
+
+
+@router.message(Command('admin'), AdminFilter())
+async def admin_command(message: Message) -> None:
+    await message.answer(
+        text=_('👨‍💼💼 Admin Panel. Time to wield the power! (But shh... keep it secret!)'),
+        reply_markup=admin_panel_kb()
     )
 
 
