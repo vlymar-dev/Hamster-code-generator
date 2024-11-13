@@ -120,8 +120,8 @@ async def unsubscribe_confirmation_handler(callback_query: CallbackQuery, db: Da
 
 @router.callback_query(F.data == 'user_progress')
 async def user_progress_handler(callback_query: CallbackQuery, db: Database) -> None:
-    user_stats = await UserProgressService.generate_user_progress(user_id=callback_query.from_user.id, db=db)
-    if not user_stats:
+    user_progress = await UserProgressService.generate_user_progress(user_id=callback_query.from_user.id, db=db)
+    if not user_progress:
         await callback_query.answer(text="User data not found.", show_alert=True)
         return
     await callback_query.message.delete()
@@ -129,17 +129,22 @@ async def user_progress_handler(callback_query: CallbackQuery, db: Database) -> 
     await callback_query.message.answer(
         text=_('📊 <b>Progress:</b>\n\n'
                '🏆 <b><u>Level:</u></b>\n'
-               '<i>{achievement_name}</i>\nYou\'re moving up! Keep going for exclusive rewards! 💥\n\n'
+               '<i>{achievement_name}</i>\n'
+               '🔝 <i><b>To the next level:</b>\n<b>{keys_needed}</b> more keys, <b>{referrals_needed}</b> more referrals, '
+               'and {days_needed} more days in bot.</i>\n\n'
                '🔑 <b><i>Total Keys Generated:</i></b> <i>{keys_total}</i>\n'
                '📨 <b><i>Referrals:</i></b> <i>{referrals}</i>\n\n'
                '🥇 <b><u>Your status:</u></b>\n'
                '<i>{user_status}</i>\n'
                '🤩 The higher the status, the more bonuses you get!\n\n'
                '🎳 <b>Invite friends, earn keys, and reach new heights with us!</b> 🌍').format(
-            achievement_name=user_stats['achievement_name'],
-            keys_total=user_stats['keys_total'],
-            referrals=user_stats['referrals'],
-            user_status=user_stats['user_status'],
+            achievement_name=user_progress['achievement_name'],
+            keys_total=user_progress['keys_total'],
+            referrals=user_progress['referrals'],
+            user_status=user_progress['user_status'],
+            keys_needed=user_progress['keys_needed'],
+            referrals_needed=user_progress['referrals_needed'],
+            days_needed=user_progress['days_needed'],
         ),
         reply_markup=get_back_to_main_menu_keyboard()
     )

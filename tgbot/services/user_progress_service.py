@@ -21,19 +21,19 @@ class UserProgressService:
             return 0
 
     @staticmethod
-    def calculate_achievement(total_keys: int, referrals: int, days_in_bot: int) -> str:
-        """Determines the user's achievement level based on keys, referrals, and days in the bot."""
-        if total_keys > 1200 and referrals > 50 and days_in_bot > 90:
-            return 'absolute_leader'
-        elif 501 <= total_keys <= 1199 and referrals > 20 and days_in_bot > 60:
-            return 'game_legend'
-        elif total_keys > 500 and referrals > 10 and days_in_bot > 40:
-            return 'code_expert'
+    def calculate_achievement(total_keys: int, referrals: int, days_in_bot: int) -> tuple[str, int, int, int]:
+        """Determines the user's achievement level and progress needed to reach the next level."""
+        if total_keys > 1200 and referrals > 50 and days_in_bot > 120:
+            return 'absolute_leader', 0, 0, 0
+        elif total_keys > 700 and referrals > 20 and days_in_bot > 90:
+            return 'game_legend', max(1200 - total_keys, 0), max(50 - referrals, 0), max(120 - days_in_bot, 0)
+        elif total_keys > 500 and referrals > 10 and days_in_bot > 60:
+            return 'code_expert', max(700 - total_keys, 0), max(20 - referrals, 0), max(90 - days_in_bot, 0)
         elif total_keys > 450 and (referrals > 5 or days_in_bot > 30):
-            return 'bonus_hunter'
-        elif total_keys > 201 and days_in_bot > 10:
-            return 'adventurer'
-        return 'newcomer'
+            return 'bonus_hunter', max(500 - total_keys, 0), max(10 - referrals, 0), max(60 - days_in_bot, 0)
+        elif total_keys > 201 and days_in_bot > 20:
+            return 'adventurer', max(450 - total_keys, 0), max(5 - referrals, 0), max(30 - days_in_bot, 0)
+        return 'newcomer', max(200 - total_keys, 0), max(1 - referrals, 0), max(10 - days_in_bot, 0)
 
     @staticmethod
     def get_achievement_text(key: str) -> str:
@@ -77,7 +77,7 @@ class UserProgressService:
             referrals = user_data['referrals']
             user_status = user_data['user_status']
 
-            achievement_key = UserProgressService.calculate_achievement(
+            achievement_key, keys_needed, referrals_needed, days_needed = UserProgressService.calculate_achievement(
                 total_keys=total_keys_generated,
                 referrals=referrals,
                 days_in_bot=days_in_bot
@@ -89,7 +89,11 @@ class UserProgressService:
                 'achievement_name': achievement,
                 'keys_total': total_keys_generated,
                 'referrals': referrals,
+                'days_in_bot': days_in_bot,
                 'user_status': user_status_text,
+                'keys_needed': keys_needed,
+                'referrals_needed': referrals_needed,
+                'days_needed': days_needed
             }
         except DatabaseError as e:
             logger.error(f"Database error occurred: {e}")
