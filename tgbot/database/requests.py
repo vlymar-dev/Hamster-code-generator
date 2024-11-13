@@ -141,4 +141,18 @@ class Database:
             return 'user'
         except DatabaseError as e:
              logger.error(f"Database error occurred while getting role for user_id={user_id}: {e}")
-             return 'en'
+             return 'user'
+
+    async def create_user_role(self, user_id: int, user_role: str) -> bool:
+        try:
+            user = await self.session.get(User, user_id)
+            if user:
+                if user.user_role != user_role:
+                    user.user_role = user_role
+                    await self.session.commit()
+                return True
+            return False
+        except DatabaseError as e:
+            await self.session.rollback()
+            logger.error(f"Database error occurred while creating user role for user_id={user_id}: {e}")
+            return False
