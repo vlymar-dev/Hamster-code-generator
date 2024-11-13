@@ -132,3 +132,13 @@ class Database:
         except DatabaseError as e:
             logger.error(f'Database error occurred while trying to subscribe for user_id={user_id}: {e}')
             return 'error'
+
+    async def get_user_role(self, user_id: int) -> str:
+        try:
+            user = await self.session.get(User, user_id)
+            if user:
+                return str(user.user_role)
+            return 'user'
+        except DatabaseError as e:
+             logger.error(f"Database error occurred while getting role for user_id={user_id}: {e}")
+             return 'en'

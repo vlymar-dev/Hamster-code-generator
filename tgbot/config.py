@@ -31,10 +31,16 @@ class Wallets:
     ton_wallet: str
 
 @dataclass
+class BotSettings:
+    admin_id: int
+
+
+@dataclass
 class TgBot:
     token: str
     bot_info: BotInfo
     wallets: Wallets
+    bot_settings: BotSettings
 
 
 @dataclass
@@ -55,6 +61,9 @@ def load_config(path: str = None) -> Config:
             wallets=Wallets(
                 trc_wallet=os.getenv('TRC_WALLET', 'wallet_address'),
                 ton_wallet=os.getenv('TON_WALLET', 'wallet_address')
+            ),
+            bot_settings=BotSettings(
+                admin_id=int(os.getenv('ADMIN_ACCESS_ID', '')),
             )
         ),
         db=DbConfig(
