@@ -33,6 +33,7 @@ class Wallets:
 @dataclass
 class BotSettings:
     admin_id: int
+    referral_threshold: int
 
 
 @dataclass
@@ -64,6 +65,7 @@ def load_config(path: str = None) -> Config:
             ),
             bot_settings=BotSettings(
                 admin_id=int(os.getenv('ADMIN_ACCESS_ID', '')),
+                referral_threshold=int(os.getenv('REFERRAL_THRESHOLD', 10)),
             )
         ),
         db=DbConfig(

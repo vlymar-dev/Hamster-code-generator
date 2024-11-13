@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from tgbot.config import config
 from tgbot.database.models import User
 from tgbot.exceptions.exceptions import SelfReferralException, UserAlreadyExistsException
 
@@ -40,17 +41,22 @@ class Database:
             logger.error(f"Database error occurred while getting language for user_id={user_id}: {e}")
             return 'en'
 
-    async def update_user_language(self, user_id: int, selected_language_code: str) -> None:
+    async def update_user_language(self, user_id: int, selected_language_code: str) -> bool:
         try:
-            user = await self.session.get(User, user_id)
+            result = await self.session.execute(
+                select(User).where(User.id == user_id).with_for_update()
+            )
+            user = result.scalar_one_or_none()
             if user:
                 if user.language_code != selected_language_code:
                     user.language_code = selected_language_code
                     await self.session.commit()
+                return True
+            return False
         except DatabaseError as e:
             await self.session.rollback()
             logger.error(f"Database error occurred while updating user language for user_id={user_id}: {e}")
-            raise
+            return False
 
     async def add_referral(self, user_id: int, referral_id: int):
         try:
@@ -58,8 +64,11 @@ class Database:
                 logger.warning(f'The user with ID {user_id} uses their own referral link.')
                 raise SelfReferralException()
 
-            existing_user = await self.session.get(User, user_id)
-            if existing_user:
+            result = await self.session.execute(
+                select(User).where(User.id == referral_id).with_for_update()
+            )
+            referrer_user = result.scalar_one_or_none()
+            if referrer_user:
                 logger.warning(f'The user with ID {user_id} already exists.')
                 raise UserAlreadyExistsException()
 
@@ -108,13 +117,16 @@ class Database:
 
     async def unsubscribe_notifications(self, user_id: int) -> str :
         try:
-            user = await self.session.get(User, user_id)
+            result = await self.session.execute(
+                select(User).where(User.id == user_id).with_for_update()
+            )
+            user = result.scalar_one_or_none()
             if user:
                 count_referrals = await self.session.scalar(
                     select(func.cardinality(User.referrals)).where(User.id == user_id)
                 )
-                if count_referrals < 10:
-                    logger.warning(f'The user with ID {user_id} uses their own referral link.')
+                if count_referrals < config.tg_bot.bot_settings.referral_threshold:
+                    logger.warning(f'The user with ID {user_id} did not meet the conditions to disable notifications.')
                     return 'conditions_not_met'
                 user.is_subscribed = False
                 await self.session.commit()
@@ -125,7 +137,10 @@ class Database:
 
     async def subscribe_notifications(self, user_id: int) -> str :
         try:
-            user = await self.session.get(User, user_id)
+            result = await self.session.execute(
+                select(User).where(User.id == user_id).with_for_update()
+            )
+            user = result.scalar_one_or_none()
             if user:
                 user.is_subscribed = True
                 await self.session.commit()
@@ -145,7 +160,10 @@ class Database:
 
     async def create_user_role(self, user_id: int, user_role: str) -> bool:
         try:
-            user = await self.session.get(User, user_id)
+            result = await self.session.execute(
+                select(User).where(User.id == user_id).with_for_update()
+            )
+            user = result.scalar_one_or_none()
             if user:
                 if user.user_role != user_role:
                     user.user_role = user_role
