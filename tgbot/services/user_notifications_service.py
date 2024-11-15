@@ -1,16 +1,17 @@
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.user_repo import UserRepository
 from tgbot.database import Database
 
 
 class UserNotificationsService:
 
     @staticmethod
-    async def unsubscribe_user(user_id: int, db: Database) -> str:
+    async def unsubscribe_user(user_id: int, user_repo: UserRepository) -> str:
         """
         Handles the logic for unsubscribing a user and returns an appropriate message.
         """
-        result = await db.unsubscribe_notifications(user_id)
+        result = await user_repo.unsubscribe_notifications(user_id)
 
         if result == 'Unsubscribe successful':
             return _('You have successfully unsubscribed from notifications.')
@@ -20,19 +21,19 @@ class UserNotificationsService:
             return _('You do not meet the requirements to unsubscribe from notifications.')
 
     @staticmethod
-    async def subscribe_user(user_id: int, db: Database) -> str:
+    async def subscribe_user(user_id: int, user_repo: UserRepository) -> str:
         """
         Handles the logic for subscribing a user and return message.
         """
-        await db.subscribe_notifications(user_id)
+        await user_repo.subscribe_notifications(user_id)
         return _('You have successfully Subscribed for notifications.')
 
     @staticmethod
-    async def get_subscription_status(user_id: int, db: Database) -> tuple[str, bool]:
+    async def get_subscription_status(user_id: int, user_repo: UserRepository) -> tuple[str, bool]:
         """
         Returns a message about the subscription status
         """
-        is_subscribed = await db.get_subscription_status(user_id)
+        is_subscribed = await user_repo.get_subscription_status(user_id)
         if is_subscribed:
             return _('Your subscription status: Subscribed'), is_subscribed
         else:
