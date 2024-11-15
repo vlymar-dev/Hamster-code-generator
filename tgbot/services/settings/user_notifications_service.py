@@ -1,7 +1,6 @@
 from aiogram.utils.i18n import gettext as _
 
 from infrastructure.repositories.user_repo import UserRepository
-from tgbot.database import Database
 
 
 class UserNotificationsService:

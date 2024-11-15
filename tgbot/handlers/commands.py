@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Bot, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
@@ -6,15 +6,15 @@ from aiogram.utils.i18n import gettext as _
 from infrastructure.models.user_model import User
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.filters.admin_filter import AdminFilter
-from tgbot.keyboards.change_language_kb import get_change_language_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
+from tgbot.keyboards.settings.change_language_kb import get_change_language_kb
 from tgbot.services.admin_panel_service import AdminPanelService
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def handle_start_command(message: Message, user_repo: UserRepository) -> None:
+async def handle_start_command(message: Message, user_repo: UserRepository, bot: Bot) -> None:
     # args = message.text.split(maxsplit=1)
     welcome_message = _('👋 Hello, <b>{first_name}</b>!\n'
                    '🛳️ <i>Welcome aboard!</i>\n\n'
@@ -28,13 +28,21 @@ async def handle_start_command(message: Message, user_repo: UserRepository) -> N
     #     try:
     #         referrer_id = int(args[1])
     #         await db.add_referral(user_id=message.from_user.id, referral_id=referrer_id)
-    #         referrer_message=_(
+
+    #         referral_message = _(
     #             '🎉 You’ve joined through the referral link of user ID <b>{referrer_id}</b>!\n\n'
     #         ).format(referrer_id=referrer_id)
     #         await message.answer(
     #             text=referrer_message + welcome_message, reply_markup=get_main_menu_kb())
+    #         referrer_message = _(
+    #                     f"🎉 User with ID <b>{message.from_user.id}</b> registered using your referral link!"
+    #                 )
+    #         await bot.send_message(referrer_id, referrer_message)
     #     except SelfReferralException:
-    #             await message.answer(text=_('Oops! 🚫 You can’t use your own referral link!'))
+    #             await message.answer(
+    #             text=_('Oops! 🚫 You can’t use your own referral link!'),
+    #             reply_markup=get_back_to_main_menu_keyboard()
+    #             )
     #     except UserAlreadyExistsException:
     #         await message.answer(
     #             text=welcome_message,

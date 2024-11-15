@@ -4,7 +4,7 @@ from infrastructure.repositories.user_repo import UserRepository
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
 
 
-class LanguageService:
+class UserLanguageService:
 
     @staticmethod
     async def update_language(user_id: int, language_code: str, i18n: CustomI18nMiddleware, user_repo: UserRepository) -> str:

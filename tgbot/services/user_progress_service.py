@@ -5,7 +5,7 @@ from typing import Optional
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.exc import DatabaseError
 
-from tgbot.database import Database
+from infrastructure.repositories.user_repo import UserRepository
 
 logger = logging.getLogger(__name__)
 
@@ -59,16 +59,16 @@ class UserProgressService:
         return statuses.get(key, statuses['free'])
 
     @staticmethod
-    async def generate_user_progress(user_id: int, db: Database) -> Optional[dict]:
+    async def generate_user_progress(user_id: int, user_repo: UserRepository) -> Optional[dict]:
         """
         Generates user progress based on data from the database.
 
         :param user_id: User ID.
-        :param db: Database
+        :param user_repo: UserRepository
         :return: Dictionary with user statistics or None if no user is found.
         """
         try:
-            user_data = await db.get_user_progress(user_id)
+            user_data = await user_repo.get_user_progress(user_id)
             if not user_data:
                 return None
 

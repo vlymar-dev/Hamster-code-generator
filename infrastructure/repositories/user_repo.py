@@ -17,7 +17,8 @@ class UserRepository:
 
     async def add_user(self, user: User) -> None:
         try:
-            existing_user = await self.session.get(User, user.id)
+            result = await self.session.execute(select(User).where(User.id == user.id))
+            existing_user = result.scalar_one_or_none()
             if not existing_user:
                 self.session.add(user)
             await self.session.commit()
@@ -42,10 +43,9 @@ class UserRepository:
 
     async def get_user_language(self, user_id: int) -> str:
         try:
-            user = await self.session.get(User, user_id)
-            if user:
-                return str(user.language_code)
-            return 'en'
+            result = await self.session.execute(select(User.language_code).where(User.id == user_id))
+            language = result.scalar_one_or_none()
+            return language if language else 'en'
         except DatabaseError as e:
             logger.error(f"Database error occurred while getting language for user_id={user_id}: {e}")
             return 'en'
@@ -69,13 +69,12 @@ class UserRepository:
 
     async def get_subscription_status(self, user_id: int) -> bool:
         try:
-            user = await self.session.get(User, user_id)
-            if user.is_subscribed:
-                return True
-            return False
+            result = await self.session.execute(select(User.is_subscribed).where(User.id == user_id))
+            is_subscribed = result.scalar_one_or_none()
+            return bool(is_subscribed)
         except DatabaseError as e:
             logger.error(f'Database error occurred while trying to get subscription status for user_id={user_id}: {e}')
-            return False
+            return True
 
     async def unsubscribe_notifications(self, user_id: int) -> str :
         try:
@@ -109,3 +108,85 @@ class UserRepository:
         except DatabaseError as e:
             logger.error(f'Database error occurred while trying to subscribe for user_id={user_id}: {e}')
             return 'error'
+
+    async def get_user_progress(self, user_id: int)-> Optional[dict[str, any]]:
+        try:
+            result = await self.session.execute(
+                select(
+                    User.referrals,
+                    User.registration_date,
+                    User.user_status,
+                    User.total_keys_generated
+                ).where(User.id == user_id)
+            )
+            user_data = result.one_or_none()
+            if user_data:
+                referrals, registration_date, user_status, total_keys_generated = user_data
+                return {
+                    'referrals': len(referrals) if referrals else 0,
+                    'registration_date': registration_date,
+                    'user_status': user_status,
+                    'total_keys_generated': total_keys_generated,
+                }
+            return None
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while retrieving progress for user_id={user_id}: {e}")
+            return None
+
+    async def get_user_role(self, user_id: int) -> str:
+        try:
+            result = await self.session.execute(select(User.user_role).where(User.id == user_id))
+            user_role = result.scalar_one_or_none()
+            return user_role if user_role else 'user'
+        except DatabaseError as e:
+             logger.error(f"Database error occurred while getting role for user_id={user_id}: {e}")
+             return 'user'
+
+    async def change_user_role(self, user_id: int, new_user_role: str) -> bool:
+        try:
+            result = await self.session.execute(
+                select(User).where(User.id == user_id).with_for_update()
+            )
+            user = result.scalar_one_or_none()
+            if user:
+                if user.user_role != new_user_role:
+                    user.user_role = new_user_role
+                    await self.session.commit()
+                return True
+            return False
+        except DatabaseError as e:
+            await self.session.rollback()
+            logger.error(f"Database error occurred while creating user role for user_id={user_id}: {e}")
+            return False
+
+    async def get_users_count(self) -> int:
+        try:
+            result = await self.session.execute(select(func.count()).select_from(User))
+            users_count = result.scalar_one()
+            return users_count
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while counting users: {e}")
+            return 0
+
+    # async def add_referral(self, user_id: int, referral_id: int) -> None:
+    #     try:
+    #         if user_id == referral_id:
+    #             logger.warning(f'The user with ID {user_id} uses their own referral link.')
+    #             raise SelfReferralException()
+    #
+    #         result = await self.session.execute(
+    #             select(User).where(User.id == referral_id).with_for_update()
+    #         )
+    #         referrer_user = result.scalar_one_or_none()
+    #         if referrer_user:
+    #             logger.warning(f'The user with ID {user_id} already exists.')
+    #             raise UserAlreadyExistsException()
+    #
+    #         referrer_user = await self.session.get(User, referral_id)
+    #         if referrer_user:
+    #             referrer_user.referrals = referrer_user.referrals + [user_id]
+    #             await self.session.commit()
+    #     except DatabaseError as e:
+    #         await self.session.rollback()
+    #         logger.error(f"Database error occurred while adding referral for user_id={user_id}, referral_id={referral_id}: {e}")
+    #         raise
