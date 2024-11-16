@@ -78,7 +78,10 @@ async def handle_start_command(message: Message, user_repo: UserRepository, bot:
                 )
     else:
 
-        await message.answer('Ты вернулся, урааа')
+        await message.answer(
+            text=welcome_message,
+            reply_markup=get_main_menu_kb()
+        )
 
 
 

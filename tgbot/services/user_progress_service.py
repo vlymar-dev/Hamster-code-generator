@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.exc import DatabaseError
@@ -9,11 +9,28 @@ from infrastructure.repositories.user_repo import UserRepository
 
 logger = logging.getLogger(__name__)
 
+ACHIEVEMENTS = {
+    'newcomer': {'keys': 200, 'referrals': 1, 'days': 10},
+    'adventurer': {'keys': 201, 'referrals': 0, 'days': 20},
+    'bonus_hunter': {'keys': 450, 'referrals': 5, 'days': 30},
+    'code_expert': {'keys': 500, 'referrals': 10, 'days': 60},
+    'game_legend': {'keys': 700, 'referrals': 20, 'days': 90},
+    'absolute_leader': {'keys': 1200, 'referrals': 50, 'days': 120},
+}
+
 class UserProgressService:
 
     @staticmethod
     def calculate_days_in_bot(registration_date: datetime) -> int:
-        """Calculates the number of days the user has spent in the bot."""
+        """
+    Calculate the number of days the user has been in the bot.
+
+    Args:
+        registration_date: The date when the user registered.
+
+    Returns:
+        Number of days since registration.
+    """
         try:
             return (datetime.now().date() - registration_date.date()).days
         except AttributeError as e:
@@ -21,30 +38,67 @@ class UserProgressService:
             return 0
 
     @staticmethod
-    def calculate_achievement(total_keys: int, referrals: int, days_in_bot: int) -> tuple[str, int, int, int]:
-        """Determines the user's achievement level and progress needed to reach the next level."""
-        if total_keys > 1200 and referrals > 50 and days_in_bot > 120:
-            return 'absolute_leader', 0, 0, 0
-        elif total_keys > 700 and referrals > 20 and days_in_bot > 90:
-            return 'game_legend', max(1200 - total_keys, 0), max(50 - referrals, 0), max(120 - days_in_bot, 0)
-        elif total_keys > 500 and referrals > 10 and days_in_bot > 60:
-            return 'code_expert', max(700 - total_keys, 0), max(20 - referrals, 0), max(90 - days_in_bot, 0)
-        elif total_keys > 450 and (referrals > 5 or days_in_bot > 30):
-            return 'bonus_hunter', max(500 - total_keys, 0), max(10 - referrals, 0), max(60 - days_in_bot, 0)
-        elif total_keys > 201 and days_in_bot > 20:
-            return 'adventurer', max(450 - total_keys, 0), max(5 - referrals, 0), max(30 - days_in_bot, 0)
-        return 'newcomer', max(200 - total_keys, 0), max(1 - referrals, 0), max(10 - days_in_bot, 0)
+    def generate_progress_bar(current: int, total: int, length: int = 10) -> str:
+        """
+        Generate a visual progress bar for the user's achievements.
+
+        Returns:
+            A string representing the progress bar with completion status.
+        """
+        if total <= 0:
+            return '▱' * length + f' (0/{total}) ❌'
+        progress = min(int((current / total) * length), length)
+        bar = '▰' * progress + '▱' * (length - progress)
+        status = '✔️' if current >= total else '❌'
+        return f'{bar} ({current}/{total}) {status}'
+
+    @staticmethod
+    def calculate_achievement(total_keys: int, referrals: int, days_in_bot: int) -> tuple[str, Optional[str]]:
+        """
+        Determine the user's current level and the next level based on progress.
+
+        Returns:
+            A tuple with the current level and the next level, if any.
+        """
+        levels = list(ACHIEVEMENTS.keys())
+        current_level = 'newcomer'
+        next_level = None
+
+        for idx, level in enumerate(levels):
+            thresholds = ACHIEVEMENTS[level]
+            if (
+                total_keys >= thresholds['keys'] and
+                referrals >= thresholds['referrals'] and
+                days_in_bot >= thresholds['days']
+            ):
+                current_level = level
+                if idx + 1 < len(levels):
+                    next_level = levels[idx + 1]
+                else:
+                    next_level = None  # Max level reached
+            else:
+                next_level = level
+                break
+
+        return current_level, next_level
 
     @staticmethod
     def get_achievement_text(key: str) -> str:
         """Returns the translated text of the achievement key."""
         achievements = {
-            'newcomer': _('🌱 <b>Newcomer</b> — <i>You\'ve just begun your journey! Keep going, there are many opportunities ahead!</i> 🚀'),
-            'adventurer': _('🔑 <b>Adventurer</b> — <i>You\'ve unlocked a few doors, but more valuable keys await you.</i> 💎'),
-            'bonus_hunter': _('🎯 <b>Bonus Hunter</b> — <i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁'),
-            'code_expert': _('🧠 <b>Code Expert</b> — <i>You already know how the system works. Keep improving!</i> 📈'),
-            'game_legend': _('🌟 <b>Game Legend</b> — <i>You\'ve achieved almost everything! Stay at the top and collect all the keys!</i> 🏅'),
-            'absolute_leader': _('👑 <b>Absolute Leader</b> — <i>You\'re at the top! All the keys are at your disposal, and you\'re a role model for everyone!</i> 🌍')
+            'newcomer': _(
+                '🌱 <b>Level:</b>\n<i>Newcomer</i> — <i>You\'ve just begun your journey! '
+                'Keep going, there are many opportunities ahead!</i> 🚀'),
+            'adventurer': _(
+                '🎩 <b>Level:</b>\n<i>Adventurer</i> — <i>You\'ve unlocked a few doors, but more valuable keys await you.</i> 💎'),
+            'bonus_hunter': _(
+                '🎯 <b>Level:</b>\n<i>Bonus Hunter</i> — <i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁'),
+            'code_expert': _(
+                '🧠 <b>Level:</b>\n<i>Code Expert</i> — <i>You already know how the system works. Keep improving!</i> 📈'),
+            'game_legend': _(
+                '🌟 <b>Level:</b>\n<i>Game Legend</i> — <i>You\'ve achieved almost everything! Stay at the top and collect all the keys!</i> 🏅'),
+            'absolute_leader': _(
+                '👑 <b>Level:</b>\n<i>Absolute Leader</i> — <i>You\'re at the top! All the keys are at your disposal, and you\'re a role model for everyone!</i> 🌍')
         }
         return achievements.get(key, achievements['newcomer'])
 
@@ -53,19 +107,22 @@ class UserProgressService:
         """Returns the translated status text by key."""
         statuses = {
             'free': _('🎮 <b>Regular Player</b> — Get keys and open doors to become stronger. 🚀'),
-            'friend': _('🤝 <b>Friend of the Project</b> — You have access to exclusive features, but there\'s more ahead! 🔥'),
+            'friend': _(
+                '🤝 <b>Friend of the Project</b> — You have access to exclusive features, but there\'s more ahead! 🔥'),
             'premium': _('👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive content. ✨')
         }
         return statuses.get(key, statuses['free'])
 
     @staticmethod
-    async def generate_user_progress(user_id: int, user_repo: UserRepository) -> Optional[dict]:
+    async def generate_user_progress(user_id: int, user_repo: UserRepository) -> Optional[str]:
         """
-        Generates user progress based on data from the database.
+        Create a detailed progress report for the user.
 
-        :param user_id: User ID.
-        :param user_repo: UserRepository
-        :return: Dictionary with user statistics or None if no user is found.
+        Retrieves user data, calculates the current and next achievement levels,
+        and formats progress bars for keys, referrals, and days in the bot.
+
+        Returns:
+            Optional[dict]: A dictionary containing progress details or None if the user data is unavailable.
         """
         try:
             user_data = await user_repo.get_user_progress(user_id)
@@ -77,24 +134,46 @@ class UserProgressService:
             referrals = user_data['referrals']
             user_status = user_data['user_status']
 
-            achievement_key, keys_needed, referrals_needed, days_needed = UserProgressService.calculate_achievement(
+            current_level, next_level = UserProgressService.calculate_achievement(
                 total_keys=total_keys_generated,
                 referrals=referrals,
                 days_in_bot=days_in_bot
             )
-            achievement = UserProgressService.get_achievement_text(achievement_key)
+
+            achievement = UserProgressService.get_achievement_text(current_level)
             user_status_text = UserProgressService.get_status_text(user_status)
 
-            return {
-                'achievement_name': achievement,
-                'keys_total': total_keys_generated,
-                'referrals': referrals,
-                'days_in_bot': days_in_bot,
-                'user_status': user_status_text,
-                'keys_needed': keys_needed,
-                'referrals_needed': referrals_needed,
-                'days_needed': days_needed
-            }
+            if next_level:
+                next_thresholds = ACHIEVEMENTS[next_level]
+                keys_progress = UserProgressService.generate_progress_bar(
+                    total_keys_generated, next_thresholds['keys'])
+                referrals_progress = UserProgressService.generate_progress_bar(
+                    referrals, next_thresholds['referrals'])
+                days_progress = UserProgressService.generate_progress_bar(
+                    days_in_bot, next_thresholds['days'])
+            else:
+                keys_progress = _('Max level achieved ✔️')
+                referrals_progress = _('Max level achieved ✔️')
+                days_progress = _('Max level achieved ✔️')
+
+            progress_text = _(
+                '🏆 <b>Progress:</b>\n\n'
+                '{achievement_name}\n\n'
+                '🔝 <b>To the next level:</b>\n'
+                '🔑 <i>Keys:</i> {keys_progress}\n'
+                '📨 <i>Referrals:</i> {referrals_progress}\n'
+                '⏳ <i>Days in Bot:</i> {days_progress}\n\n'
+                '🥇 <b>Your status:</b>\n'
+                '{user_status}\n\n'
+                '🎳 Invite friends, earn keys, and reach new heights with us! 🌍'
+            ).format(
+                achievement_name=achievement,
+                keys_progress=keys_progress,
+                referrals_progress=referrals_progress,
+                days_progress=days_progress,
+                user_status=user_status_text
+            )
+            return progress_text
         except DatabaseError as e:
             logger.error(f"Database error occurred: {e}")
             return None

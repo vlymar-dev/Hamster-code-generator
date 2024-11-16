@@ -5,11 +5,12 @@ from aiogram.utils.i18n import gettext as _
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.config import config
 from tgbot.handlers.messages import send_main_menu
-from tgbot.keyboards.settings.change_language_kb import get_change_language_kb
 from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
-from tgbot.keyboards.settings.notifications_kb import notifications_kb
+from tgbot.keyboards.progress_kb import get_progress_keyboard
 from tgbot.keyboards.referral_kb import referral_links_kb
+from tgbot.keyboards.settings.change_language_kb import get_change_language_kb
+from tgbot.keyboards.settings.notifications_kb import notifications_kb
 from tgbot.keyboards.settings.settings_kb import get_settings_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
 from tgbot.services.settings.user_language_service import UserLanguageService
@@ -133,26 +134,8 @@ async def user_progress_handler(callback_query: CallbackQuery, user_repo: UserRe
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=_('📊 <b>Progress:</b>\n\n'
-               '🏆 <b><u>Level:</u></b>\n'
-               '<i>{achievement_name}</i>\n'
-               '🔝 <i><b>To the next level:</b>\n<b>{keys_needed}</b> more keys, <b>{referrals_needed}</b> more referrals, '
-               'and {days_needed} more days in bot.</i>\n\n'
-               '🔑 <b><i>Total Keys Generated:</i></b> <i>{keys_total}</i>\n'
-               '📨 <b><i>Referrals:</i></b> <i>{referrals}</i>\n\n'
-               '🥇 <b><u>Your status:</u></b>\n'
-               '<i>{user_status}</i>\n'
-               '🤩 The higher the status, the more bonuses you get!\n\n'
-               '🎳 <b>Invite friends, earn keys, and reach new heights with us!</b> 🌍').format(
-            achievement_name=user_progress['achievement_name'],
-            keys_total=user_progress['keys_total'],
-            referrals=user_progress['referrals'],
-            user_status=user_progress['user_status'],
-            keys_needed=user_progress['keys_needed'],
-            referrals_needed=user_progress['referrals_needed'],
-            days_needed=user_progress['days_needed'],
-        ),
-        reply_markup=get_back_to_main_menu_keyboard()
+        text=user_progress,
+        reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id)
     )
 
 
