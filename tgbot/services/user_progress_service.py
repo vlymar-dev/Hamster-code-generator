@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.exc import DatabaseError
@@ -75,7 +75,7 @@ class UserProgressService:
                 if idx + 1 < len(levels):
                     next_level = levels[idx + 1]
                 else:
-                    next_level = None  # Max level reached
+                    next_level = None
             else:
                 next_level = level
                 break
@@ -122,7 +122,7 @@ class UserProgressService:
         and formats progress bars for keys, referrals, and days in the bot.
 
         Returns:
-            Optional[dict]: A dictionary containing progress details or None if the user data is unavailable.
+            Optional[str]: A string containing progress details or None if the user data is unavailable.
         """
         try:
             user_data = await user_repo.get_user_progress(user_id)

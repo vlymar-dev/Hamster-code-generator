@@ -2,15 +2,15 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
-from tgbot.database import Database
+from infrastructure.repositories.user_repo import UserRepository
 from tgbot.keyboards.admin_panel_kb import admin_panel_users_kb
 from tgbot.services.admin_panel_service import AdminPanelService
 
 router = Router()
 
 @router.callback_query(F.data == 'manage_users')
-async def manage_users_handler(callback_query: CallbackQuery, db: Database) -> None:
-    users_count = await AdminPanelService.manage_users(db)
+async def manage_users_handler(callback_query: CallbackQuery, user_repo: UserRepository) -> None:
+    users_count = await AdminPanelService.manage_users(user_repo)
     await callback_query.answer()
     await callback_query.message.answer(
         text=_('Total users: {users_count}').format(users_count=users_count),
