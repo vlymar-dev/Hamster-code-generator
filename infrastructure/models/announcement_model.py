@@ -11,7 +11,8 @@ class Announcement(Base):
     __tablename__ = 'announcements'
 
     id = mapped_column(Integer, primary_key=True)
-    text: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    text: Mapped[str] = mapped_column(String(3500), nullable=False)
     image_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now().replace(second=0, microsecond=0)

@@ -25,7 +25,7 @@ class AnnouncementRepository:
         try:
             query = select(Announcement)
             result = await self.session.execute(query)
-            return result.scalars().all()
+            return list(result.scalars().all())
         except DatabaseError as e:
             logger.error(f"Database error occurred while fetching all announcements: {e}")
             return []
