@@ -180,3 +180,5 @@ proxies.txt
 # Images (Temporarily)
 images/
 images_data/
+uploads/*
+!uploads/.gitkeep

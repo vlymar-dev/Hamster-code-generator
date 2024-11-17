@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.i18n import gettext as _
@@ -74,10 +74,32 @@ async def process_announcement_text_handler(message: Message, state: FSMContext)
 
 
 @router.message(CreateAnnouncementState.announcement_image)
-async def process_announcement_image_handler(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+async def process_announcement_image_handler(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository, bot: Bot) -> None:
     data = await state.get_data()
 
-    if message.text.lower().strip() in ['no_image']:
+    if message.photo:
+        try:
+            photo = message.photo[-1]
+            image_url = await AnnouncementService.process_and_save_image(photo, bot)
+            announcement = await AnnouncementService.create_announcement(
+                title=data['announcement_title'],
+                text=data['announcement_text'],
+                created_by=message.from_user.id,
+                image_url=image_url,
+                announcement_repo=announcement_repo
+            )
+            await state.clear()
+            await message.answer(
+                text=_('✅ Announcement "{title}" with image created.').format(title=announcement.title),
+                reply_markup=get_back_to_announcements_kb()
+            )
+        except ValueError as e:
+            await message.answer(
+                text=_('🚫 Unsupported image format. Please send a correct image.'),
+                reply_markup=get_cancel_announcement_action_kb()
+            )
+
+    elif message.text.lower().strip() in ['no_image']:
         announcement = await AnnouncementService.create_announcement(
             title=data['announcement_title'],
             text=data['announcement_text'],
@@ -86,15 +108,14 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
         )
         await state.clear()
         await message.answer(
-            text='✅ Announcement "{title}" created.'.format(title=announcement.title),
+            text=_('✅ Announcement "{title}" without image created.').format(title=announcement.title),
             reply_markup=get_back_to_announcements_kb()
         )
-    # else:
-    #     await message.answer(
-    #         text='✅ Announcement "{title}" created.'.format(title=announcement.title),
-    #         reply_markup=get_back_to_announcements_kb()
-    #     )
-
+    else:
+        await message.answer(
+            text=_('Please submit an image or enter <code>no_image</code> to skip.'),
+            reply_markup=get_cancel_announcement_action_kb()
+        )
 
 
 @router.callback_query(F.data == 'edit_announcement')
