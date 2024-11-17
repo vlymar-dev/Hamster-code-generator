@@ -10,7 +10,7 @@ def admin_panel_kb() -> InlineKeyboardMarkup:
 
     builder.row(InlineKeyboardButton(text=_('🔑 Keys'), callback_data='manage_keys'),
                 InlineKeyboardButton(text=_('🧑‍💻 Users'), callback_data='manage_users'))
-    builder.row(InlineKeyboardButton(text=_('📣 Announcements'), callback_data='announcements'))
+    builder.row(InlineKeyboardButton(text=_('📣 Announcements'), callback_data='manage_announcements'))
     builder.row(back_to_main_menu_button())
     return builder.as_markup()
 
@@ -23,11 +23,23 @@ def admin_panel_users_kb() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def admin_panel_user_role() -> InlineKeyboardMarkup:
+def admin_panel_user_role_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(InlineKeyboardButton(text=_('Admin'), callback_data='change_role_to_admin'),
                 InlineKeyboardButton(text=_('User'), callback_data='change_role_to_user'))
+    builder.row(back_to_admin_panel_button())
+    return builder.as_markup()
+
+def announcements_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(InlineKeyboardButton(text=_('➕ Create Announcement'), callback_data='create_announcement'))
+    builder.row(InlineKeyboardButton(text=_('✏️ Edit Announcement'), callback_data='edit_announcement'))
+    builder.row(InlineKeyboardButton(text=_('🔍 View Announcement'), callback_data='view_announcements'))
+    builder.row(InlineKeyboardButton(text=_('❌ Delete Announcement'), callback_data='delete_announcement'))
+    builder.row(InlineKeyboardButton(text=_('📤 Broadcast Announcement'), callback_data='broadcast_announcement'))
+
     builder.row(back_to_admin_panel_button())
     return builder.as_markup()
 

@@ -2,7 +2,7 @@ from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 
 from infrastructure.repositories.user_repo import UserRepository
-from tgbot.keyboards.admin_panel_kb import admin_panel_kb
+from tgbot.keyboards.admin_panel.admin_panel_kb import admin_panel_kb
 
 
 class AdminPanelService:

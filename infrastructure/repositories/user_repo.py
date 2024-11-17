@@ -39,6 +39,7 @@ class UserRepository:
             logger.error(f"Database error occurred while checking user_id={user_id}: {e}")
             return False
 
+    # TODO: Заменить в старт хендлере на check_user_exists
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         try:
             user = await self.session.get(User, user_id)

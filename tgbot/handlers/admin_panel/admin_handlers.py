@@ -90,5 +90,5 @@ async def back_to_admin_panel_handler(callback_query: CallbackQuery, state: FSMC
 
 
 
-def register_admin_panel_callback_queries_handler(dp) -> None:
+def register_admin_panel_handlers(dp) -> None:
     dp.include_router(router)
