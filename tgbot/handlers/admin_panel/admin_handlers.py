@@ -4,8 +4,12 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.utils.i18n import gettext as _
 
 from infrastructure.repositories.user_repo import UserRepository
-from tgbot.keyboards.admin_panel_kb import admin_panel_user_role, admin_panel_users_kb, get_cancel_change_role_kb
-from tgbot.services.admin_panel_service import AdminPanelService
+from tgbot.keyboards.admin_panel.admin_panel_kb import (
+    admin_panel_user_role_kb,
+    admin_panel_users_kb,
+    get_cancel_change_role_kb,
+)
+from tgbot.services.admin_panel.admin_panel_service import AdminPanelService
 from tgbot.states.admin_panel_state import AdminPanelState
 
 router = Router()
@@ -22,10 +26,6 @@ async def manage_users_handler(callback_query: CallbackQuery, user_repo: UserRep
 
 @router.callback_query(F.data == 'manage_keys')
 async def manage_keys_handler(callback_query: CallbackQuery) -> None:
-    ...
-
-@router.callback_query(F.data == 'announcements')
-async def announcements_handler(callback_query: CallbackQuery) -> None:
     ...
 
 
@@ -57,7 +57,7 @@ async def process_change_role_handler(message: Message, state: FSMContext, user_
         await state.update_data(change_role_user_id=user_id)
         await message.answer(
             text=_(f'👤 <b>Select a role for the user: <i>{user_id}</i></b>'),
-            reply_markup=admin_panel_user_role(),
+            reply_markup=admin_panel_user_role_kb(),
         )
 
     except ValueError:

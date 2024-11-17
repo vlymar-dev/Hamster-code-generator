@@ -8,7 +8,7 @@ from infrastructure.repositories.user_repo import UserRepository
 from tgbot.filters.admin_filter import AdminFilter
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from tgbot.keyboards.settings.change_language_kb import get_change_language_kb
-from tgbot.services.admin_panel_service import AdminPanelService
+from tgbot.services.admin_panel.admin_panel_service import AdminPanelService
 
 router = Router()
 

@@ -31,18 +31,6 @@ def admin_panel_user_role_kb() -> InlineKeyboardMarkup:
     builder.row(back_to_admin_panel_button())
     return builder.as_markup()
 
-def announcements_kb() -> InlineKeyboardMarkup:
-    builder = InlineKeyboardBuilder()
-
-    builder.row(InlineKeyboardButton(text=_('➕ Create Announcement'), callback_data='create_announcement'))
-    builder.row(InlineKeyboardButton(text=_('✏️ Edit Announcement'), callback_data='edit_announcement'))
-    builder.row(InlineKeyboardButton(text=_('🔍 View Announcement'), callback_data='view_announcements'))
-    builder.row(InlineKeyboardButton(text=_('❌ Delete Announcement'), callback_data='delete_announcement'))
-    builder.row(InlineKeyboardButton(text=_('📤 Broadcast Announcement'), callback_data='broadcast_announcement'))
-
-    builder.row(back_to_admin_panel_button())
-    return builder.as_markup()
-
 
 def get_cancel_change_role_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[back_to_admin_panel_button()]])
