@@ -31,6 +31,14 @@ class UserRepository:
             logger.error(f'Database error occurred while adding user: {e}')
             raise
 
+    async def check_user_exists(self, user_id: int) -> bool:
+        try:
+            result = await self.session.execute(select(User.id).where(User.id == user_id))
+            return result.scalar_one_or_none() is not None
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while checking user_id={user_id}: {e}")
+            return False
+
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         try:
             user = await self.session.get(User, user_id)
@@ -142,7 +150,7 @@ class UserRepository:
              logger.error(f"Database error occurred while getting role for user_id={user_id}: {e}")
              return 'user'
 
-    async def change_user_role(self, user_id: int, new_user_role: str) -> bool:
+    async def change_user_role(self, user_id: int, new_user_role: str) -> str:
         try:
             result = await self.session.execute(
                 select(User).where(User.id == user_id).with_for_update()
@@ -152,12 +160,13 @@ class UserRepository:
                 if user.user_role != new_user_role:
                     user.user_role = new_user_role
                     await self.session.commit()
-                return True
-            return False
+                    return 'success'
+                return 'unchanged'
+            return 'user_not_found'
         except DatabaseError as e:
             await self.session.rollback()
-            logger.error(f"Database error occurred while creating user role for user_id={user_id}: {e}")
-            return False
+            logger.error(f"Database error occurred while changing role for user_id={user_id}: {e}")
+            return 'error'
 
     async def get_users_count(self) -> int:
         try:
