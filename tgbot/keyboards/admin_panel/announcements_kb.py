@@ -26,6 +26,18 @@ def get_announcement_menu_kb() -> InlineKeyboardMarkup:
     builder.row(cancel_announcement_action_button(_('🔙 Back to announcements')))
     return builder.as_markup()
 
+def get_announcements_languages_kb(languages_dict: dict) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    for lang_code, language_name in languages_dict.items():
+        builder.button(
+            text=language_name,
+            callback_data=f'announcement_text_{lang_code}'
+        )
+    builder.adjust(2)
+    builder.row(cancel_announcement_action_button(_('🔙 Back to announcements')))
+    return builder.as_markup()
+
 
 def get_cancel_announcement_action_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[cancel_announcement_action_button(_('🔙 Cancel'))]])

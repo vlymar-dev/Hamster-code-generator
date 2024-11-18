@@ -90,3 +90,7 @@ class AnnouncementService:
     @staticmethod
     async def check_announcement_exists(announcement_id: int, announcement_repo: AnnouncementRepository) -> bool:
         return await announcement_repo.check_announcement_exists(announcement_id)
+
+    @staticmethod
+    def get_available_languages(languages: dict, text_languages: list[str]) -> dict:
+        return {key: value for key, value in languages.items() if key not in text_languages}

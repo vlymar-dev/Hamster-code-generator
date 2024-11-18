@@ -9,3 +9,6 @@ class CreateAnnouncementState(StatesGroup):
 
 class AnnouncementDetailState(StatesGroup):
     announcement_id = State()
+    text_languages = State()
+    language_code = State()
+    translation_text = State()

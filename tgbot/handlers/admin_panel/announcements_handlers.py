@@ -5,9 +5,11 @@ from aiogram.utils.i18n import gettext as _
 
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
 from infrastructure.repositories.user_repo import UserRepository
+from tgbot.common.staticdata import LANGUAGES_DICT
 from tgbot.keyboards.admin_panel.announcements_kb import (
     get_announcement_menu_kb,
     get_announcements_kb,
+    get_announcements_languages_kb,
     get_back_to_announcements_kb,
     get_cancel_announcement_action_kb,
 )
@@ -53,14 +55,13 @@ async def create_announcement_handler(callback_query: CallbackQuery, state: FSMC
 
 @router.message(CreateAnnouncementState.announcement_title)
 async def process_announcement_text_handler(message: Message, state: FSMContext) -> None:
-    if message.text:
-        await state.update_data(announcement_title=message.html_text)
-        await state.set_state(CreateAnnouncementState.announcement_image)
-        await message.answer(
-            text=_('📝 Text:\n{text}\n\n'
-                   'Send an image or type <code>no_image</code> to skip.').format(text=message.html_text),
-            reply_markup=get_cancel_announcement_action_kb()
-        )
+    await state.update_data(announcement_title=message.html_text)
+    await state.set_state(CreateAnnouncementState.announcement_image)
+    await message.answer(
+        text=_('📝 <b>Title:</b>\n{title}\n\n'
+               'Send an image or type <code>no_image</code> to skip.').format(title=message.html_text),
+        reply_markup=get_cancel_announcement_action_kb()
+    )
 
 
 
@@ -107,16 +108,6 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
         )
 
 
-@router.callback_query(F.data == 'create_translation')
-async def create_translation_handler(callback_query: CallbackQuery) -> None:
-    await callback_query.message.delete()
-    await callback_query.answer()
-    await callback_query.message.answer(
-        text=_(''),
-        reply_markup=...
-    )
-
-
 @router.callback_query(F.data == 'view_announcement_detail')
 async def view_announcement_detail_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     await callback_query.message.delete()
@@ -130,37 +121,93 @@ async def view_announcement_detail_handler(callback_query: CallbackQuery, state:
 
 @router.message(AnnouncementDetailState.announcement_id)
 async def process_announcement_id_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
-    announcement_id = int(message.text)
-    exist_announcement = await announcement_repo.check_announcement_exists(announcement_id)
-    if exist_announcement:
-        await state.update_data(announcement_id=message.text)
-        title, english_text, language_codes, image_url = await AnnouncementService.get_announcement_details(announcement_id, announcement_repo)
-        text = _('Title: {title}\n\n'
-                 'Languages: {languages}\n\n'
-                 'Text: {text}'
-                 ).format(
-                    title=title,
-                    languages=language_codes,
-                    text=english_text,
+    try:
+        announcement_id = int(message.text)
+        is_announcement_exist = await announcement_repo.check_announcement_exists(announcement_id)
+        if is_announcement_exist:
+            title, english_text, language_codes, image_url = await AnnouncementService.get_announcement_details(announcement_id, announcement_repo)
+            await state.update_data(announcement_id=message.text)
+            await state.update_data(text_languages=language_codes)
+            text = _('🔖 <b>Title:</b> {title}\n\n'
+                     '🌏 <b>Languages:</b> {languages}\n\n'
+                     '📙 <b>Text:</b> {text}'
+                     ).format(
+                        title=title,
+                        languages=language_codes,
+                        text=english_text,
+                    )
+            if image_url:
+                await message.answer_photo(
+                    photo=FSInputFile(image_url),
+                    caption=text,
+                    reply_markup=get_announcement_menu_kb()
                 )
-
-        if image_url:
-            await message.answer_photo(
-                photo=FSInputFile(image_url),
-                caption=text,
-                reply_markup=get_announcement_menu_kb()
-            )
+            else:
+                await message.answer(
+                    text=text,
+                    reply_markup=get_announcement_menu_kb()
+                )
         else:
             await message.answer(
-                text=text,
-                reply_markup=get_announcement_menu_kb()
+                text=_('⚠️ <b>Oops!</b> Enter the correct announcement id!'),
+                reply_markup=get_cancel_announcement_action_kb()
             )
-    else:
+    except ValueError:
         await message.answer(
-            text=_('⚠️ <b>Oops!</b> Enter the correct announcement id!'),
-            reply_markup=get_cancel_announcement_action_kb()
-        )
+            text=_('⚠️ Invalid announcement ID. Please enter a number.'),
+            reply_markup=get_cancel_announcement_action_kb())
         return
+
+
+@router.callback_query(F.data == 'create_announcement_translation')
+async def create_translation_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    text_languages = data['text_languages']
+    available_languages_dict = AnnouncementService.get_available_languages(
+        languages=LANGUAGES_DICT,
+        text_languages=text_languages,
+    )
+    await callback_query.message.delete()
+    await callback_query.answer()
+    await callback_query.message.answer(
+        text=_('🌏 Select a language from the list of available languages:'),
+        reply_markup=get_announcements_languages_kb(available_languages_dict)
+    )
+
+
+@router.callback_query(F.data.startswith('announcement_text_'))
+async def get_announcement_text_language_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
+    language_code: str = callback_query.data.split('_')[-1]
+    await state.update_data(language_code=language_code)
+    await callback_query.message.delete()
+    await callback_query.answer()
+    await callback_query.message.answer(
+        text=_('📝 Enter the announcement text for {language_code}:').format(language_code=language_code),
+        reply_markup=get_cancel_announcement_action_kb()
+    )
+    await state.set_state(AnnouncementDetailState.translation_text)
+
+
+@router.message(AnnouncementDetailState.translation_text)
+async def process_translation_text_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+    data = await state.get_data()
+
+    announcement_id = int(data['announcement_id'])
+    language_code = data['language_code']
+    translation_text = message.html_text
+
+    translation = await AnnouncementService.create_translation_for_announcement(
+        announcement_id=announcement_id,
+        language_code=language_code,
+        text=translation_text,
+        announcement_repo=announcement_repo,
+    )
+    await message.answer(
+        text=_('✅ Translation for: \'{language}\' created').format(
+            language=translation.language_code
+        ),
+        reply_markup=get_back_to_announcements_kb()
+    )
 
 
 @router.callback_query(F.data == 'edit_announcement')
