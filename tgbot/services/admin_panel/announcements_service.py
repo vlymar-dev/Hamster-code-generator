@@ -1,6 +1,7 @@
 import os
 import uuid
 from io import BytesIO
+from typing import Optional
 
 import aiofiles
 from aiogram import Bot
@@ -44,7 +45,7 @@ class AnnouncementService:
                 raise ValueError("The provided file is not a supported image.")
         finally:
             await file.close()
-        image_url = os.path.join('announcement_images', filename)
+        image_url = os.path.join('uploads/announcement_images', filename)
         return image_url
 
 
@@ -70,3 +71,22 @@ class AnnouncementService:
         await announcement_repo.add_translation(new_translation)
         return new_translation
 
+    @staticmethod
+    async def get_announcement_details(announcement_id: int, announcement_repo: AnnouncementRepository) -> Optional[
+        tuple]:
+        announcement = await announcement_repo.get_announcement_with_translations(announcement_id)
+        if not announcement:
+            return None
+
+        english_text = next(
+            (translation.text for translation in announcement.translations_text if translation.language_code == 'en'),
+            None
+        )
+
+        language_codes = [translation.language_code for translation in announcement.translations_text]
+
+        return announcement.title, english_text, language_codes, announcement.image_url
+
+    @staticmethod
+    async def check_announcement_exists(announcement_id: int, announcement_repo: AnnouncementRepository) -> bool:
+        return await announcement_repo.check_announcement_exists(announcement_id)

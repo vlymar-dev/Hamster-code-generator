@@ -1,8 +1,11 @@
 import logging
+from cgitb import reset
+from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, exists
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
 
@@ -39,12 +42,23 @@ class AnnouncementRepository:
             logger.error(f"Database error occurred while fetching all announcements: {e}")
             return []
 
-    # async def get_announcement_by_id(self, user_id: int) -> Optional[Announcement]:
-    #     try:
-    #         announcement = await self.session.get(Announcement, user_id)
-    #         if announcement:
-    #             return announcement
-    #         return None
-    #     except DatabaseError as e:
-    #         logger.error(f"Database error occurred while fetching announcement by id {user_id}: {e}")
-    #         return None
+    async def get_announcement_with_translations(self, announcement_id: int) -> Optional[Announcement]:
+        try:
+            result = await self.session.execute(
+                select(Announcement)
+                .options(joinedload(Announcement.translations_text))
+                .where(Announcement.id == announcement_id)
+            )
+            return result.unique().scalar_one_or_none()
+        except Exception as e:
+            logger.error(f"Error fetching announcement with translations: {e}")
+            raise
+
+    async def check_announcement_exists(self, announcement_id: int) -> bool:
+        try:
+            query = select(exists().where(Announcement.id == announcement_id))
+            result = await self.session.execute(query)
+            return result.scalar()
+        except Exception as e:
+            logger.error(f"Error while checking if announcement_id={announcement_id} exists: {e}")
+            return False
