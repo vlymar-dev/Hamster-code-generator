@@ -7,7 +7,7 @@ from aiogram import Bot
 from aiogram.types import PhotoSize
 from PIL import Image, UnidentifiedImageError
 
-from infrastructure.models.announcement_model import Announcement
+from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
 
 
@@ -49,13 +49,24 @@ class AnnouncementService:
 
 
     @staticmethod
-    async def create_announcement(title: str, text: str, created_by: int, announcement_repo: AnnouncementRepository,
+    async def create_announcement_without_text_translation(title: str, created_by: int, announcement_repo: AnnouncementRepository,
                                   image_url: str = None,) -> Announcement:
         new_announcement = Announcement(
             title=title,
-            text=text,
             image_url=image_url,
             created_by=created_by
         )
         await announcement_repo.add_announcement(new_announcement)
         return new_announcement
+
+    @staticmethod
+    async def create_translation_for_announcement(announcement_id: int, language_code: str, text: str,
+                                                  announcement_repo: AnnouncementRepository) -> AnnouncementTranslation:
+        new_translation = AnnouncementTranslation(
+            announcement_id=announcement_id,
+            language_code=language_code,
+            text=text,
+        )
+        await announcement_repo.add_translation(new_translation)
+        return new_translation
+

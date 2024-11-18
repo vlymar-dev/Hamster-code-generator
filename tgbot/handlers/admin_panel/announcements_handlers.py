@@ -51,26 +51,16 @@ async def create_announcement_handler(callback_query: CallbackQuery, state: FSMC
 
 
 @router.message(CreateAnnouncementState.announcement_title)
-async def process_announcement_title_handler(message: Message, state: FSMContext) -> None:
-    if message.text:
-        await state.update_data(announcement_title=message.html_text)
-        await state.set_state(CreateAnnouncementState.announcement_text)
-        await message.answer(
-            text=_('📝 Enter the announcement text below:'),
-            reply_markup=get_cancel_announcement_action_kb()
-        )
-
-
-@router.message(CreateAnnouncementState.announcement_text)
 async def process_announcement_text_handler(message: Message, state: FSMContext) -> None:
     if message.text:
-        await state.update_data(announcement_text=message.html_text)
+        await state.update_data(announcement_title=message.html_text)
         await state.set_state(CreateAnnouncementState.announcement_image)
         await message.answer(
             text=_('📝 Text:\n{text}\n\n'
                    'Send an image or type <code>no_image</code> to skip.').format(text=message.html_text),
             reply_markup=get_cancel_announcement_action_kb()
         )
+
 
 
 @router.message(CreateAnnouncementState.announcement_image)
@@ -81,9 +71,8 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
         try:
             photo = message.photo[-1]
             image_url = await AnnouncementService.process_and_save_image(photo, bot)
-            announcement = await AnnouncementService.create_announcement(
+            announcement = await AnnouncementService.create_announcement_without_text_translation(
                 title=data['announcement_title'],
-                text=data['announcement_text'],
                 created_by=message.from_user.id,
                 image_url=image_url,
                 announcement_repo=announcement_repo
@@ -100,9 +89,8 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
             )
 
     elif message.text.lower().strip() in ['no_image']:
-        announcement = await AnnouncementService.create_announcement(
+        announcement = await AnnouncementService.create_announcement_without_text_translation(
             title=data['announcement_title'],
-            text=data['announcement_text'],
             created_by=message.from_user.id,
             announcement_repo=announcement_repo
         )
