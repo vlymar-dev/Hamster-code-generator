@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.models.announcement_model import Announcement
+from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,15 @@ class AnnouncementRepository:
         except DatabaseError as e:
             await self.session.rollback()
             logger.error(f'Database error occurred while adding announcement: {e}')
+            raise
+
+    async def add_translation(self, translation_text: AnnouncementTranslation) -> None:
+        try:
+            self.session.add(translation_text)
+            await self.session.commit()
+        except DatabaseError as e:
+            await self.session.rollback()
+            logger.error(f'Database error occurred while adding translation: {e}')
             raise
 
     async def get_all_announcements(self) -> list[Announcement]:
