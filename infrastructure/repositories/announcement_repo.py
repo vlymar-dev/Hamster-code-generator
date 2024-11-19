@@ -84,3 +84,20 @@ class AnnouncementRepository:
         except DatabaseError as e:
             logger.error(f"Database error occurred while fetching announcement ID={announcement_id}: {e}")
             raise
+
+    async def delete_announcement_with_translations(self, announcement_id: int) -> None:
+        try:
+            query = select(Announcement).where(Announcement.id == announcement_id)
+            result = await self.session.execute(query)
+            announcement = result.scalar_one_or_none()
+
+            if not announcement:
+                raise ValueError(f"Announcement with ID {announcement_id} does not exist.")
+
+            await self.session.delete(announcement)
+            await self.session.commit()
+
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Error occurred while deleting announcement ID={announcement_id}: {e}")
+            raise

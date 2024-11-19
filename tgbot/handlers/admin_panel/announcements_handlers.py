@@ -16,7 +16,7 @@ from tgbot.keyboards.admin_panel.announcements_kb import (
     get_cancel_announcement_action_kb,
 )
 from tgbot.services.admin_panel.announcements_service import AnnouncementService
-from tgbot.states.announcements_state import AnnouncementDetailState, CreateAnnouncementState
+from tgbot.states.announcements_state import AnnouncementDeleteState, AnnouncementDetailState, CreateAnnouncementState
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +119,7 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
 
 @router.callback_query(F.data == 'view_announcement_detail')
 async def view_announcement_detail_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
@@ -168,7 +169,7 @@ async def process_announcement_id_input(message: Message, state: FSMContext, ann
             text=_('⚠️ An unexpected error occurred. Please try again later.'),
             reply_markup=get_cancel_announcement_action_kb()
         )
-    logger.error(f"Error in process_announcement_id_input: {e}")
+        logger.error(f"Error in process_announcement_id_input: {e}")
 
 
 @router.callback_query(F.data == 'create_announcement_translation')
@@ -241,10 +242,41 @@ async def view_announcements_handler(callback_query: CallbackQuery, user_repo: U
 
 
 @router.callback_query(F.data == 'delete_announcement')
-async def delete_announcement_handler(callback_query: CallbackQuery, user_repo: UserRepository) -> None:
+async def delete_announcement_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
     await callback_query.message.delete()
     await callback_query.answer()
+    await callback_query.message.answer(
+        text=_('📝 Enter the announcement id to delete:'),
+        reply_markup=get_cancel_announcement_action_kb()
+    )
+    await state.set_state(AnnouncementDeleteState.announcement_id)
 
+
+
+@router.message(AnnouncementDeleteState.announcement_id)
+async def process_delete_announcement_handler(message: Message, announcement_repo: AnnouncementRepository, state: FSMContext) -> None:
+    try:
+        announcement_id = int(message.text)
+
+        await AnnouncementService.delete_announcement(announcement_id, announcement_repo)
+        await state.clear()
+        await message.answer(
+            text=_('✅ Announcement with ID: <b>{id}</b> has been deleted.').format(id=announcement_id),
+            reply_markup=get_back_to_announcements_kb()
+        )
+    except ValueError as e:
+        await message.answer(
+            text=_('❌ {error}').format(error=str(e)),
+            reply_markup=get_back_to_announcements_kb()
+        )
+    except Exception as e:
+        await state.clear()
+        await message.answer(
+            text=_('⚠️ An unexpected error occurred. Please try again later.'),
+            reply_markup=get_back_to_announcements_kb()
+        )
+        logger.error(f"Error in delete_announcement_handler: {e}")
 
 
 @router.callback_query(F.data == 'broadcast_announcement')

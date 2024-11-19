@@ -85,5 +85,14 @@ class AnnouncementService:
         return announcement.title, english_text, language_codes, announcement.image_url
 
     @staticmethod
+    async def delete_announcement(announcement_id: int, announcement_repo: AnnouncementRepository) -> None:
+        try:
+            await announcement_repo.delete_announcement_with_translations(announcement_id)
+        except ValueError as e:
+            raise ValueError(str(e))
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error occurred while deleting announcement: {e}")
+
+    @staticmethod
     def get_available_languages(languages: dict, text_languages: list[str]) -> dict:
         return {key: value for key, value in languages.items() if key not in text_languages}

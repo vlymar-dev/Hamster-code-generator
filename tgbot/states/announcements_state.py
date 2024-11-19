@@ -12,3 +12,7 @@ class AnnouncementDetailState(StatesGroup):
     text_languages = State()
     language_code = State()
     translation_text = State()
+
+
+class AnnouncementDeleteState(StatesGroup):
+    announcement_id = State()
