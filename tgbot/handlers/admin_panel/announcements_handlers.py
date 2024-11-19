@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message
@@ -16,19 +18,26 @@ from tgbot.keyboards.admin_panel.announcements_kb import (
 from tgbot.services.admin_panel.announcements_service import AnnouncementService
 from tgbot.states.announcements_state import AnnouncementDetailState, CreateAnnouncementState
 
+logger = logging.getLogger(__name__)
+
 router = Router()
 
 
 async def show_announcements_text(announcement_repo: AnnouncementRepository) -> str:
-    announcements = await AnnouncementService.show_announcements(announcement_repo)
+    announcements = await AnnouncementService.show_announcements_with_languages(announcement_repo)
 
     if announcements:
         posts = "\n\n".join(
-            [f"🔖 ID: <code>{announcement.id}</code>\n{announcement.title}" for announcement in announcements]
+            [
+                f'🔅 <b>ID:</b> <code>{announcement["id"]}</code>\n'
+                f'🔖 <b>Title:</b> {announcement["title"]}\n'
+                f'🌏 <b>Languages:</b> {", ".join(announcement["languages"]) if announcement["languages"] else _("No translations available")}'
+                for announcement in announcements
+            ]
         )
-        return _("📌 All announcements:\n\n") + posts
+        return _('📌 All announcements:\n\n') + posts
     else:
-        return _("No announcements yet.")
+        return _('No announcements yet.')
 
 
 @router.callback_query(F.data == 'manage_announcements')
@@ -123,40 +132,43 @@ async def view_announcement_detail_handler(callback_query: CallbackQuery, state:
 async def process_announcement_id_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
     try:
         announcement_id = int(message.text)
-        is_announcement_exist = await announcement_repo.check_announcement_exists(announcement_id)
-        if is_announcement_exist:
-            title, english_text, language_codes, image_url = await AnnouncementService.get_announcement_details(announcement_id, announcement_repo)
-            await state.update_data(announcement_id=message.text)
-            await state.update_data(text_languages=language_codes)
-            text = _('🔖 <b>Title:</b> {title}\n\n'
-                     '🌏 <b>Languages:</b> {languages}\n\n'
-                     '📙 <b>Text:</b> {text}'
-                     ).format(
-                        title=title,
-                        languages=language_codes,
-                        text=english_text,
-                    )
-            if image_url:
-                await message.answer_photo(
-                    photo=FSInputFile(image_url),
-                    caption=text,
-                    reply_markup=get_announcement_menu_kb()
+        title, english_text, language_codes, image_url = await AnnouncementService.get_announcement_details(
+            announcement_id, announcement_repo
+        )
+
+        await state.update_data(announcement_id=message.text)
+        await state.update_data(text_languages=language_codes)
+
+        text = _('🔖 <b>Title:</b> {title}\n\n'
+                 '🌏 <b>Languages:</b> {languages}\n\n'
+                 '📙 <b>Text:</b> {text}'
+                 ).format(
+                    title=title,
+                    languages=", ".join(language_codes),
+                    text=english_text or _("No text available."),
                 )
-            else:
-                await message.answer(
-                    text=text,
-                    reply_markup=get_announcement_menu_kb()
-                )
+        if image_url:
+            await message.answer_photo(
+                photo=FSInputFile(image_url),
+                caption=text,
+                reply_markup=get_announcement_menu_kb()
+            )
         else:
             await message.answer(
-                text=_('⚠️ <b>Oops!</b> Enter the correct announcement id!'),
-                reply_markup=get_cancel_announcement_action_kb()
+                text=text,
+                reply_markup=get_announcement_menu_kb()
             )
-    except ValueError:
+    except ValueError as e:
         await message.answer(
-            text=_('⚠️ Invalid announcement ID. Please enter a number.'),
-            reply_markup=get_cancel_announcement_action_kb())
-        return
+            text=_('⚠️ {error}').format(error=str(e)),
+            reply_markup=get_cancel_announcement_action_kb()
+        )
+    except Exception as e:
+        await message.answer(
+            text=_('⚠️ An unexpected error occurred. Please try again later.'),
+            reply_markup=get_cancel_announcement_action_kb()
+        )
+    logger.error(f"Error in process_announcement_id_input: {e}")
 
 
 @router.callback_query(F.data == 'create_announcement_translation')
@@ -191,23 +203,28 @@ async def get_announcement_text_language_handler(callback_query: CallbackQuery, 
 @router.message(AnnouncementDetailState.translation_text)
 async def process_translation_text_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
     data = await state.get_data()
-
     announcement_id = int(data['announcement_id'])
     language_code = data['language_code']
     translation_text = message.html_text
 
-    translation = await AnnouncementService.create_translation_for_announcement(
-        announcement_id=announcement_id,
-        language_code=language_code,
-        text=translation_text,
-        announcement_repo=announcement_repo,
-    )
-    await message.answer(
-        text=_('✅ Translation for: \'{language}\' created').format(
-            language=translation.language_code
-        ),
-        reply_markup=get_back_to_announcements_kb()
-    )
+    try:
+        translation_text = await AnnouncementService.create_translation_for_announcement(
+            announcement_id=announcement_id,
+            language_code=language_code,
+            text=translation_text,
+            announcement_repo=announcement_repo,
+        )
+        await message.answer(
+            text=_('✅ Translation for: \'{language}\' created').format(
+                language=translation_text.language_code
+            ),
+            reply_markup=get_back_to_announcements_kb()
+        )
+    except ValueError as e:
+        await message.answer(
+            text=_('❌ {error}').format(error=str(e)),
+            reply_markup=get_cancel_announcement_action_kb()
+        )
 
 
 @router.callback_query(F.data == 'edit_announcement')

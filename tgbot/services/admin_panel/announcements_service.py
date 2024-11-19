@@ -1,12 +1,12 @@
 import os
 import uuid
 from io import BytesIO
-from typing import Optional
 
 import aiofiles
 from aiogram import Bot
 from aiogram.types import PhotoSize
 from PIL import Image, UnidentifiedImageError
+from sqlalchemy.util import await_only
 
 from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
@@ -15,9 +15,8 @@ from infrastructure.repositories.announcement_repo import AnnouncementRepository
 class AnnouncementService:
 
     @staticmethod
-    async def show_announcements( announcement_repo: AnnouncementRepository) -> list[Announcement]:
-        announcements = await announcement_repo.get_all_announcements()
-        return announcements
+    async def show_announcements_with_languages(announcement_repo: AnnouncementRepository) -> list[dict]:
+        return await announcement_repo.get_all_announcements_with_languages()
 
 
     @staticmethod
@@ -68,28 +67,22 @@ class AnnouncementService:
             language_code=language_code,
             text=text,
         )
-        await announcement_repo.add_translation(new_translation)
-        return new_translation
+        try:
+            return await announcement_repo.add_translation_if_exists(new_translation)
+        except ValueError as e:
+            raise ValueError(str(e))
 
     @staticmethod
-    async def get_announcement_details(announcement_id: int, announcement_repo: AnnouncementRepository) -> Optional[
-        tuple]:
-        announcement = await announcement_repo.get_announcement_with_translations(announcement_id)
-        if not announcement:
-            return None
+    async def get_announcement_details(announcement_id: int, announcement_repo: AnnouncementRepository) -> tuple:
+        announcement = await announcement_repo.get_announcement_or_error(announcement_id)
 
         english_text = next(
             (translation.text for translation in announcement.translations_text if translation.language_code == 'en'),
             None
         )
-
         language_codes = [translation.language_code for translation in announcement.translations_text]
 
         return announcement.title, english_text, language_codes, announcement.image_url
-
-    @staticmethod
-    async def check_announcement_exists(announcement_id: int, announcement_repo: AnnouncementRepository) -> bool:
-        return await announcement_repo.check_announcement_exists(announcement_id)
 
     @staticmethod
     def get_available_languages(languages: dict, text_languages: list[str]) -> dict:

@@ -1,9 +1,8 @@
 import logging
-from cgitb import reset
-from typing import Optional
 
-from sqlalchemy import select, exists
-from sqlalchemy.exc import DatabaseError
+from mako.testing.helpers import result_lines
+from sqlalchemy import select
+from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -24,41 +23,64 @@ class AnnouncementRepository:
             logger.error(f'Database error occurred while adding announcement: {e}')
             raise
 
-    async def add_translation(self, translation_text: AnnouncementTranslation) -> None:
+    async def add_translation_if_exists(self, translation: AnnouncementTranslation) -> AnnouncementTranslation:
         try:
-            self.session.add(translation_text)
-            await self.session.commit()
-        except DatabaseError as e:
-            await self.session.rollback()
-            logger.error(f'Database error occurred while adding translation: {e}')
-            raise
-
-    async def get_all_announcements(self) -> list[Announcement]:
-        try:
-            query = select(Announcement)
+            query = select(Announcement).where(Announcement.id == translation.announcement_id)
             result = await self.session.execute(query)
-            return list(result.scalars().all())
+            announcement = result.scalar_one_or_none()
+
+            if not announcement:
+                raise ValueError(f"Announcement with ID {translation.announcement_id} does not exist.")
+
+            self.session.add(translation)
+            await self.session.commit()
+            return translation
+        except IntegrityError as e:
+            await self.session.rollback()
+            raise ValueError(f"Translation for this language already exists: {e}")
+        except Exception as e:
+            await self.session.rollback()
+            raise e
+
+    async def get_all_announcements_with_languages(self) -> list[dict]:
+        try:
+            query = (
+                select(Announcement.id, Announcement.title, AnnouncementTranslation.language_code)
+                .join(AnnouncementTranslation, Announcement.id == AnnouncementTranslation.announcement_id, isouter=True)
+            )
+            result = await self.session.execute(query)
+
+            announcements = {}
+            for row in result.all():
+                announcement_id = row.id
+                if announcement_id not in announcements:
+                    announcements[announcement_id] = {
+                        'id': row.id,
+                        'title': row.title,
+                        'languages': set(),
+                    }
+                if row.language_code:
+                    announcements[announcement_id]['languages'].add(row.language_code)
+
+            for announcement in announcements.values():
+                announcement['languages'] = list(announcement['languages'])
+
+            return list(announcements.values())
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching all announcements: {e}")
+            logger.error(f"Database error occurred while fetching announcements with languages: {e}")
             return []
 
-    async def get_announcement_with_translations(self, announcement_id: int) -> Optional[Announcement]:
+    async def get_announcement_or_error(self, announcement_id: int) -> Announcement:
         try:
-            result = await self.session.execute(
-                select(Announcement)
-                .options(joinedload(Announcement.translations_text))
-                .where(Announcement.id == announcement_id)
-            )
-            return result.unique().scalar_one_or_none()
-        except Exception as e:
-            logger.error(f"Error fetching announcement with translations: {e}")
-            raise
-
-    async def check_announcement_exists(self, announcement_id: int) -> bool:
-        try:
-            query = select(exists().where(Announcement.id == announcement_id))
+            query = select(Announcement).options(joinedload(Announcement.translations_text)).where(
+                Announcement.id == announcement_id)
             result = await self.session.execute(query)
-            return result.scalar()
-        except Exception as e:
-            logger.error(f"Error while checking if announcement_id={announcement_id} exists: {e}")
-            return False
+            announcement = result.unique().scalar_one_or_none()
+
+            if not announcement:
+                raise ValueError(f"Announcement with ID {announcement_id} does not exist.")
+
+            return announcement
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while fetching announcement ID={announcement_id}: {e}")
+            raise
