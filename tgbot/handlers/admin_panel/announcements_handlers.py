@@ -16,7 +16,7 @@ from tgbot.keyboards.admin_panel.announcements_kb import (
     get_cancel_announcement_action_kb,
 )
 from tgbot.services.admin_panel.announcements_service import AnnouncementService
-from tgbot.states.announcements_state import AnnouncementDeleteState, AnnouncementDetailState, CreateAnnouncementState
+from tgbot.states.announcements_state import DeleteAnnouncement, AnnouncementDetails, CreateAnnouncement
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +59,13 @@ async def create_announcement_handler(callback_query: CallbackQuery, state: FSMC
         text=_('📝 Enter the announcement title:'),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(CreateAnnouncementState.announcement_title)
+    await state.set_state(CreateAnnouncement.Title)
 
 
-@router.message(CreateAnnouncementState.announcement_title)
+@router.message(CreateAnnouncement.Title)
 async def process_announcement_text_handler(message: Message, state: FSMContext) -> None:
-    await state.update_data(announcement_title=message.html_text)
-    await state.set_state(CreateAnnouncementState.announcement_image)
+    await state.update_data(Title=message.html_text)
+    await state.set_state(CreateAnnouncement.Image)
     await message.answer(
         text=_('📝 <b>Title:</b>\n{title}\n\n'
                'Send an image or type <code>no_image</code> to skip.').format(title=message.html_text),
@@ -74,7 +74,7 @@ async def process_announcement_text_handler(message: Message, state: FSMContext)
 
 
 
-@router.message(CreateAnnouncementState.announcement_image)
+@router.message(CreateAnnouncement.Image)
 async def process_announcement_image_handler(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository, bot: Bot) -> None:
     data = await state.get_data()
 
@@ -83,7 +83,7 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
             photo = message.photo[-1]
             image_url = await AnnouncementService.process_and_save_image(photo, bot)
             announcement = await AnnouncementService.create_announcement_without_text_translation(
-                title=data['announcement_title'],
+                title=data['Title'],
                 created_by=message.from_user.id,
                 image_url=image_url,
                 announcement_repo=announcement_repo
@@ -101,7 +101,7 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
 
     elif message.text.lower().strip() in ['no_image']:
         announcement = await AnnouncementService.create_announcement_without_text_translation(
-            title=data['announcement_title'],
+            title=data['Title'],
             created_by=message.from_user.id,
             announcement_repo=announcement_repo
         )
@@ -126,10 +126,10 @@ async def view_announcement_detail_handler(callback_query: CallbackQuery, state:
         text=_('📝 Enter the announcement id:'),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(AnnouncementDetailState.announcement_id)
+    await state.set_state(AnnouncementDetails.ID)
 
 
-@router.message(AnnouncementDetailState.announcement_id)
+@router.message(AnnouncementDetails.ID)
 async def process_announcement_id_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
     try:
         announcement_id = int(message.text)
@@ -138,7 +138,7 @@ async def process_announcement_id_input(message: Message, state: FSMContext, ann
         )
 
         await state.update_data(announcement_id=message.text)
-        await state.update_data(text_languages=language_codes)
+        await state.update_data(Languages=language_codes)
 
         text = _('🔖 <b>Title:</b> {title}\n\n'
                  '🌏 <b>Languages:</b> {languages}\n\n'
@@ -175,7 +175,7 @@ async def process_announcement_id_input(message: Message, state: FSMContext, ann
 @router.callback_query(F.data == 'create_announcement_translation')
 async def create_translation_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
-    text_languages = data['text_languages']
+    text_languages = data['Languages']
     available_languages_dict = AnnouncementService.get_available_languages(
         languages=LANGUAGES_DICT,
         text_languages=text_languages,
@@ -191,21 +191,21 @@ async def create_translation_handler(callback_query: CallbackQuery, state: FSMCo
 @router.callback_query(F.data.startswith('announcement_text_'))
 async def get_announcement_text_language_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     language_code: str = callback_query.data.split('_')[-1]
-    await state.update_data(language_code=language_code)
+    await state.update_data(LanguageCode=language_code)
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
         text=_('📝 Enter the announcement text for {language_code}:').format(language_code=language_code),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(AnnouncementDetailState.translation_text)
+    await state.set_state(AnnouncementDetails.TranslationText)
 
 
-@router.message(AnnouncementDetailState.translation_text)
+@router.message(AnnouncementDetails.TranslationText)
 async def process_translation_text_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
     data = await state.get_data()
     announcement_id = int(data['announcement_id'])
-    language_code = data['language_code']
+    language_code = data['LanguageCode']
     translation_text = message.html_text
 
     try:
@@ -250,11 +250,11 @@ async def delete_announcement_handler(callback_query: CallbackQuery, state: FSMC
         text=_('📝 Enter the announcement id to delete:'),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(AnnouncementDeleteState.announcement_id)
+    await state.set_state(DeleteAnnouncement.ID)
 
 
 
-@router.message(AnnouncementDeleteState.announcement_id)
+@router.message(DeleteAnnouncement.ID)
 async def process_delete_announcement_handler(message: Message, announcement_repo: AnnouncementRepository, state: FSMContext) -> None:
     try:
         announcement_id = int(message.text)
