@@ -1,6 +1,7 @@
 import os
 import uuid
 from io import BytesIO
+from typing import Optional
 
 import aiofiles
 from aiogram import Bot
@@ -94,5 +95,28 @@ class AnnouncementService:
             raise RuntimeError(f"Unexpected error occurred while deleting announcement: {e}")
 
     @staticmethod
-    def get_available_languages(languages: dict, text_languages: list[str]) -> dict:
-        return {key: value for key, value in languages.items() if key not in text_languages}
+    def filter_languages(languages: dict, text_languages: list[str], include: bool) -> dict:
+        """
+            Filters languages based on their presence in the `text_languages` list.
+
+            Args:
+                languages (dict): A dictionary of all available languages (code -> name).
+                text_languages (list[str]): A list of language codes to compare against.
+                include (bool): If True, return languages present in `text_languages`.
+                                If False, return languages not present in `text_languages`.
+
+            Returns:
+                dict: A filtered dictionary of languages based on the `include` parameter.
+            """
+        if include:
+            return {key: value for key, value in languages.items() if key in text_languages}
+        else:
+            return {key: value for key, value in languages.items() if key not in text_languages}
+
+    @staticmethod
+    async def get_translation_for_language(announcement_id: int, language_code: str,
+                                           announcement_repo: AnnouncementRepository) -> Optional[str]:
+        translation = await announcement_repo.get_translation(announcement_id, language_code)
+        if translation:
+            return translation.text
+        return None

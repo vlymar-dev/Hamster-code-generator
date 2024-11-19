@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from mako.testing.helpers import result_lines
 from sqlalchemy import select
@@ -100,4 +101,20 @@ class AnnouncementRepository:
         except Exception as e:
             await self.session.rollback()
             logger.error(f"Error occurred while deleting announcement ID={announcement_id}: {e}")
+            raise
+
+    async def get_translation(self, announcement_id: int, language_code: str) -> Optional[AnnouncementTranslation]:
+        try:
+            query = (
+                select(AnnouncementTranslation)
+                .where(
+                    AnnouncementTranslation.announcement_id == announcement_id,
+                    AnnouncementTranslation.language_code == language_code
+                )
+            )
+            result = await self.session.execute(query)
+            return result.scalar_one_or_none()
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while fetching translation for announcement ID={announcement_id}, "
+                         f"language={language_code}: {e}")
             raise
