@@ -23,7 +23,7 @@ def get_announcement_menu_kb() -> InlineKeyboardMarkup:
     builder.row(InlineKeyboardButton(text=_('✏️ Edit'), callback_data='edit_announcement_translation'))
     builder.row(InlineKeyboardButton(text=_('📤 Broadcast Announcement'), callback_data='broadcast_announcement'))
 
-    builder.row(cancel_announcement_action_button(_('🔙 Back to announcements')))
+    builder.row(cancel_announcement_action_button(_('🔙 Back to announcements'), 'back_to_announcements'))
     return builder.as_markup()
 
 def get_languages_kb(languages_dict: dict, callback_prefix: str) -> InlineKeyboardMarkup:
@@ -35,17 +35,27 @@ def get_languages_kb(languages_dict: dict, callback_prefix: str) -> InlineKeyboa
             callback_data=f'{callback_prefix}_{lang_code}'
         )
     builder.adjust(2)
-    builder.row(cancel_announcement_action_button(_('🔙 Back to announcements')))
+    builder.row(cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details'))
     return builder.as_markup()
 
 
 def get_cancel_announcement_action_kb() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[[cancel_announcement_action_button(_('🔙 Cancel'))]])
+    return InlineKeyboardMarkup(
+        inline_keyboard=
+        [[cancel_announcement_action_button(_('🔙 Cancel'), 'back_to_announcements')]])
+
+
+def get_back_to_announcement_details_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=
+        [[cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details')]])
 
 
 def get_back_to_announcements_kb() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[[cancel_announcement_action_button(_('🔙 Back to announcements'))]])
+    return InlineKeyboardMarkup(
+        inline_keyboard=
+        [[cancel_announcement_action_button(_('🔙 Back to announcements'), 'back_to_announcements')]])
 
 
-def cancel_announcement_action_button(text: str) -> InlineKeyboardButton:
-    return InlineKeyboardButton(text=text, callback_data='back_to_announcements')
+def cancel_announcement_action_button(text: str, callback_data: str) -> InlineKeyboardButton:
+    return InlineKeyboardButton(text=text, callback_data=callback_data)
