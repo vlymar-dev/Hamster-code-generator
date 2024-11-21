@@ -30,14 +30,14 @@ class AnnouncementRepository:
             announcement = result.scalar_one_or_none()
 
             if not announcement:
-                raise ValueError(f"Announcement with ID {translation.announcement_id} does not exist.")
+                raise ValueError(f'Announcement with ID {translation.announcement_id} does not exist.')
 
             self.session.add(translation)
             await self.session.commit()
             return translation
         except IntegrityError as e:
             await self.session.rollback()
-            raise ValueError(f"Translation for this language already exists: {e}")
+            raise ValueError(f'Translation for this language already exists: {e}')
         except Exception as e:
             await self.session.rollback()
             raise e
@@ -67,7 +67,7 @@ class AnnouncementRepository:
 
             return list(announcements.values())
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching announcements with languages: {e}")
+            logger.error(f'Database error occurred while fetching announcements with languages: {e}')
             return []
 
     async def get_announcement_or_error(self, announcement_id: int) -> Announcement:
@@ -78,11 +78,11 @@ class AnnouncementRepository:
             announcement = result.unique().scalar_one_or_none()
 
             if not announcement:
-                raise ValueError(f"Announcement with ID {announcement_id} does not exist.")
+                raise ValueError(f'Announcement with ID {announcement_id} does not exist.')
 
             return announcement
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching announcement ID={announcement_id}: {e}")
+            logger.error(f'Database error occurred while fetching announcement ID={announcement_id}: {e}')
             raise
 
     async def delete_announcement_with_translations(self, announcement_id: int) -> None:
@@ -92,14 +92,14 @@ class AnnouncementRepository:
             announcement = result.scalar_one_or_none()
 
             if not announcement:
-                raise ValueError(f"Announcement with ID {announcement_id} does not exist.")
+                raise ValueError(f'Announcement with ID {announcement_id} does not exist.')
 
             await self.session.delete(announcement)
             await self.session.commit()
 
         except Exception as e:
             await self.session.rollback()
-            logger.error(f"Error occurred while deleting announcement ID={announcement_id}: {e}")
+            logger.error(f'Error occurred while deleting announcement ID={announcement_id}: {e}')
             raise
 
     async def get_translation(self, announcement_id: int, language_code: str) -> Optional[AnnouncementTranslation]:
@@ -114,8 +114,8 @@ class AnnouncementRepository:
             result = await self.session.execute(query)
             return result.scalar_one_or_none()
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching translation for announcement ID={announcement_id}, "
-                         f"language={language_code}: {e}")
+            logger.error(f'Database error occurred while fetching translation for announcement ID={announcement_id}, '
+                         f'language={language_code}: {e}')
             raise
 
     async def update_translation(self, translation: AnnouncementTranslation) -> AnnouncementTranslation:
@@ -140,3 +140,29 @@ class AnnouncementRepository:
         except Exception as e:
             await self.session.rollback()
             raise ValueError(f'Error when creating or updating a translation: {e}')
+
+    async def get_announcement_with_translations(self, announcement_id: int) -> Optional[dict]:
+        try:
+            query = (
+                select(Announcement)
+                .options(joinedload(Announcement.translations_text))
+                .where(Announcement.id == announcement_id)
+            )
+            result = await self.session.execute(query)
+            announcement = result.scalars().unique().first()
+
+            if not announcement:
+                return None
+
+            translations = [
+                {'language_code': t.language_code, 'text': t.text}
+                for t in announcement.translations_text
+            ]
+
+            return {
+                'image_url': announcement.image_url,
+                'translations': translations,
+            }
+        except DatabaseError as e:
+            logger.error(f'Database error occurred while fetching announcement ID={announcement_id}: {e}')
+            return None

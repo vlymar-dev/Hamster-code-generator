@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 from io import BytesIO
@@ -5,12 +6,15 @@ from typing import Optional
 
 import aiofiles
 from aiogram import Bot
-from aiogram.types import PhotoSize
+from aiogram.exceptions import TelegramForbiddenError
+from aiogram.types import FSInputFile, PhotoSize
 from PIL import Image, UnidentifiedImageError
 
 from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
+from infrastructure.repositories.user_repo import UserRepository
 
+logger = logging.getLogger(__name__)
 
 class AnnouncementService:
 
@@ -31,8 +35,8 @@ class AnnouncementService:
             file.seek(0)
 
             with Image.open(file) as image:
-                if image.mode not in ("RGB", "RGBA"):
-                    image = image.convert("RGB")
+                if image.mode not in ('RGB', 'RGBA'):
+                    image = image.convert('RGB')
 
                 output_io = BytesIO()
                 image.save(output_io, format='WEBP', quality=85, optimize=True)
@@ -41,7 +45,7 @@ class AnnouncementService:
                 async with aiofiles.open(image_path, 'wb') as file:
                     await file.write(output_io.getvalue())
         except UnidentifiedImageError:
-                raise ValueError("The provided file is not a supported image.")
+                raise ValueError('The provided file is not a supported image.')
         finally:
             await file.close()
         image_url = os.path.join('uploads/announcement_images', filename)
@@ -91,7 +95,7 @@ class AnnouncementService:
         except ValueError as e:
             raise ValueError(str(e))
         except Exception as e:
-            raise RuntimeError(f"Unexpected error occurred while deleting announcement: {e}")
+            raise RuntimeError(f'Unexpected error occurred while deleting announcement: {e}')
 
     @staticmethod
     def filter_languages(languages: dict, text_languages: list[str], include: bool) -> dict:
@@ -129,6 +133,73 @@ class AnnouncementService:
                 language_code=language_code,
                 text=text
             )
-            return await announcement_repo.upsert_translation(translation)
+            return await announcement_repo.update_translation(translation)
         except ValueError as e:
             raise ValueError(f'Failed to create or update translation: {e}')
+
+    @staticmethod
+    async def get_all_users_basic_info(user_repo: UserRepository) -> list[dict]:
+        return await user_repo.get_users_with_subscription_info()
+
+    @staticmethod
+    async def get_announcement(announcement_repo: AnnouncementRepository, announcement_id: int) -> Optional[dict]:
+        return await announcement_repo.get_announcement_with_translations(announcement_id)
+
+    @staticmethod
+    def get_message_for_user(language_code: str, translations: list[dict]) -> str:
+        for translation in translations:
+            if translation['language_code'] == language_code:
+                return translation['text']
+        return ''
+
+    @staticmethod
+    async def send_message(bot: Bot, user_id: int, message: str, image_url: Optional[str]) -> bool:
+        try:
+            if image_url:
+                image = FSInputFile(image_url)
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=image,
+                    caption=message
+                )
+            else:
+                await bot.send_message(chat_id=user_id, text=message)
+            return True
+        except TelegramForbiddenError:
+            return False
+        except Exception as e:
+            logger.error(f'Failed to send message to user {user_id}: {e}')
+            return False
+
+    @staticmethod
+    async def broadcast_announcement(announcement_id: int, user_repo: UserRepository, announcement_repo: AnnouncementRepository, bot: Bot,
+    ) -> dict:
+        users = await AnnouncementService.get_all_users_basic_info(user_repo)
+        announcement = await AnnouncementService.get_announcement(announcement_repo, announcement_id)
+
+        if not announcement:
+            raise ValueError(f'Announcement with ID {announcement_id} not found.')
+
+        translations = announcement.get('translations', [])
+        image_url = announcement.get('image_url')
+
+        success_count = 0
+        failed_count = 0
+
+        for user in users:
+            if not user['is_subscribed']:
+                continue
+
+            user_message = AnnouncementService.get_message_for_user(user['language_code'], translations)
+            success = await AnnouncementService.send_message(
+                bot=bot,
+                user_id=user['id'],
+                message=user_message,
+                image_url=image_url
+            )
+
+            if success:
+                success_count += 1
+            else:
+                failed_count += 1
+        return {'success': success_count, 'failed': failed_count}

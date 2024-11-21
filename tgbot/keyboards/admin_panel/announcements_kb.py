@@ -56,6 +56,13 @@ def get_back_to_announcements_kb() -> InlineKeyboardMarkup:
         inline_keyboard=
         [[cancel_announcement_action_button(_('🔙 Back to announcements'), 'back_to_announcements')]])
 
+def get_confirmation_broadcast_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(InlineKeyboardButton(text=_('✅ Yes'), callback_data='confirm_broadcast'))
+    builder.row(cancel_announcement_action_button('❌ No', 'back_to_announcement_details'))
+    return builder.as_markup()
+
 
 def cancel_announcement_action_button(text: str, callback_data: str) -> InlineKeyboardButton:
     return InlineKeyboardButton(text=text, callback_data=callback_data)

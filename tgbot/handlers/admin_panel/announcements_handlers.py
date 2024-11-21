@@ -1,4 +1,5 @@
 import logging
+from email.policy import default
 
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
@@ -6,6 +7,7 @@ from aiogram.types import CallbackQuery, FSInputFile, Message
 from aiogram.utils.i18n import gettext as _
 
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
+from infrastructure.repositories.user_repo import UserRepository
 from tgbot.common.staticdata import LANGUAGES_DICT
 from tgbot.keyboards.admin_panel.announcements_kb import (
     get_announcement_menu_kb,
@@ -13,7 +15,7 @@ from tgbot.keyboards.admin_panel.announcements_kb import (
     get_back_to_announcement_details_kb,
     get_back_to_announcements_kb,
     get_cancel_announcement_action_kb,
-    get_languages_kb,
+    get_languages_kb, get_confirmation_broadcast_kb,
 )
 from tgbot.services.admin_panel.announcements_service import AnnouncementService
 from tgbot.states.announcements_state import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement
@@ -336,10 +338,43 @@ async def get_view_translation_text_handler(callback_query: CallbackQuery, annou
 
 
 @router.callback_query(F.data == 'broadcast_announcement')
-async def broadcast_announcement_handler(callback_query: CallbackQuery) -> None:
+async def broadcast_announcement_request_handler(callback_query: CallbackQuery) -> None:
+    await callback_query.message.delete()
+    await callback_query.answer()
+    await callback_query.message.answer(
+        text=_('🫔 Are you sure you want to broadcast this announcement?'),
+        reply_markup=get_confirmation_broadcast_kb()
+    )
+
+@router.callback_query(F.data == 'confirm_broadcast')
+async def confirm_broadcast_handler(callback_query: CallbackQuery, state: FSMContext, user_repo: UserRepository, announcement_repo: AnnouncementRepository, bot: Bot
+) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
 
+    data = await state.get_data()
+    announcement_id = data.get('ID')
+
+    try:
+        stats = await AnnouncementService.broadcast_announcement(
+            announcement_id=announcement_id,
+            user_repo=user_repo,
+            announcement_repo=announcement_repo,
+            bot=bot
+        )
+        await callback_query.message.answer(
+            text=_(
+                '📤 Broadcast completed:\n\n'
+                '✅ Delivered: <b>{success}</b>\n'
+                '❌ Failed: <b>{failed}</b>'
+            ).format(success=stats['success'], failed=stats['failed']),
+            reply_markup=get_back_to_announcement_details_kb()
+        )
+    except ValueError as e:
+        await callback_query.message.answer(f'❌ Error: {str(e)}')
+    except Exception as e:
+        logging.error(f'Unexpected error in broadcast_announcement_handler: {e}')
+        await callback_query.message.answer('❌ An unexpected error occurred.')
 
 
 @router.callback_query(F.data == 'back_to_announcements')
@@ -399,7 +434,7 @@ async def show_announcement_details(target, announcement_id: int, announcement_r
         ).format(
             announcement_id=announcement_id,
             title=title,
-            languages=", ".join(language_codes),
+            languages=', '.join(language_codes),
             text=english_text or _('No text available.')
         )
 

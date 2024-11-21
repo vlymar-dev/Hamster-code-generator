@@ -178,6 +178,20 @@ class UserRepository:
             logger.error(f"Database error occurred while counting users: {e}")
             return 0
 
+    async def get_users_with_subscription_info(self) -> list[dict]:
+        try:
+            result = await self.session.execute(
+                select(User.id, User.language_code, User.is_subscribed)
+            )
+            users = result.fetchall()
+            return [
+                {"id": row.id, "language_code": row.language_code, "is_subscribed": row.is_subscribed}
+                for row in users
+            ]
+        except DatabaseError as e:
+            logger.error(f"Database error occurred while fetching all users data: {e}")
+            return []
+
     # async def add_referral(self, user_id: int, referral_id: int) -> None:
     #     try:
     #         if user_id == referral_id:
