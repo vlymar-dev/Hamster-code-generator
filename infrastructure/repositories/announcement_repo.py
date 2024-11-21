@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-from mako.testing.helpers import result_lines
 from sqlalchemy import select
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -118,3 +117,26 @@ class AnnouncementRepository:
             logger.error(f"Database error occurred while fetching translation for announcement ID={announcement_id}, "
                          f"language={language_code}: {e}")
             raise
+
+    async def update_translation(self, translation: AnnouncementTranslation) -> AnnouncementTranslation:
+        try:
+            query = (
+                select(AnnouncementTranslation)
+                .where(
+                    AnnouncementTranslation.announcement_id == translation.announcement_id,
+                    AnnouncementTranslation.language_code == translation.language_code
+                )
+            )
+            result = await self.session.execute(query)
+            existing_translation = result.scalar_one_or_none()
+
+            if not existing_translation:
+                raise ValueError(f'Translation for announcement ID {translation.announcement_id} and language '
+                                 f'{translation.language_code} does not exist.')
+
+            existing_translation.text = translation.text
+            await self.session.commit()
+            return existing_translation
+        except Exception as e:
+            await self.session.rollback()
+            raise ValueError(f'Error when creating or updating a translation: {e}')

@@ -7,7 +7,6 @@ import aiofiles
 from aiogram import Bot
 from aiogram.types import PhotoSize
 from PIL import Image, UnidentifiedImageError
-from sqlalchemy.util import await_only
 
 from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
@@ -120,3 +119,16 @@ class AnnouncementService:
         if translation:
             return translation.text
         return None
+
+    @staticmethod
+    async def update_translation_for_announcement(announcement_id: int, language_code: str, text: str,
+                                                  announcement_repo: AnnouncementRepository) -> AnnouncementTranslation:
+        try:
+            translation = AnnouncementTranslation(
+                announcement_id=announcement_id,
+                language_code=language_code,
+                text=text
+            )
+            return await announcement_repo.upsert_translation(translation)
+        except ValueError as e:
+            raise ValueError(f'Failed to create or update translation: {e}')

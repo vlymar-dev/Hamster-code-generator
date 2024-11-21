@@ -6,7 +6,6 @@ class CreateAnnouncement(StatesGroup):
     Image = State()
 
 
-
 class AnnouncementDetails(StatesGroup):
     ID = State()
     Languages = State()
