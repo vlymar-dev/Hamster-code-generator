@@ -5,6 +5,7 @@ from typing import Optional
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.exc import DatabaseError
 
+from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 
 logger = logging.getLogger(__name__)
@@ -114,7 +115,7 @@ class UserProgressService:
         return statuses.get(key, statuses['free'])
 
     @staticmethod
-    async def generate_user_progress(user_id: int, user_repo: UserRepository) -> Optional[str]:
+    async def generate_user_progress(user_id: int, user_repo: UserRepository, referral_repo: ReferralRepository) -> Optional[str]:
         """
         Create a detailed progress report for the user.
 
@@ -125,7 +126,7 @@ class UserProgressService:
             Optional[str]: A string containing progress details or None if the user data is unavailable.
         """
         try:
-            user_data = await user_repo.get_user_progress(user_id)
+            user_data = await user_repo.get_user_progress(user_id, referral_repo)
             if not user_data:
                 return None
 

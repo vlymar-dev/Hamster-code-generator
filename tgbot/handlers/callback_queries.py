@@ -2,6 +2,7 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.config import config
 from tgbot.handlers.messages import send_main_menu
@@ -112,11 +113,11 @@ async def subscribe_confirm_handler(callback_query: CallbackQuery, user_repo: Us
     )
 
 @router.callback_query(F.data == 'unsubscribe')
-async def unsubscribe_handler(callback_query: CallbackQuery, user_repo: UserRepository) -> None:
+async def unsubscribe_handler(callback_query: CallbackQuery, user_repo: UserRepository, referral_repo: ReferralRepository) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
     response_text = await UserNotificationsService.unsubscribe_user(
-        user_id=callback_query.from_user.id, user_repo=user_repo
+        user_id=callback_query.from_user.id, user_repo=user_repo, referral_repo=referral_repo
     )
     await callback_query.message.answer(
         text=response_text,
@@ -124,9 +125,9 @@ async def unsubscribe_handler(callback_query: CallbackQuery, user_repo: UserRepo
     )
 
 @router.callback_query(F.data == 'user_progress')
-async def user_progress_handler(callback_query: CallbackQuery, user_repo: UserRepository) -> None:
+async def user_progress_handler(callback_query: CallbackQuery, user_repo: UserRepository, referral_repo: ReferralRepository) -> None:
     user_progress = await UserProgressService.generate_user_progress(
-        user_id=callback_query.from_user.id, user_repo=user_repo
+        user_id=callback_query.from_user.id, user_repo=user_repo, referral_repo=referral_repo
     )
     if not user_progress:
         await callback_query.answer(text="User data not found.", show_alert=True)

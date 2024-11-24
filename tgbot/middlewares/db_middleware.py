@@ -5,6 +5,7 @@ from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
+from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 
 
@@ -21,4 +22,5 @@ class DatabaseMiddleware(BaseMiddleware):
         async with self.session_maker() as session:
             data['user_repo'] = UserRepository(session)
             data['announcement_repo'] = AnnouncementRepository(session)
+            data['referral_repo'] = ReferralRepository(session)
             return await handler(event, data)

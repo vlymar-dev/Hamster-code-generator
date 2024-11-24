@@ -1,16 +1,17 @@
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 
 
 class UserNotificationsService:
 
     @staticmethod
-    async def unsubscribe_user(user_id: int, user_repo: UserRepository) -> str:
+    async def unsubscribe_user(user_id: int, user_repo: UserRepository, referral_repo: ReferralRepository) -> str:
         """
         Handles the logic for unsubscribing a user and returns an appropriate message.
         """
-        result = await user_repo.unsubscribe_notifications(user_id)
+        result = await user_repo.unsubscribe_notifications(user_id, referral_repo)
 
         if result == 'Unsubscribe successful':
             return _('You have successfully unsubscribed from notifications.')
