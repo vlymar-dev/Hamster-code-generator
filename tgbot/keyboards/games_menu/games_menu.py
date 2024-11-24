@@ -11,7 +11,7 @@ def get_games_codes_and_keys_kb() -> InlineKeyboardMarkup:
     for game_key, game_name in GAME_TASKS_DICT.items():
         builder.button(
             text=game_name,
-            callback_data=game_key,
+            callback_data=f'get_codes_for_{game_key}',
         )
     builder.adjust(2)
     builder.row(InlineKeyboardButton(text='🔑 Hamster keys', callback_data='hamster_keys'))

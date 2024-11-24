@@ -100,3 +100,23 @@ class GameTaskService:
         except Exception as e:
             logger.error(f"Failed to verify answer for task_id={task_id}: {e}")
             return False
+
+    @staticmethod
+    async def get_paginated_response(
+        game_task_repo: GameTaskRepository,
+        game_name: str,
+        page: int,
+        tasks_per_page: int = 20,
+    ) -> tuple[list[GameTask], int, int]:
+        """
+        Gets the tasks for the specified game and page.
+        Returns the tasks, the current page and the total number of pages.
+        """
+        offset = (page - 1) * tasks_per_page
+
+        tasks = await game_task_repo.get_tasks_by_game_name(game_name, limit=tasks_per_page, offset=offset)
+
+        total_tasks = await game_task_repo.count_tasks_by_game(game_name)
+        total_pages = (total_tasks + tasks_per_page - 1) // tasks_per_page
+
+        return tasks, page, total_pages

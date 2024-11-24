@@ -1,5 +1,4 @@
 import logging
-from email.policy import default
 
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
@@ -15,7 +14,8 @@ from tgbot.keyboards.admin_panel.announcements_kb import (
     get_back_to_announcement_details_kb,
     get_back_to_announcements_kb,
     get_cancel_announcement_action_kb,
-    get_languages_kb, get_confirmation_broadcast_kb,
+    get_confirmation_broadcast_kb,
+    get_languages_kb,
 )
 from tgbot.services.admin_panel.announcements_service import AnnouncementService
 from tgbot.states.announcements_state import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement

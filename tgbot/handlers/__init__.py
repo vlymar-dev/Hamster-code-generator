@@ -1,6 +1,7 @@
 from . import callback_queries, commands
 from .admin_panel import admin_handlers, announcements_handlers
 from .donation import donation_handlers, refund_command
+from .games_menu import games_menu_handlers
 
 
 def register_handlers(dp):
@@ -10,3 +11,4 @@ def register_handlers(dp):
     refund_command.register_refund_command_handler(dp)
     admin_handlers.register_admin_panel_handlers(dp)
     announcements_handlers.register_announcements_handlers(dp)
+    games_menu_handlers.register_games_menu_handler(dp)

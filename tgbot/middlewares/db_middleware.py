@@ -24,5 +24,5 @@ class DatabaseMiddleware(BaseMiddleware):
             data['user_repo'] = UserRepository(session)
             data['announcement_repo'] = AnnouncementRepository(session)
             data['referral_repo'] = ReferralRepository(session)
-            data['gametask_repo'] = GameTaskRepository(session)
+            data['game_task_repo'] = GameTaskRepository(session)
             return await handler(event, data)
