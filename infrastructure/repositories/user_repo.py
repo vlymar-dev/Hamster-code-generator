@@ -5,7 +5,8 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.models.user_model import User
+from infrastructure.models.user import User
+from infrastructure.repositories.referral_repo import ReferralRepository
 from tgbot.config import config
 from tgbot.exceptions.exceptions import UserAlreadyExistsException
 
@@ -85,16 +86,14 @@ class UserRepository:
             logger.error(f'Database error occurred while trying to get subscription status for user_id={user_id}: {e}')
             return True
 
-    async def unsubscribe_notifications(self, user_id: int) -> str :
+    async def unsubscribe_notifications(self, user_id: int, referral_repo: ReferralRepository) -> str :
         try:
             result = await self.session.execute(
                 select(User).where(User.id == user_id).with_for_update()
             )
             user = result.scalar_one_or_none()
             if user:
-                count_referrals = await self.session.scalar(
-                    select(func.cardinality(User.referrals)).where(User.id == user_id)
-                )
+                count_referrals = await referral_repo.get_referral_count(user_id)
                 if count_referrals < config.tg_bot.bot_settings.referral_threshold:
                     logger.warning(f'The user with ID {user_id} did not meet the conditions to disable notifications.')
                     return 'conditions_not_met'
@@ -118,11 +117,10 @@ class UserRepository:
             logger.error(f'Database error occurred while trying to subscribe for user_id={user_id}: {e}')
             return 'error'
 
-    async def get_user_progress(self, user_id: int)-> Optional[dict[str, any]]:
+    async def get_user_progress(self, user_id: int, referral_repo: ReferralRepository)-> Optional[dict[str, any]]:
         try:
             result = await self.session.execute(
                 select(
-                    User.referrals,
                     User.registration_date,
                     User.user_status,
                     User.total_keys_generated
@@ -130,9 +128,10 @@ class UserRepository:
             )
             user_data = result.one_or_none()
             if user_data:
-                referrals, registration_date, user_status, total_keys_generated = user_data
+                registration_date, user_status, total_keys_generated = user_data
+                count_referrals = await referral_repo.get_referral_count(user_id)
                 return {
-                    'referrals': len(referrals) if referrals else 0,
+                    'referrals': count_referrals,
                     'registration_date': registration_date,
                     'user_status': user_status,
                     'total_keys_generated': total_keys_generated,
@@ -191,26 +190,3 @@ class UserRepository:
         except DatabaseError as e:
             logger.error(f"Database error occurred while fetching all users data: {e}")
             return []
-
-    # async def add_referral(self, user_id: int, referral_id: int) -> None:
-    #     try:
-    #         if user_id == referral_id:
-    #             logger.warning(f'The user with ID {user_id} uses their own referral link.')
-    #             raise SelfReferralException()
-    #
-    #         result = await self.session.execute(
-    #             select(User).where(User.id == referral_id).with_for_update()
-    #         )
-    #         referrer_user = result.scalar_one_or_none()
-    #         if referrer_user:
-    #             logger.warning(f'The user with ID {user_id} already exists.')
-    #             raise UserAlreadyExistsException()
-    #
-    #         referrer_user = await self.session.get(User, referral_id)
-    #         if referrer_user:
-    #             referrer_user.referrals = referrer_user.referrals + [user_id]
-    #             await self.session.commit()
-    #     except DatabaseError as e:
-    #         await self.session.rollback()
-    #         logger.error(f"Database error occurred while adding referral for user_id={user_id}, referral_id={referral_id}: {e}")
-    #         raise
