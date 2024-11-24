@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.types import ARRAY
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from infrastructure.models.base import Base
 
@@ -12,9 +11,9 @@ class User(Base):
 
     # Basic user info
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    first_name: Mapped[str] = mapped_column(String(100))
-    last_name: Mapped[str] = mapped_column(String(100))
-    username: Mapped[str] = mapped_column(String(100))
+    first_name: Mapped[str] = mapped_column(String(100), nullable=True)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=True)
+    username: Mapped[str] = mapped_column(String(100), nullable=True)
     language_code: Mapped[str] = mapped_column(String(5), nullable=False)
     registration_date: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now().replace(second=0, microsecond=0)
@@ -28,7 +27,12 @@ class User(Base):
 
     # Referral info
     referred_by: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id'), nullable=True)
-    referrals: Mapped[list[int]] = mapped_column(ARRAY(BigInteger), default=list)
+    referrals: Mapped[list['Referral']] = relationship(
+        'Referral',
+        foreign_keys='Referral.referrer_id',
+        back_populates='referrer',
+        lazy='selectin'
+    )
 
     # Activity
     total_keys_generated: Mapped[int] = mapped_column(Integer, default=0)
