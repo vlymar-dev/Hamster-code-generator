@@ -47,11 +47,12 @@ class GameTaskRepository:
             stmt = (
                 select(GameTask)
                 .where(GameTask.game_name == game_name)
+                .order_by(GameTask.id.desc())
                 .limit(limit)
                 .offset(offset)
             )
             result = await self.session.execute(stmt)
-            tasks = result.scalars().all()
+            tasks = list(result.scalars().all())
             return tasks
         except DatabaseError as e:
             logger.error(f"Database error occurred while fetching tasks for game_name={game_name}: {e}")
