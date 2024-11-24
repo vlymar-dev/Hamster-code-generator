@@ -1,23 +1,30 @@
+import logging
+
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.game_task_repo import GameTaskRepository
 from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.config import config
 from tgbot.handlers.messages import send_main_menu
 from tgbot.keyboards.donation.donation_kb import get_donation_kb
-from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
+from tgbot.keyboards.games_menu.game_task_kb import pagination_kb
+from tgbot.keyboards.games_menu.games_menu import get_games_codes_and_keys_kb
+from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
 from tgbot.keyboards.progress_kb import get_progress_keyboard
 from tgbot.keyboards.referral_kb import referral_links_kb
 from tgbot.keyboards.settings.change_language_kb import get_change_language_kb
 from tgbot.keyboards.settings.notifications_kb import notifications_kb
 from tgbot.keyboards.settings.settings_kb import get_settings_kb
 from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
+from tgbot.services.admin_panel.game_task_service import GameTaskService
 from tgbot.services.settings.user_language_service import UserLanguageService
 from tgbot.services.settings.user_notifications_service import UserNotificationsService
 from tgbot.services.user_progress_service import UserProgressService
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 
@@ -139,14 +146,44 @@ async def user_progress_handler(callback_query: CallbackQuery, user_repo: UserRe
         reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id)
     )
 
+@router.callback_query(F.data == 'get_games')
+async def get_games_handler(callback_query: CallbackQuery):
+    await callback_query.answer()
+    await callback_query.message.delete()
+    await callback_query.message.answer(
+        text=_('Select the desired action'),  #TODO: Correct the text
+        reply_markup=get_games_codes_and_keys_kb()
+    )
 
-@router.callback_query(F.data == 'get_keys')
-async def get_keys_handler(callback_query: CallbackQuery) -> None:
+
+@router.callback_query(F.data == 'get_codes')
+async def get_tasks_handler(callback_query: CallbackQuery, gametask_repo: GameTaskRepository):
     await callback_query.message.delete()
     await callback_query.answer()
+
+    current_page = 1
+    tasks_per_page = 20
+
+    tasks = await GameTaskService.get_tasks_by_game_name(
+        game_name="Game1",
+        task_repo=gametask_repo,
+        limit=tasks_per_page,
+        offset=(current_page - 1) * tasks_per_page
+    )
+    total_tasks = await GameTaskService.count_tasks_by_game("Game1", gametask_repo)
+    total_pages = (total_tasks + tasks_per_page - 1) // tasks_per_page
+
+    if not tasks:
+        await callback_query.message.answer("No tasks available for this game.")
+        return
+
+    task_text = "\n".join([f"{i + 1}. {task.task}" for i, task in enumerate(tasks)])
+
+    pagination_keyboard = pagination_kb(current_page=current_page, total_pages=total_pages)
+
     await callback_query.message.answer(
-        text=_('Here keys'),
-        reply_markup=get_main_menu_kb()
+        text=f"Задачи (стр. {current_page}/{total_pages}):\n\n{task_text}",
+        reply_markup=pagination_keyboard
     )
 
 
@@ -172,6 +209,55 @@ async def back_to_main_menu_handler(callback_query: CallbackQuery):
     await callback_query.answer()
     await send_main_menu(callback_query)
 
+
+async def handle_show_tasks(callback_query: CallbackQuery, gametask_repo: GameTaskRepository):
+    if ':' not in callback_query.data:
+        await callback_query.answer("Invalid callback data.", show_alert=True)
+        return
+
+    try:
+        current_page = int(callback_query.data.split(':')[1])
+    except (IndexError, ValueError):
+        await callback_query.answer("Failed to parse page number.", show_alert=True)
+        return
+
+    tasks_per_page = 20
+
+    tasks = await GameTaskService.get_tasks_by_game_name(
+        game_name="Game",
+        task_repo=gametask_repo,
+        limit=tasks_per_page,
+        offset=(current_page - 1) * tasks_per_page
+    )
+    logger.debug(f"Tasks retrieved for game_name='Game1': {tasks}")
+
+    total_tasks = await GameTaskService.count_tasks_by_game("Game", gametask_repo)
+    logger.debug(f"Total tasks count for game_name='Game': {total_tasks}")
+
+    total_pages = (total_tasks + tasks_per_page - 1) // tasks_per_page
+    logger.debug(f"Total pages calculated: {total_pages}")
+
+    if not tasks:
+        await callback_query.answer("No tasks available for this page.", show_alert=True)
+        return
+
+    task_text = "\n".join([f"{i + 1}. {task.task}" for i, task in enumerate(tasks)])
+    logger.debug(f"Generated task text: {task_text}")
+
+    pagination_keyboard = pagination_kb(current_page=current_page, total_pages=total_pages)
+
+    await callback_query.message.edit_text(
+        text=f"Tasks (page {current_page}/{total_pages}):\n\n{task_text}",
+        reply_markup=pagination_keyboard
+    )
+    logger.info(f"Message updated for page {current_page}.")
+
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith('page:'))
+async def handle_pagination(callback_query: CallbackQuery, gametask_repo: GameTaskRepository):
+    logger.debug(f"Callback data received: {callback_query.data}")
+    await handle_show_tasks(callback_query, gametask_repo)
 
 
 def register_callback_queries_handler(dp) -> None:

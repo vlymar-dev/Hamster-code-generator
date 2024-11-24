@@ -21,7 +21,7 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
     random_buttons = get_random_referral_buttons()
     builder.row(random_buttons[0])
     builder.row(random_buttons[1], random_buttons[2])
-    builder.row(InlineKeyboardButton(text=_('🔑 GET Keys'), callback_data='get_keys'))
+    builder.row(InlineKeyboardButton(text=_('🔑 GET Keys | 🕹️ Youtube Video Codes'), callback_data='get_games'))
     builder.row(InlineKeyboardButton(text=_('⚙️ Settings'), callback_data='settings_menu'),
                 InlineKeyboardButton(text=_('🏆 Progress'), callback_data='user_progress'),
                 InlineKeyboardButton(text=_('ℹ Info'), callback_data='user_info'))
