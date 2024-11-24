@@ -3,7 +3,8 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 
-from infrastructure.models.user_model import User
+from infrastructure.models.user import User
+from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.filters.admin_filter import AdminFilter
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
@@ -14,55 +15,8 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def handle_start_command(message: Message, user_repo: UserRepository, bot: Bot) -> None:
-    # args = message.text.split(maxsplit=1)
-    welcome_message = _('👋 Hello, <b>{first_name}</b>!\n'
-                   '🛳️ <i>Welcome aboard!</i>\n\n'
-                   '🌊 Join the adventure with us — pick an action below and start playing! 🚀 \n'
-                   '🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for active players.\n'
-                   '🏆 Play, progress, and unlock new rewards with every step! \n\n'
-                   '📖 <i>Terms of use are available in the <b>Info</b> section.</i>').format(
-                first_name=message.from_user.first_name,
-            )
-    # if len(args) > 1 and args[1].isdigit():
-    #     try:
-    #         referrer_id = int(args[1])
-    #         await db.add_referral(user_id=message.from_user.id, referral_id=referrer_id)
-
-    #         referral_message = _(
-    #             '🎉 You’ve joined through the referral link of user ID <b>{referrer_id}</b>!\n\n'
-    #         ).format(referrer_id=referrer_id)
-    #         await message.answer(
-    #             text=referrer_message + welcome_message, reply_markup=get_main_menu_kb())
-    #         referrer_message = _(
-    #                     f"🎉 User with ID <b>{message.from_user.id}</b> registered using your referral link!"
-    #                 )
-    #         await bot.send_message(referrer_id, referrer_message)
-    #     except SelfReferralException:
-    #             await message.answer(
-    #             text=_('Oops! 🚫 You can’t use your own referral link!'),
-    #             reply_markup=get_back_to_main_menu_keyboard()
-    #             )
-    #     except UserAlreadyExistsException:
-    #         await message.answer(
-    #             text=welcome_message,
-    #             reply_markup=get_main_menu_kb()
-    #         )
-    # else:
-    #     await message.answer(
-    #         text=welcome_message,
-    #         reply_markup=get_main_menu_kb()
-    #     )
-    # user = message.from_user
-    # user_data = {
-    #     'id': user.id,
-    #     'first_name': user.first_name,
-    #     'last_name': user.last_name,
-    #     'username': user.username,
-    #     'language_code': user.language_code,
-    # }
-    # await db.add_user(user_data)
-    user = await user_repo.get_user_by_id(message.from_user.id)
+async def handle_start_command(message: Message, user_repo: UserRepository, bot: Bot, referral_repo: ReferralRepository) -> None:
+    user: User = await user_repo.get_user_by_id(message.from_user.id)
     if not user:
         new_user = User(
             id=message.from_user.id,
@@ -72,17 +26,28 @@ async def handle_start_command(message: Message, user_repo: UserRepository, bot:
             language_code=message.from_user.language_code
         )
         await user_repo.add_user(new_user)
-        await message.answer(
-                    text=welcome_message,
-                    reply_markup=get_main_menu_kb()
-                )
-    else:
 
-        await message.answer(
-            text=welcome_message,
-            reply_markup=get_main_menu_kb()
-        )
-
+        args = message.text.split(maxsplit=1)
+        if len(args) > 1 and args[1].isdigit():
+            referrer_id = int(args[1])
+            referrer_exists = await user_repo.check_user_exists(referrer_id)
+            if referrer_exists:
+                await referral_repo.add_referral(referrer_id=referrer_id, referred_id=message.from_user.id)
+                referrer_message = _(
+                            f"🎉 User with ID <b>{message.from_user.id}</b> registered using your referral link!"
+                        )
+                await bot.send_message(referrer_id, referrer_message)
+    await message.answer(
+        text=_('👋 Hello, <b>{first_name}</b>!\n'
+                   '🛳️ <i>Welcome aboard!</i>\n\n'
+                   '🌊 Join the adventure with us — pick an action below and start playing! 🚀 \n'
+                   '🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for active players.\n'
+                   '🏆 Play, progress, and unlock new rewards with every step! \n\n'
+                   '📖 <i>Terms of use are available in the <b>Info</b> section.</i>').format(
+                first_name=message.from_user.first_name,
+            ),
+        reply_markup=get_main_menu_kb()
+    )
 
 
 @router.message(Command('change_language'))

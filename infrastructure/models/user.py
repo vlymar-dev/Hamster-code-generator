@@ -26,7 +26,6 @@ class User(Base):
     is_subscribed: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # Referral info
-    referred_by: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id'), nullable=True)
     referrals: Mapped[list['Referral']] = relationship(
         'Referral',
         foreign_keys='Referral.referrer_id',
