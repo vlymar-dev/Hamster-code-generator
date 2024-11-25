@@ -29,4 +29,15 @@ def get_game_codes_actions_kb() -> InlineKeyboardMarkup:
 
 
 def get_cancel_game_code_action_kb() -> InlineKeyboardMarkup:
-    pass
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=_('🔙 Cancel'), callback_data='back_to_admin_game_menu')]
+        ]
+    )
+
+def get_confirm_deletion_task_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(InlineKeyboardButton(text=_('✅ Confirm'), callback_data='confirm_deletion'))
+    builder.row(InlineKeyboardButton(text=_('❌ Cancel'), callback_data='back_to_admin_panel'))
+    return builder.as_markup()

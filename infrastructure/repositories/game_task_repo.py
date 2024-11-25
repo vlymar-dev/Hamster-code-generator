@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,11 +25,11 @@ class GameTaskRepository:
             await self.session.commit()
         except IntegrityError as e:
             await self.session.rollback()
-            logger.error(f"Integrity error occurred while adding task: {e}")
+            logger.error(f'Integrity error occurred while adding task: {e}')
             raise
         except DatabaseError as e:
             await self.session.rollback()
-            logger.error(f"Database error occurred while adding task: {e}")
+            logger.error(f'Database error occurred while adding task: {e}')
             raise
 
     async def get_task_by_id(self, task_id: int) -> Optional[GameTask]:
@@ -37,7 +37,7 @@ class GameTaskRepository:
             task = await self.session.get(GameTask, task_id)
             return task
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching task by id {task_id}: {e}")
+            logger.error(f'Database error occurred while fetching task by id {task_id}: {e}')
             return None
 
     async def get_tasks_by_game_name(
@@ -55,27 +55,8 @@ class GameTaskRepository:
             tasks = list(result.scalars().all())
             return tasks
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching tasks for game_name={game_name}: {e}")
+            logger.error(f'Database error occurred while fetching tasks for game_name={game_name}: {e}')
             return []
-
-    async def update_task(self, task_id: int, game_name: str, task: Optional[str] = None,
-                          answer: Optional[str] = None) -> bool:
-        try:
-            stmt = update(GameTask).where(
-                GameTask.id == task_id, GameTask.game_name == game_name
-            )
-            if task is not None:
-                stmt = stmt.values(task=task)
-            if answer is not None:
-                stmt = stmt.values(answer=answer)
-
-            await self.session.execute(stmt)
-            await self.session.commit()
-            return True
-        except DatabaseError as e:
-            await self.session.rollback()
-            logger.error(f"Database error occurred while updating task_id={task_id}: {e}")
-            return False
 
     async def delete_task(self, task_id: int, game_name: str) -> bool:
         try:
@@ -87,7 +68,7 @@ class GameTaskRepository:
             return True
         except DatabaseError as e:
             await self.session.rollback()
-            logger.error(f"Database error occurred while deleting task_id={task_id}: {e}")
+            logger.error(f'Database error occurred while deleting task_id={task_id}: {e}')
             return False
 
     async def count_tasks_by_game(self, game_name: str) -> int:
@@ -97,5 +78,5 @@ class GameTaskRepository:
             )
             return result.scalar_one_or_none() or 0
         except DatabaseError as e:
-            logger.error(f"Database error occurred while counting tasks for game_name={game_name}: {e}")
+            logger.error(f'Database error occurred while counting tasks for game_name={game_name}: {e}')
             return 0
