@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 class GameTaskService:
 
     @staticmethod
-    async def create_task(game_name: str, task: str, answer: str, task_repo: GameTaskRepository) -> GameTask:
+    async def create_task(game_name: str, task: str, answer: str, game_task_repo: GameTaskRepository) -> GameTask:
         new_task = GameTask(game_name=game_name, task=task, answer=answer)
         try:
-            await task_repo.add_task(new_task)
+            await game_task_repo.add_task(new_task)
             logger.info(f"Task created successfully for game: {game_name}")
             return new_task
         except Exception as e:
