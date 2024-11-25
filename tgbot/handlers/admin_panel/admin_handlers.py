@@ -26,7 +26,7 @@ async def manage_users_handler(callback_query: CallbackQuery, user_repo: UserRep
 
 @router.callback_query(F.data == 'manage_keys')
 async def manage_keys_handler(callback_query: CallbackQuery) -> None:
-    ...
+    await callback_query.answer()
 
 
 @router.callback_query(F.data == 'add_role')
@@ -87,7 +87,6 @@ async def back_to_admin_panel_handler(callback_query: CallbackQuery, state: FSMC
     await callback_query.answer()
     await callback_query.message.delete()
     await AdminPanelService.show_admin_panel(callback_query.message)
-
 
 
 def register_admin_panel_handlers(dp) -> None:

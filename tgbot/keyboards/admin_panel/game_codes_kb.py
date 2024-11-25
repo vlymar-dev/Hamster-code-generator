@@ -1,0 +1,32 @@
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.i18n import gettext as _
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from tgbot.common.staticdata import GAME_TASKS_DICT
+from tgbot.keyboards.admin_panel.admin_panel_kb import back_to_admin_panel_button
+
+
+def get_admin_panel_codes_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    for game_key, game_name in GAME_TASKS_DICT.items():
+        builder.button(
+            text=game_name,
+            callback_data=f'admin_codes_for_{game_key}',
+        )
+    builder.adjust(2)
+    builder.row(back_to_admin_panel_button())
+    return builder.as_markup()
+
+
+def get_game_codes_actions_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(InlineKeyboardButton(text=_('➕ Add Code'), callback_data='add_code'),
+                InlineKeyboardButton(text=_('❌ Delete Code'), callback_data='delete_code'))
+    builder.row(back_to_admin_panel_button())
+    return builder.as_markup()
+
+
+def get_cancel_game_code_action_kb() -> InlineKeyboardMarkup:
+    pass

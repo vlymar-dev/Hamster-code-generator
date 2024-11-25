@@ -14,7 +14,7 @@ class GameTaskRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_task(self, game_task: GameTask) -> None:
+    async def add_game_task(self, game_task: GameTask) -> None:
         try:
             result = await self.session.execute(
                 select(GameTask).where(GameTask.id == game_task.id)

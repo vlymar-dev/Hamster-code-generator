@@ -9,6 +9,7 @@ def admin_panel_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(InlineKeyboardButton(text=_('🔑 Keys'), callback_data='manage_keys'),
+                InlineKeyboardButton(text=_('🕹️ Codes'), callback_data='manage_codes'),
                 InlineKeyboardButton(text=_('🧑‍💻 Users'), callback_data='manage_users'))
     builder.row(InlineKeyboardButton(text=_('📣 Announcements'), callback_data='manage_announcements'))
     builder.row(back_to_main_menu_button())
