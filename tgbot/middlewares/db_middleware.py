@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from infrastructure.repositories.announcement_repo import AnnouncementRepository
 from infrastructure.repositories.game_task_repo import GameTaskRepository
+from infrastructure.repositories.promo_code_repo import PromoCodeRepository
 from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_repo import UserRepository
 
@@ -25,4 +26,5 @@ class DatabaseMiddleware(BaseMiddleware):
             data['announcement_repo'] = AnnouncementRepository(session)
             data['referral_repo'] = ReferralRepository(session)
             data['game_task_repo'] = GameTaskRepository(session)
+            data['promo_code_repo'] = PromoCodeRepository(session)
             return await handler(event, data)
