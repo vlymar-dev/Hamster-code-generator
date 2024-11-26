@@ -16,12 +16,7 @@ class GameTaskRepository:
 
     async def add_task(self, game_task: GameTask) -> None:
         try:
-            result = await self.session.execute(
-                select(GameTask).where(GameTask.id == game_task.id)
-            )
-            existing_task = result.scalar_one_or_none()
-            if not existing_task:
-                self.session.add(game_task)
+            self.session.add(game_task)
             await self.session.commit()
         except IntegrityError as e:
             await self.session.rollback()
@@ -60,10 +55,10 @@ class GameTaskRepository:
 
     async def delete_task(self, task_id: int, game_name: str) -> bool:
         try:
-            stmt = delete(GameTask).where(
+            result = delete(GameTask).where(
                 GameTask.id == task_id, GameTask.game_name == game_name
             )
-            await self.session.execute(stmt)
+            await self.session.execute(result)
             await self.session.commit()
             return True
         except DatabaseError as e:
