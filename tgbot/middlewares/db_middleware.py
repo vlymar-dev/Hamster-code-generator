@@ -8,6 +8,7 @@ from infrastructure.repositories.announcement_repo import AnnouncementRepository
 from infrastructure.repositories.game_task_repo import GameTaskRepository
 from infrastructure.repositories.promo_code_repo import PromoCodeRepository
 from infrastructure.repositories.referral_repo import ReferralRepository
+from infrastructure.repositories.user_key_repo import UserKeyRepository
 from infrastructure.repositories.user_repo import UserRepository
 
 
@@ -27,4 +28,5 @@ class DatabaseMiddleware(BaseMiddleware):
             data['referral_repo'] = ReferralRepository(session)
             data['game_task_repo'] = GameTaskRepository(session)
             data['promo_code_repo'] = PromoCodeRepository(session)
+            data['user_key_repo'] = UserKeyRepository(session)
             return await handler(event, data)
