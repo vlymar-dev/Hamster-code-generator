@@ -16,7 +16,7 @@ router = Router()
 
 @router.message(CommandStart())
 async def handle_start_command(message: Message, user_repo: UserRepository, bot: Bot, referral_repo: ReferralRepository) -> None:
-    user: User = await user_repo.get_user_by_id(message.from_user.id)
+    user: bool = await user_repo.check_user_exists(message.from_user.id)
     if not user:
         new_user = User(
             id=message.from_user.id,

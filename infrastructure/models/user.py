@@ -36,6 +36,4 @@ class User(Base):
     # Activity
     total_keys_generated: Mapped[int] = mapped_column(Integer, default=0)
     daily_requests_count: Mapped[int] = mapped_column(Integer, default=0)
-    last_request_datetime: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now().replace(second=0, microsecond=0)
-    )
+    last_request_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=True)

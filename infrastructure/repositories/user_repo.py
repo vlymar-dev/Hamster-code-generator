@@ -40,17 +40,6 @@ class UserRepository:
             logger.error(f"Database error occurred while checking user_id={user_id}: {e}")
             return False
 
-    # TODO: Заменить в старт хендлере на check_user_exists
-    async def get_user_by_id(self, user_id: int) -> Optional[User]:
-        try:
-            user = await self.session.get(User, user_id)
-            if user:
-                return user
-            return None
-        except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching user by id {user_id}: {e}")
-            return None
-
     async def get_user_language(self, user_id: int) -> str:
         try:
             result = await self.session.execute(select(User.language_code).where(User.id == user_id))
