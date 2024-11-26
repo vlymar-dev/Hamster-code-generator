@@ -3,10 +3,17 @@ LANGUAGES_DICT = {
     'ru': 'Русский',
 }
 
+STATUS_LIMITS = {
+    'free': {'daily_limit': 2, 'interval_minutes': 60},
+    'friend': {'daily_limit': 5, 'interval_minutes': 10},
+    'premium': {'daily_limit': 25, 'interval_minutes': 0}
+}
+
 GAME_TASKS_DICT = {
     'cats': '🐈‍⬛ Cats Codes',
     'blum': '⚫️ BLUM Cinema',
-    'Game1': 'Game1'
+    'tapswap': '🖐 TapSwap Cinema',
+    'Game1': 'Test!'
 }
 
 HAMSTER_GAMES_LIST = [
