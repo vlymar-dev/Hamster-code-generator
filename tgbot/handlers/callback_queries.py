@@ -6,6 +6,7 @@ from aiogram.utils.i18n import gettext as _
 
 from infrastructure.repositories.promo_code_repo import PromoCodeRepository
 from infrastructure.repositories.referral_repo import ReferralRepository
+from infrastructure.repositories.user_key_repo import UserKeyRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.common.staticdata import HAMSTER_GAMES_LIST
 from tgbot.config import config
@@ -163,21 +164,25 @@ async def referral_links_handler(callback_query: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == 'hamster_keys')
-async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: PromoCodeRepository) -> None:
-    await callback_query.answer()
-    await callback_query.message.delete()
+async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: PromoCodeRepository, user_key_repo: UserKeyRepository) -> None:
+    user_id: int = callback_query.from_user.id
     text = []
     for game_name in HAMSTER_GAMES_LIST:
+        # TODO: Check request improvement
         game_code = await PromoCodeService.pop_one_code_per_game(game_name, promo_code_repo)
         if game_code:
             text.append(f'<b>{game_name}:</b>\n • <code>{game_code}</code>\n')
         else:
             text.append(_('<b>{}:</b>\n • <i>No promo codes available 🥹</i>').format(game_name))
     formated_text = '\n'.join(text)
+    await callback_query.answer()
+    await callback_query.message.delete()
     await callback_query.message.answer(
         text=_('{text}\n\n🔖 (click to copy)').format(text=formated_text),
         reply_markup=get_back_to_main_menu_keyboard()
     )
+    await user_key_repo.increment_keys(user_id)
+    await user_key_repo.increment_daily_requests(user_id)
 
 
 @router.callback_query(F.data == 'back_to_main_menu')
