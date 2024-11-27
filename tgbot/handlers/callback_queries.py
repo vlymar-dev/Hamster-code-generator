@@ -138,7 +138,7 @@ async def user_progress_handler(callback_query: CallbackQuery, user_repo: UserRe
         user_id=callback_query.from_user.id, user_repo=user_repo, referral_repo=referral_repo
     )
     if not user_progress:
-        await callback_query.answer(text="User data not found.", show_alert=True)
+        await callback_query.answer(text='User data not found.', show_alert=True)
         return
     await callback_query.message.delete()
     await callback_query.answer()
@@ -187,7 +187,19 @@ async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: Promo
             await callback_query.answer(time_text, show_alert=True)
             return
 
-    promo_codes = await PromoCodeService.get_and_delete_promo_codes(HAMSTER_GAMES_LIST, promo_code_repo)
+    try:
+        promo_codes = await PromoCodeService.get_and_delete_promo_codes(
+            game_names=HAMSTER_GAMES_LIST,
+            user_id=user_id,
+            promo_code_repo=promo_code_repo,
+            user_key_repo=user_key_repo)
+    except Exception as e:
+        logger.error(f'Error during promo code retrieval for user_id={user_id}: {e}')
+        await callback_query.answer(
+            text=_('An error occurred while retrieving promo codes. Please try again later.'),
+            show_alert=True
+        )
+        return
     text = []
     for game_name, promo_code in promo_codes.items():
         if promo_code:
@@ -202,8 +214,6 @@ async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: Promo
         text=_('{text}\n\n🔖 (click to copy)').format(text=formatted_text),
         reply_markup=get_back_to_main_menu_keyboard()
     )
-    await user_key_repo.increment_keys(user_id)
-    await user_key_repo.increment_daily_requests(user_id)
 
 
 @router.callback_query(F.data == 'back_to_main_menu')

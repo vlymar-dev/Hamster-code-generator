@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from infrastructure.repositories.promo_code_repo import PromoCodeRepository
+from infrastructure.repositories.user_key_repo import UserKeyRepository
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,9 @@ class PromoCodeService:
             raise
 
     @staticmethod
-    async def get_and_delete_promo_codes(game_names: list[str], promo_code_repo: PromoCodeRepository) -> dict[
+    async def get_and_delete_promo_codes(game_names: list[str], user_id: int, promo_code_repo: PromoCodeRepository, user_key_repo: UserKeyRepository) -> dict[
         str, Optional[str]]:
-        """Get and remove promo codes for a list of games."""
+        """Get and remove promo codes for a list of games. Updates user key data."""
         try:
             promo_codes = await promo_code_repo.get_promo_codes(game_names)
             if not promo_codes:
@@ -36,6 +37,9 @@ class PromoCodeService:
                     result[game_name] = None
 
             await promo_code_repo.delete_promo_codes(ids_to_delete)
+            await user_key_repo.update_last_request_datetime(user_id)
+            await user_key_repo.increment_keys(user_id)
+            await user_key_repo.increment_daily_requests(user_id)
             return result
         except Exception as e:
             logger.error(f'Error in get_and_delete_promo_codes: {e}')
