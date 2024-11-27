@@ -167,12 +167,14 @@ async def referral_links_handler(callback_query: CallbackQuery) -> None:
 @router.callback_query(F.data == 'hamster_keys')
 async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: PromoCodeRepository, user_key_repo: UserKeyRepository) -> None:
     user_id: int = callback_query.from_user.id
-    user_status: str = 'free'  # TODO: implement user status retrieval
 
-    validation_result = await UserKeyService.validate_user_request(user_id, user_status, user_key_repo)
+    validation_result = await UserKeyService.validate_user_request(user_id, user_key_repo)
     if not validation_result['can_generate']:
         if validation_result['reason'] == 'daily_limit_exceeded':
-            await callback_query.answer('You have reached your daily key limit.', show_alert=True)
+            await callback_query.answer(
+                text='🥹 You have reached your daily key limit.',
+                show_alert=True
+            )
             return
         elif validation_result['reason'] == 'interval_not_met':
             remaining_time = validation_result['remaining_time']

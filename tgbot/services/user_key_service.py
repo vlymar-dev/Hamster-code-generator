@@ -1,5 +1,8 @@
 import logging
+from datetime import datetime
 from typing import Optional
+
+from sqlalchemy.sql.functions import current_time
 
 from infrastructure.repositories.user_key_repo import UserKeyRepository
 from tgbot.common.staticdata import STATUS_LIMITS
@@ -20,20 +23,19 @@ class UserKeyService:
             return False
 
     @staticmethod
-    async def validate_user_request(user_id: int, user_status: str, user_key_repo: UserKeyRepository) -> dict:
+    async def validate_user_request(user_id: int, user_key_repo: UserKeyRepository) -> dict:
         """Check all conditions for key generation."""
         try:
-            # Checking the daily limit
-            if not await UserKeyService._check_daily_limit(user_id, user_status, user_key_repo):
+            daily_requests, last_request, user_status = await UserKeyService._get_user_data(user_id, user_key_repo)
+
+            if not UserKeyService._check_daily_limit(daily_requests, user_status):
                 return {'can_generate': False, 'reason': 'daily_limit_exceeded', 'remaining_time': None}
 
-            # Check request interval
-            remaining_time_seconds = await UserKeyService._check_request_interval(user_id, user_status, user_key_repo)
-            if remaining_time_seconds is not None:
-                remaining_time = format_seconds_to_minutes_and_seconds(remaining_time_seconds)
+            remaining_time = UserKeyService._check_request_interval(last_request, user_status)
+            if remaining_time is not None:
+                print(remaining_time)
                 return {'can_generate': False, 'reason': 'interval_not_met', 'remaining_time': remaining_time}
 
-            # All conditions are met
             return {'can_generate': True, 'reason': None, 'remaining_time': None}
 
         except Exception as e:
@@ -41,34 +43,26 @@ class UserKeyService:
             return {'can_generate': False, 'reason': 'error', 'remaining_time': None}
 
     @staticmethod
-    async def _check_daily_limit(user_id: int, user_status: str, user_key_repo: UserKeyRepository) -> bool:
-        """Check the daily key limit has not been reached."""
-        try:
-            today_keys = await user_key_repo.get_daily_requests(user_id)
-            daily_limit = STATUS_LIMITS[user_status]['daily_limit']
-            if today_keys is not None and today_keys < daily_limit:
-                return True
-            return False
-        except Exception as e:
-            logger.error(f'Error when checking daily key limit for user_id={user_id}: {e}')
-            return False
+    async def _get_user_data(user_id: int, user_key_repo: UserKeyRepository) -> tuple:
+        """Retrieves user data in a single query."""
+        user_data = await user_key_repo.get_user_activity_data(user_id)
+        if not user_data:
+            raise ValueError("User data not found")
+        return user_data['daily_requests_count'], user_data['last_request_datetime'], user_data['user_status']
 
     @staticmethod
-    async def _check_request_interval(user_id: int, user_status: str, user_key_repo: UserKeyRepository) -> Optional[int]:
-        """Check the interval between key requests."""
-        try:
-            last_request = await user_key_repo.get_last_request_datetime(user_id)
-            interval_minutes = STATUS_LIMITS[user_status]['interval_minutes']
-            if last_request is not None:
-                current_time = get_current_time()
-                elapsed_time = (current_time - last_request).total_seconds()
-                interval_seconds = interval_minutes * 60
+    def _check_daily_limit(today_keys: int, user_status: str) -> bool:
+        """Check the daily key limit has not been reached."""
+        daily_limit = STATUS_LIMITS[user_status]['daily_limit']
+        return today_keys < daily_limit
 
-                if elapsed_time >= interval_seconds:
-                    return None
-                else:
-                    return int(interval_seconds - elapsed_time)
+    @staticmethod
+    def _check_request_interval(last_request: Optional[datetime], user_status: str) -> Optional[dict]:
+        if not last_request:
             return None
-        except Exception as e:
-            logger.error(f'Error when checking query interval for user_id={user_id}: {e}')
-            return None
+        interval_seconds = STATUS_LIMITS[user_status]['interval_minutes'] * 60
+        elapsed_seconds = int((get_current_time() - last_request).total_seconds())
+
+        if elapsed_seconds < interval_seconds:
+            return format_seconds_to_minutes_and_seconds(interval_seconds - elapsed_seconds)
+        return None

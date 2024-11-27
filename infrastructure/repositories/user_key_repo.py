@@ -46,26 +46,24 @@ class UserKeyRepository:
             logger.error(f'Database error when resetting daily requests for user_id={user_id}: {e}')
             return False
 
-    async def get_daily_requests(self, user_id: int) -> Optional[int]:
-        """Get the number of daily user requests."""
+    async def get_user_activity_data(self, user_id: int) -> Optional[dict]:
+        """Gets daily requests, time of last request, and user status per request."""
         try:
             result = await self.session.execute(
-                select(User.daily_requests_count).where(User.id == user_id)
+                select(
+                    User.daily_requests_count,
+                    User.last_request_datetime,
+                    User.user_status
+                ).where(User.id == user_id)
             )
-            daily_requests = result.scalar_one_or_none()
-            return daily_requests
-        except DatabaseError as e:
-            logger.error(f'Database error when retrieving daily requests for user_id={user_id}: {e}')
+            row = result.one_or_none()
+            if row:
+                return {
+                    'daily_requests_count': row.daily_requests_count,
+                    'last_request_datetime': row.last_request_datetime,
+                    'user_status': row.user_status
+                }
             return None
-
-    async def get_last_request_datetime(self, user_id: int) -> Optional[datetime]:
-        """Get the last request datetime of a user."""
-        try:
-            result = await self.session.execute(
-                select(User.last_request_datetime).where(User.id == user_id)
-            )
-            last_request_datetime = result.scalar_one_or_none()
-            return last_request_datetime
         except DatabaseError as e:
-            logger.error(f'Database error when retrieving last request time for user_id={user_id}: {e}')
+            logger.error(f'Database error when retrieving user activity data for user_id={user_id}: {e}')
             return None
