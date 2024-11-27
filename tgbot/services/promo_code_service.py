@@ -37,9 +37,6 @@ class PromoCodeService:
                     result[game_name] = None
 
             await promo_code_repo.delete_promo_codes(ids_to_delete)
-            await user_key_repo.update_last_request_datetime(user_id)
-            await user_key_repo.increment_keys(user_id)
-            await user_key_repo.increment_daily_requests(user_id)
             return result
         except Exception as e:
             logger.error(f'Error in get_and_delete_promo_codes: {e}')

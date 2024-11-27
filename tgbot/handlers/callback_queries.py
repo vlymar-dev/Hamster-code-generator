@@ -208,6 +208,7 @@ async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: Promo
             text.append(_('<b>{}:</b>\n • <i>No promo codes available 🥹</i>').format(game_name))
 
     formatted_text = '\n'.join(text)
+    await UserKeyService.update_user_activity(user_id, user_key_repo)
     await callback_query.answer()
     await callback_query.message.delete()
     await callback_query.message.answer(

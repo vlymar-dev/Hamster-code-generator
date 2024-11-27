@@ -14,34 +14,23 @@ class UserKeyRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def increment_keys(self, user_id: int, increment: int = 1, ) -> bool:
-        """Increment the number of generated keys a user has."""
+    async def update_user_activity(self, user_id: int, increment_keys: int = 1, increment_requests: int = 1) -> bool:
+        """Updates the number of keys, queries, and the time of the last query."""
         try:
             await self.session.execute(
                 update(User)
                 .where(User.id == user_id)
-                .values(total_keys_generated=User.total_keys_generated + increment)
+                .values(
+                    total_keys_generated=User.total_keys_generated + increment_keys,
+                    daily_requests_count=User.daily_requests_count + increment_requests,
+                    last_request_datetime=datetime.now().replace(second=0, microsecond=0),
+                )
             )
             await self.session.commit()
             return True
         except DatabaseError as e:
             await self.session.rollback()
-            logger.error(f'Database error when incrementing keys for user_id={user_id}: {e}')
-            return False
-
-    async def increment_daily_requests(self, user_id: int) -> bool:
-        """Increment daily_requests_count."""
-        try:
-            await self.session.execute(
-                update(User)
-                .where(User.id == user_id)
-                .values(daily_requests_count=User.daily_requests_count + 1)
-            )
-            await self.session.commit()
-            return True
-        except DatabaseError as e:
-            await self.session.rollback()
-            logger.error(f'Database error when incrementing requests for user_id={user_id}: {e}')
+            logger.error(f'Database error when updating user activity for user_id={user_id}: {e}')
             return False
 
     async def reset_daily_request(self, user_id: int) -> bool:
@@ -68,21 +57,6 @@ class UserKeyRepository:
         except DatabaseError as e:
             logger.error(f'Database error when retrieving daily requests for user_id={user_id}: {e}')
             return None
-
-    async def update_last_request_datetime(self, user_id: int) -> bool:
-        """Update the time of the last user request."""
-        try:
-            await self.session.execute(
-                update(User)
-                .where(User.id == user_id)
-                .values(last_request_datetime=datetime.now().replace(second=0, microsecond=0))
-            )
-            await self.session.commit()
-            return True
-        except DatabaseError as e:
-            await self.session.rollback()
-            logger.error(f'Database error when updating the last request time for user_id={user_id}: {e}')
-            return False
 
     async def get_last_request_datetime(self, user_id: int) -> Optional[datetime]:
         """Get the last request datetime of a user."""

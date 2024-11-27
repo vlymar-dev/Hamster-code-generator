@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import DatabaseError

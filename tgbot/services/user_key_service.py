@@ -11,19 +11,12 @@ logger = logging.getLogger(__name__)
 class UserKeyService:
 
     @staticmethod
-    async def increment_keys(user_id: int, user_key_repo: UserKeyRepository) -> bool:
+    async def update_user_activity(user_id: int, user_key_repo: UserKeyRepository) -> bool:
+        """Updates all the user's activity settings."""
         try:
-            return await user_key_repo.increment_keys(user_id)
+            return await user_key_repo.update_user_activity(user_id)
         except Exception as e:
-            logger.error(f'Error when incrementing the total number of keys for user_id={user_id}: {e}')
-            return False
-
-    @staticmethod
-    async def increment_daily_requests(user_id: int, user_key_repo: UserKeyRepository) -> bool:
-        try:
-            return await user_key_repo.increment_daily_requests(user_id)
-        except Exception as e:
-            logger.error(f'Error when incrementing daily requests for user_id={user_id}: {e}')
+            logger.error(f'Error when updating user activity for user_id={user_id}: {e}')
             return False
 
     @staticmethod
