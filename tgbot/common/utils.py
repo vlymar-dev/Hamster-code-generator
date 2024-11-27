@@ -1,12 +1,11 @@
 from datetime import datetime
+from typing import Optional
 
 
 def get_current_time() -> datetime:
     return datetime.now()
 
-def format_seconds_to_minutes_and_seconds(seconds: int) -> str:
+def format_seconds_to_minutes_and_seconds(seconds: int) -> dict[str, Optional[int]]:
     minutes = seconds // 60
-    remaining_seconds = seconds % 60
-    if minutes > 0 :
-        return f'{minutes} {remaining_seconds}'
-    return f'{remaining_seconds}'
+    seconds = seconds % 60
+    return {'min': minutes if minutes > 0 else None, 'sec': seconds}

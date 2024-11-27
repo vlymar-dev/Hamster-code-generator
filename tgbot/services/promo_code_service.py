@@ -17,17 +17,26 @@ class PromoCodeService:
             raise
 
     @staticmethod
-    async def pop_one_code_per_game(game_name: str, promo_code_repo: PromoCodeRepository) -> Optional[str]:
-        """
-        Get and remove one promo code for the specified game.
-        """
+    async def get_and_delete_promo_codes(game_names: list[str], promo_code_repo: PromoCodeRepository) -> dict[
+        str, Optional[str]]:
+        """Get and remove promo codes for a list of games."""
         try:
-            promo_code = await promo_code_repo.pop_code_by_game(game_name)
-            if not promo_code:
-                logger.info(f'There are no promo codes available for the game: {game_name}')
-                return None
-            logger.info(f'Promo code for the game has been issued {game_name}: {promo_code}')
-            return promo_code
+            promo_codes = await promo_code_repo.get_promo_codes(game_names)
+            if not promo_codes:
+                return {game_name: None for game_name in game_names}
+
+            result = {}
+            ids_to_delete = []
+            for game_name in game_names:
+                game_codes = [code for code in promo_codes if code.game_name == game_name]
+                if game_codes:
+                    result[game_name] = game_codes[0].promo_code
+                    ids_to_delete.append(game_codes[0].id)
+                else:
+                    result[game_name] = None
+
+            await promo_code_repo.delete_promo_codes(ids_to_delete)
+            return result
         except Exception as e:
-            logger.error(f'Error when receiving and deleting a promo code for the game {game_name}: {e}')
+            logger.error(f'Error in get_and_delete_promo_codes: {e}')
             raise
