@@ -37,28 +37,26 @@ class PromoCodeRepository:
             logger.error(f'Database error when receiving the number of codes by games: {e}')
             raise
 
-    async def pop_code_by_game(self, game_name: str) -> Optional[str]:
-        """
-        Get and remove one promo code for the specified game.
-        """
+    async def get_promo_codes(self, game_names: list[str]) -> list[PromoCode]:
         try:
-            async with self.session.begin():
-                result = await self.session.execute(
-                    select(PromoCode)
-                    .where(PromoCode.game_name == game_name)
-                    .order_by(PromoCode.id)
-                    .limit(1)
-                )
-                code_to_delete = result.scalar()
-                if not code_to_delete:
-                    return None
-                promo_code = code_to_delete.promo_code
-                await self.session.execute(
-                    delete(PromoCode).where(PromoCode.id == code_to_delete.id)
-                )
-                return promo_code
+            result = await self.session.execute(
+                select(PromoCode)
+                .where(PromoCode.game_name.in_(game_names))
+                .order_by(PromoCode.game_name, PromoCode.id)
+            )
+            return list(result.scalars().all())
         except DatabaseError as e:
-            await self.session.rollback()
-            logger.error(f'Database error when deleting codes: {e}')
+            logger.error(f'Database error when retrieving promo codes: {e}')
             raise
 
+    async def delete_promo_codes(self, promo_code_ids: list[int]) -> None:
+        try:
+            await self.session.execute(
+                delete(PromoCode)
+                .where(PromoCode.id.in_(promo_code_ids))
+            )
+            await self.session.commit()
+        except DatabaseError as e:
+            await self.session.rollback()
+            logger.error(f'Database error when deleting promo codes: {e}')
+            raise
