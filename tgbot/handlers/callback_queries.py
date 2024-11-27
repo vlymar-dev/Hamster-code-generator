@@ -22,6 +22,7 @@ from tgbot.middlewares.i18n_middleware import CustomI18nMiddleware
 from tgbot.services.promo_code_service import PromoCodeService
 from tgbot.services.settings.user_language_service import UserLanguageService
 from tgbot.services.settings.user_notifications_service import UserNotificationsService
+from tgbot.services.user_key_service import UserKeyService
 from tgbot.services.user_progress_service import UserProgressService
 
 logger = logging.getLogger(__name__)
@@ -166,19 +167,39 @@ async def referral_links_handler(callback_query: CallbackQuery) -> None:
 @router.callback_query(F.data == 'hamster_keys')
 async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: PromoCodeRepository, user_key_repo: UserKeyRepository) -> None:
     user_id: int = callback_query.from_user.id
+    user_status: str = 'free'  # TODO: implement user status retrieval
+
+    validation_result = await UserKeyService.validate_user_request(user_id, user_status, user_key_repo)
+    if not validation_result['can_generate']:
+        if validation_result['reason'] == 'daily_limit_exceeded':
+            await callback_query.answer('You have reached your daily key limit.', show_alert=True)
+            return
+        elif validation_result['reason'] == 'interval_not_met':
+            remaining_time = validation_result['remaining_time']
+            minutes = remaining_time.get('min')
+            seconds = remaining_time.get('sec')
+            if minutes:
+                time_text = _('⏱️ Wait for {minutes} min {seconds} sec before getting the next key.').format(
+                    minutes=minutes, seconds=seconds
+                )
+            else:
+                time_text = _('⏱️ Wait for {seconds} sec before getting the next key.').format(seconds=seconds)
+            await callback_query.answer(time_text, show_alert=True)
+            return
+
+    promo_codes = await PromoCodeService.get_and_delete_promo_codes(HAMSTER_GAMES_LIST, promo_code_repo)
     text = []
-    for game_name in HAMSTER_GAMES_LIST:
-        # TODO: Check request improvement
-        game_code = await PromoCodeService.pop_one_code_per_game(game_name, promo_code_repo)
-        if game_code:
-            text.append(f'<b>{game_name}:</b>\n • <code>{game_code}</code>\n')
+    for game_name, promo_code in promo_codes.items():
+        if promo_code:
+            text.append(f'<b>{game_name}:</b>\n • <code>{promo_code}</code>\n')
         else:
             text.append(_('<b>{}:</b>\n • <i>No promo codes available 🥹</i>').format(game_name))
-    formated_text = '\n'.join(text)
+
+    formatted_text = '\n'.join(text)
     await callback_query.answer()
     await callback_query.message.delete()
     await callback_query.message.answer(
-        text=_('{text}\n\n🔖 (click to copy)').format(text=formated_text),
+        text=_('{text}\n\n🔖 (click to copy)').format(text=formatted_text),
         reply_markup=get_back_to_main_menu_keyboard()
     )
     await user_key_repo.increment_keys(user_id)
