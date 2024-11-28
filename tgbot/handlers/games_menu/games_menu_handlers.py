@@ -73,7 +73,7 @@ async def process_tasks_page(
         )
         return
 
-    task_text = '\n'.join(['{task} - <code>{answer}</code>'.format(task=task.task.strip(), answer=task.answer.strip()) for task in tasks])
+    task_text = '\n'.join(['<b>{task}</b> - <code>{answer}</code>'.format(task=task.task.strip(), answer=task.answer.strip()) for task in tasks])
     pagination_keyboard = get_pagination_kb(
         current_page=page,
         total_pages=total_pages,
@@ -81,7 +81,7 @@ async def process_tasks_page(
     )
 
     await callback_query.message.edit_text(
-        text=task_text,
+        text=task_text + _('\n\n🔖 (<i>click to copy</i>)'),
         reply_markup=pagination_keyboard
     )
 

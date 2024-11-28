@@ -66,7 +66,7 @@ class GameTaskService:
         game_task_repo: GameTaskRepository,
         game_name: str,
         page: int,
-        tasks_per_page: int = 20,
+        tasks_per_page: int = 10,
     ) -> tuple[list[GameTask], int, int]:
         """
         Gets the tasks for the specified game and page.

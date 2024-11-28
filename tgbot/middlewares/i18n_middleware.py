@@ -1,8 +1,9 @@
-from aiogram.utils.i18n import I18n, SimpleI18nMiddleware
 from typing import Any, Optional
-from tgbot.database import Database
-from aiogram.types import TelegramObject, Update
 
+from aiogram.types import TelegramObject, Update
+from aiogram.utils.i18n import I18n, SimpleI18nMiddleware
+
+from tgbot.database import Database
 
 
 class CustomI18nMiddleware(SimpleI18nMiddleware):

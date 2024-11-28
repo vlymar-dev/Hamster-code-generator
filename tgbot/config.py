@@ -14,7 +14,7 @@ class DbConfig:
 
     @property
     def db_url(self) -> str:
-        return f'postgresql+asyncpg://{self.user}:{self.password}@:{self.port}/{self.database}'
+        return f'postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}'
 
 @dataclass
 class BotInfo:
