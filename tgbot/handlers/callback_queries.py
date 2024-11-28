@@ -31,7 +31,7 @@ router = Router()
 
 
 @router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
-async def update_language_handler(callback_query: CallbackQuery, user_repo: UserRepository, i18n: CustomI18nMiddleware) -> None:
+async def update_language_handler(callback_query: CallbackQuery, user_repo: UserRepository, i18n: CustomI18nMiddleware, user_key_repo: UserKeyRepository) -> None:
     selected_language_code = callback_query.data.split(':')[1]
     user_id = callback_query.from_user.id
     response_text = await UserLanguageService.update_language(
@@ -43,7 +43,7 @@ async def update_language_handler(callback_query: CallbackQuery, user_repo: User
 
     await callback_query.answer(text=response_text)
 
-    await send_main_menu(callback_query.message)
+    await send_main_menu(callback_query.message, user_key_repo)
 
 
 @router.callback_query(F.data == 'user_info')
@@ -221,9 +221,9 @@ async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: Promo
 
 
 @router.callback_query(IsBannedFilter(), F.data == 'back_to_main_menu')
-async def back_to_main_menu_handler(callback_query: CallbackQuery):
+async def back_to_main_menu_handler(callback_query: CallbackQuery, user_key_repo: UserKeyRepository):
     await callback_query.answer()
-    await send_main_menu(callback_query)
+    await send_main_menu(callback_query, user_key_repo)
 
 
 def register_callback_queries_handler(dp) -> None:

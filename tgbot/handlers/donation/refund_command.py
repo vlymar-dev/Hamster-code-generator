@@ -5,6 +5,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.user_key_repo import UserKeyRepository
 from tgbot.handlers.messages import send_main_menu
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
 
@@ -12,7 +13,7 @@ router = Router()
 
 
 @router.message(F.text.startswith('/refund_stars'))
-async  def refund_stars_command_handler(message: Message) -> None:
+async  def refund_stars_command_handler(message: Message, user_key_repo: UserKeyRepository) -> None:
     transaction_id: str = message.text.split(' ')[1] if len(message.text.split()) > 1 else None
 
     if not transaction_id:
@@ -39,7 +40,7 @@ async  def refund_stars_command_handler(message: Message) -> None:
                 _('⚠️ <b>This transaction has already been refunded!!</b>')
             )
             await asyncio.sleep(2)
-            await send_main_menu(message)
+            await send_main_menu(message, user_key_repo)
         else:
             await message.answer(
                 _('❗️ <b>Error:</b> {error}').format(error=error.message)
