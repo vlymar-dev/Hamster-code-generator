@@ -10,6 +10,7 @@ from infrastructure.repositories.user_key_repo import UserKeyRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.common.staticdata import HAMSTER_GAMES_LIST
 from tgbot.config import config
+from tgbot.filters.is_banned_filter import IsBannedFilter
 from tgbot.handlers.messages import send_main_menu
 from tgbot.keyboards.donation.donation_kb import get_donation_kb
 from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 
-@router.callback_query(F.data.startswith('set_lang:'))
+@router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
 async def update_language_handler(callback_query: CallbackQuery, user_repo: UserRepository, i18n: CustomI18nMiddleware) -> None:
     selected_language_code = callback_query.data.split(':')[1]
     user_id = callback_query.from_user.id
@@ -71,7 +72,7 @@ async def user_info_handler(callback_query: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(F.data == 'settings_menu')
+@router.callback_query(IsBannedFilter(), F.data == 'settings_menu')
 async def settings_menu_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
@@ -132,7 +133,7 @@ async def unsubscribe_handler(callback_query: CallbackQuery, user_repo: UserRepo
         reply_markup=get_back_to_main_menu_keyboard()
     )
 
-@router.callback_query(F.data == 'user_progress')
+@router.callback_query(IsBannedFilter(), F.data == 'user_progress')
 async def user_progress_handler(callback_query: CallbackQuery, user_repo: UserRepository, referral_repo: ReferralRepository) -> None:
     user_progress = await UserProgressService.generate_user_progress(
         user_id=callback_query.from_user.id, user_repo=user_repo, referral_repo=referral_repo
@@ -219,7 +220,7 @@ async def get_hamster_keys(callback_query: CallbackQuery, promo_code_repo: Promo
     )
 
 
-@router.callback_query(F.data == 'back_to_main_menu')
+@router.callback_query(IsBannedFilter(), F.data == 'back_to_main_menu')
 async def back_to_main_menu_handler(callback_query: CallbackQuery):
     await callback_query.answer()
     await send_main_menu(callback_query)

@@ -26,7 +26,7 @@ class UserRepository:
         except IntegrityError as e:
             await self.session.rollback()
             logger.error(f'Integrity error occurred while adding user: {e}')
-            raise UserAlreadyExistsException(f"User with id {user.id} already exists.")
+            raise UserAlreadyExistsException(f'User with id {user.id} already exists.')
         except DatabaseError as e:
             await self.session.rollback()
             logger.error(f'Database error occurred while adding user: {e}')
@@ -37,7 +37,7 @@ class UserRepository:
             result = await self.session.execute(select(User.id).where(User.id == user_id))
             return result.scalar_one_or_none() is not None
         except DatabaseError as e:
-            logger.error(f"Database error occurred while checking user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while checking user_id={user_id}: {e}')
             return False
 
     async def get_user_language(self, user_id: int) -> str:
@@ -46,7 +46,7 @@ class UserRepository:
             language = result.scalar_one_or_none()
             return language if language else 'en'
         except DatabaseError as e:
-            logger.error(f"Database error occurred while getting language for user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while getting language for user_id={user_id}: {e}')
             return 'en'
 
     async def update_user_language(self, user_id: int, selected_language_code: str) -> bool:
@@ -63,7 +63,7 @@ class UserRepository:
             return False
         except DatabaseError as e:
             await self.session.rollback()
-            logger.error(f"Database error occurred while updating user language for user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while updating user language for user_id={user_id}: {e}')
             return False
 
     async def get_subscription_status(self, user_id: int) -> bool:
@@ -127,7 +127,7 @@ class UserRepository:
                 }
             return None
         except DatabaseError as e:
-            logger.error(f"Database error occurred while retrieving progress for user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while retrieving progress for user_id={user_id}: {e}')
             return None
 
     async def get_user_role(self, user_id: int) -> str:
@@ -136,7 +136,7 @@ class UserRepository:
             user_role = result.scalar_one_or_none()
             return user_role if user_role else 'user'
         except DatabaseError as e:
-             logger.error(f"Database error occurred while getting role for user_id={user_id}: {e}")
+             logger.error(f'Database error occurred while getting role for user_id={user_id}: {e}')
              return 'user'
 
     async def change_user_role(self, user_id: int, new_user_role: str) -> str:
@@ -154,7 +154,7 @@ class UserRepository:
             return 'user_not_found'
         except DatabaseError as e:
             await self.session.rollback()
-            logger.error(f"Database error occurred while changing role for user_id={user_id}: {e}")
+            logger.error(f'Database error occurred while changing role for user_id={user_id}: {e}')
             return 'error'
 
     async def get_users_count(self) -> int:
@@ -163,7 +163,7 @@ class UserRepository:
             users_count = result.scalar_one()
             return users_count
         except DatabaseError as e:
-            logger.error(f"Database error occurred while counting users: {e}")
+            logger.error(f'Database error occurred while counting users: {e}')
             return 0
 
     async def get_users_with_subscription_info(self) -> list[dict]:
@@ -173,9 +173,17 @@ class UserRepository:
             )
             users = result.fetchall()
             return [
-                {"id": row.id, "language_code": row.language_code, "is_subscribed": row.is_subscribed}
+                {'id': row.id, 'language_code': row.language_code, 'is_subscribed': row.is_subscribed}
                 for row in users
             ]
         except DatabaseError as e:
-            logger.error(f"Database error occurred while fetching all users data: {e}")
+            logger.error(f'Database error occurred while fetching all users data: {e}')
             return []
+
+    async def is_user_banned(self, user_id: int) -> bool:
+        try:
+            result = await self.session.execute(select(User.is_banned).where(User.id == user_id))
+            return result.scalar_one_or_none()
+        except DatabaseError as e:
+             logger.error(f'Database error occurred while checking ban status for user_id={user_id}: {e}')
+             return True
