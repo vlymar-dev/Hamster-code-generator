@@ -33,7 +33,6 @@ class UserKeyService:
 
             remaining_time = UserKeyService._check_request_interval(last_request, user_status)
             if remaining_time is not None:
-                print(remaining_time)
                 return {'can_generate': False, 'reason': 'interval_not_met', 'remaining_time': remaining_time}
 
             return {'can_generate': True, 'reason': None, 'remaining_time': None}
@@ -41,6 +40,15 @@ class UserKeyService:
         except Exception as e:
             logger.error(f'Error when checking key generation conditions for user_id={user_id}: {e}')
             return {'can_generate': False, 'reason': 'error', 'remaining_time': None}
+
+    @staticmethod
+    async def get_total_keys(user_key_repo: UserKeyRepository):
+        try:
+            keys = await user_key_repo.get_today_keys_count()
+            return keys
+        except Exception as e:
+            logger.error(f'Error while fetching total keys count: {e}')
+            return 0
 
     @staticmethod
     async def _get_user_data(user_id: int, user_key_repo: UserKeyRepository) -> tuple:

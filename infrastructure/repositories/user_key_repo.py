@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -67,3 +67,14 @@ class UserKeyRepository:
         except DatabaseError as e:
             logger.error(f'Database error when retrieving user activity data for user_id={user_id}: {e}')
             return None
+
+    async def get_today_keys_count(self) -> int:
+        try:
+            result = await self.session.execute(
+                select(func.sum(User.daily_requests_count))
+            )
+            today_keys = result.scalar_one_or_none()
+            return today_keys if today_keys else 0
+        except DatabaseError as e:
+            logger.error(f'Database error occurred while calculating total keys: {e}')
+            return 0
