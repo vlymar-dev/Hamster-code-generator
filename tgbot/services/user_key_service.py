@@ -2,11 +2,9 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy.sql.functions import current_time
-
 from infrastructure.repositories.user_key_repo import UserKeyRepository
 from tgbot.common.staticdata import STATUS_LIMITS
-from tgbot.common.utils import format_seconds_to_minutes_and_seconds, get_current_time
+from tgbot.common.utils import format_seconds_to_minutes_and_seconds, get_current_date, get_current_time
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +25,8 @@ class UserKeyService:
         """Check all conditions for key generation."""
         try:
             daily_requests, last_request, user_status = await UserKeyService._get_user_data(user_id, user_key_repo)
+
+            await UserKeyService._reset_daily_request_if_needed(user_id, last_request, user_key_repo)
 
             if not UserKeyService._check_daily_limit(daily_requests, user_status):
                 return {'can_generate': False, 'reason': 'daily_limit_exceeded', 'remaining_time': None}
@@ -49,6 +49,21 @@ class UserKeyService:
         if not user_data:
             raise ValueError("User data not found")
         return user_data['daily_requests_count'], user_data['last_request_datetime'], user_data['user_status']
+
+    @staticmethod
+    async def _reset_daily_request_if_needed(user_id: int, last_request: Optional[datetime], user_key_repo: UserKeyRepository) -> None:
+        """Resets the daily limit to zero if the last request was not today."""
+        if not last_request:
+            return
+
+        last_request_date = last_request.date()
+        current_date = get_current_date()
+
+        if last_request_date < current_date:
+            try:
+                await user_key_repo.reset_daily_request(user_id)
+            except Exception as e:
+                logger.error(f'Error when resetting daily requests for user_id={user_id}: {e}')
 
     @staticmethod
     def _check_daily_limit(today_keys: int, user_status: str) -> bool:
