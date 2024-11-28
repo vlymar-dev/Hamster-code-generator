@@ -3,13 +3,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.user_key_repo import UserKeyRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.keyboards.admin_panel.admin_panel_kb import (
     admin_panel_user_role_kb,
     admin_panel_users_kb,
-    get_cancel_change_role_kb,
+    get_back_to_admin_panel_kb,
 )
 from tgbot.services.admin_panel.admin_panel_service import AdminPanelService
+from tgbot.services.user_key_service import UserKeyService
 from tgbot.states.admin_panel_state import AdminPanelState
 
 router = Router()
@@ -25,15 +27,21 @@ async def manage_users_handler(callback_query: CallbackQuery, user_repo: UserRep
     )
 
 @router.callback_query(F.data == 'manage_keys')
-async def manage_keys_handler(callback_query: CallbackQuery) -> None:
+async def manage_keys_handler(callback_query: CallbackQuery, user_key_repo: UserKeyRepository) -> None:
     await callback_query.answer()
+    await callback_query.message.delete()
+    today_keys = await UserKeyService.get_total_keys(user_key_repo)
+    await callback_query.message.answer(
+        text=_('<b>Picked up the keys today:</b> {}').format(today_keys),
+        reply_markup=get_back_to_admin_panel_kb()
+    )
 
 
 @router.callback_query(F.data == 'add_role')
 async def add_role_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     await callback_query.message.answer(
         text=_('🆔 <b>Enter user ID:</b>'),
-        reply_markup=get_cancel_change_role_kb()
+        reply_markup=get_back_to_admin_panel_kb()
     )
     await callback_query.message.delete()
     await callback_query.answer()
@@ -51,7 +59,7 @@ async def process_change_role_handler(message: Message, state: FSMContext, user_
                 text=_(f'❗️ <b>Error changing user role.</b>\n\n'
                        f'User <b><i>{user_id}</i></b> not found in DB.\n\n'
                        f'<i>Retry entering the ID or return to the main menu</i>'),
-                reply_markup=get_cancel_change_role_kb()
+                reply_markup=get_back_to_admin_panel_kb()
             )
             return
         await state.update_data(change_role_user_id=user_id)
@@ -64,7 +72,7 @@ async def process_change_role_handler(message: Message, state: FSMContext, user_
         await message.delete()
         await message.answer(
             text=_('⚠️ <b>Oops!</b> Looks like it\'s not a number'),
-            reply_markup=get_cancel_change_role_kb(),
+            reply_markup=get_back_to_admin_panel_kb(),
         )
         return
 
@@ -77,7 +85,7 @@ async def select_role_handler(callback_query: CallbackQuery, state: FSMContext, 
     await callback_query.answer()
     await callback_query.message.answer(
         text=text,
-        reply_markup=get_cancel_change_role_kb()
+        reply_markup=get_back_to_admin_panel_kb()
     )
 
 

@@ -33,7 +33,7 @@ def admin_panel_user_role_kb() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_cancel_change_role_kb() -> InlineKeyboardMarkup:
+def get_back_to_admin_panel_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[back_to_admin_panel_button()]])
 
 
