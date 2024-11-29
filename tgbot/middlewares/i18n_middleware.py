@@ -3,7 +3,7 @@ from typing import Any, Optional
 from aiogram.types import TelegramObject, Update
 from aiogram.utils.i18n import I18n, SimpleI18nMiddleware
 
-from tgbot.database import Database
+from infrastructure.repositories.user_repo import UserRepository
 
 
 class CustomI18nMiddleware(SimpleI18nMiddleware):
@@ -12,7 +12,7 @@ class CustomI18nMiddleware(SimpleI18nMiddleware):
         super().__init__(self.i18n)
 
     async def get_locale(self, event: TelegramObject, data: dict[str, Any]) -> str:
-        db: Database = data.get('db')
+        user_repo: UserRepository = data.get('user_repo')
         user_id: Optional[int] = None
 
         if isinstance(event, Update):
@@ -21,8 +21,8 @@ class CustomI18nMiddleware(SimpleI18nMiddleware):
             elif event.callback_query:
                 user_id = event.callback_query.from_user.id
 
-        if db and user_id:
-            user_language = await db.get_user_language(user_id)
+        if user_repo and user_id:
+            user_language = await user_repo.get_user_language(user_id)
             if user_language:
                 return user_language
 
