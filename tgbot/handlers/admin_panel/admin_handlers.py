@@ -3,14 +3,17 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.i18n import gettext as _
 
+from infrastructure.repositories.promo_code_repo import PromoCodeRepository
 from infrastructure.repositories.user_key_repo import UserKeyRepository
 from infrastructure.repositories.user_repo import UserRepository
+from tgbot.common.staticdata import HAMSTER_GAMES_LIST
 from tgbot.keyboards.admin_panel.admin_panel_kb import (
     admin_panel_user_role_kb,
     admin_panel_users_kb,
     get_back_to_admin_panel_kb,
 )
 from tgbot.services.admin_panel.admin_panel_service import AdminPanelService
+from tgbot.services.promo_code_service import PromoCodeService
 from tgbot.services.user_key_service import UserKeyService
 from tgbot.states.admin_panel_state import AdminPanelState
 
@@ -27,12 +30,16 @@ async def manage_users_handler(callback_query: CallbackQuery, user_repo: UserRep
     )
 
 @router.callback_query(F.data == 'manage_keys')
-async def manage_keys_handler(callback_query: CallbackQuery, user_key_repo: UserKeyRepository) -> None:
+async def manage_keys_handler(callback_query: CallbackQuery, user_key_repo: UserKeyRepository, promo_code_repo: PromoCodeRepository) -> None:
     await callback_query.answer()
     await callback_query.message.delete()
     today_keys = await UserKeyService.get_total_keys(user_key_repo)
+    db_keys_count = await PromoCodeService.get_key_counts_for_games(HAMSTER_GAMES_LIST, promo_code_repo)
+    db_keys_count_formated = '\n'.join(f'{count}.....<b>{game}</b>' for game, count in db_keys_count.items())
     await callback_query.message.answer(
-        text=_('<b>Picked up the keys today:</b> {}').format(today_keys),
+        text=_('<b>Picked up the keys today:</b> {today_keys}\n\n'
+               '🕹️ <i>All games:</i>\n'
+               '{db_keys}').format(today_keys=today_keys, db_keys=db_keys_count_formated),
         reply_markup=get_back_to_admin_panel_kb()
     )
 

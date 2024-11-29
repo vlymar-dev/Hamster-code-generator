@@ -25,15 +25,23 @@ class PromoCodeRepository:
             logger.error(f'Database error when adding a promo code: {e}')
             raise
 
-    async def get_code_count_for_game(self, game_name: str) -> int:
+    async def get_code_counts_for_games(self, game_names: list[str]) -> dict[str, int]:
         try:
-            result = await self.session.scalar(
-                select(func.count(PromoCode.id))
-                .where(PromoCode.game_name == game_name)
+            result = await self.session.execute(
+                select(
+                    PromoCode.game_name,
+                    func.count(PromoCode.id).label('count')
+                )
+                .where(PromoCode.game_name.in_(game_names))
+                .group_by(PromoCode.game_name)
             )
-            return result or 0
+            counts = {row.game_name: row.count for row in result.fetchall()}
+            for game_name in game_names:
+                if game_name not in counts:
+                    counts[game_name] = 0
+            return counts
         except DatabaseError as e:
-            logger.error(f'Database error when receiving the number of codes by games: {e}')
+            logger.error(f'Database error when retrieving code counts for games: {e}')
             raise
 
     async def get_promo_codes(self, game_names: list[str]) -> list[PromoCode]:

@@ -10,12 +10,12 @@ logger = logging.getLogger(__name__)
 class PromoCodeService:
 
     @staticmethod
-    async def get_code_count_for_game(game_name: str, promo_code_repo: PromoCodeRepository) -> int:
+    async def get_key_counts_for_games(game_names: list[str], promo_code_repo: PromoCodeRepository) -> dict[str, int]:
         try:
-            return await promo_code_repo.get_code_count_for_game(game_name)
+            return await promo_code_repo.get_code_counts_for_games(game_names)
         except Exception as e:
-            logger.error(f'Error retrieving promo code counts: {e}')
-            raise
+            logger.error(f'Error while retrieving key counts for games: {e}')
+            return {game_name: 0 for game_name in game_names}
 
     @staticmethod
     async def get_and_delete_promo_codes(game_names: list[str], user_id: int, promo_code_repo: PromoCodeRepository, user_key_repo: UserKeyRepository) -> dict[
