@@ -10,7 +10,7 @@ class User(Base):
     __tablename__ = 'users'
 
     # Basic user info
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=True)
     last_name: Mapped[str] = mapped_column(String(100), nullable=True)
     username: Mapped[str] = mapped_column(String(100), nullable=True)
@@ -24,14 +24,6 @@ class User(Base):
     user_status: Mapped[str] = mapped_column(String(20), default='free')
     user_role: Mapped[str] = mapped_column(String(20), default='user')
     is_subscribed: Mapped[bool] = mapped_column(Boolean, default=True)
-
-    # Referral info
-    referrals: Mapped[list['Referral']] = relationship(
-        'Referral',
-        foreign_keys='Referral.referrer_id',
-        back_populates='referrer',
-        lazy='selectin'
-    )
 
     # Activity
     total_keys_generated: Mapped[int] = mapped_column(Integer, default=0)

@@ -62,6 +62,8 @@ async def notification_menu() -> InlineKeyboardMarkup:
         "binancemoon": "Binance Moonbix",
         "tonstation": "Ton Station",
         "bybitcoin": "Bybit Coin",
+        'paws': 'paws',
+        'bombie': 'bombie',
     }
 
     builder = InlineKeyboardBuilder()

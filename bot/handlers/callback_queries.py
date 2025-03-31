@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
@@ -9,6 +9,7 @@ from infrastructure.repositories.referral_repo import ReferralRepository
 from infrastructure.repositories.user_key_repo import UserKeyRepository
 from infrastructure.repositories.user_repo import UserRepository
 from tgbot.common.staticdata import HAMSTER_GAMES_LIST
+from tgbot.common.utils import ImageCacheManager, get_random_image
 from tgbot.config import config
 from tgbot.filters.is_banned_filter import IsBannedFilter
 from tgbot.handlers.messages import send_main_menu
@@ -29,6 +30,8 @@ from tgbot.services.user_progress_service import UserProgressService
 logger = logging.getLogger(__name__)
 router = Router()
 
+cache_manager = ImageCacheManager()
+
 
 @router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
 async def update_language_handler(callback_query: CallbackQuery, user_repo: UserRepository, i18n: CustomI18nMiddleware, user_key_repo: UserKeyRepository) -> None:
@@ -47,29 +50,37 @@ async def update_language_handler(callback_query: CallbackQuery, user_repo: User
 
 
 @router.callback_query(F.data == 'user_info')
-async def user_info_handler(callback_query: CallbackQuery) -> None:
+async def user_info_handler(callback_query: CallbackQuery, bot: Bot) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
-    await callback_query.message.answer(
-        text=_('<b>ℹ️ Info</b>\n\n'
-               '<i>Explore crypto games and bonuses with our bot — stay ahead and earn more! </i>💪\n\n'
-               '📊 <b>Check Progress:</b>\n'
-               '• Track your achievements. 🎯\n'
-               '• Raise your status and unlock new privileges! 🚀\n\n'
-               '🎰 <b>GAME CENTER</b>:\n• Earn and grow with exclusive opportunities! 🎗️\n\n'
-               '💡 <i>Enjoy the bot?</i> <b>Support us!</b> Payment info — <i>/paysupport</i>\n\n'
-               '<b>USDT/Ton (TON):</b> <code>{ton_wallet}</code>\n'
-               '<b>USDT (TRC20):</b> <code>{trc_wallet}</code>\n'
-               '<i>(Tap to copy)</i> 📋\n\n'
-               '📬 <i>Got questions or suggestions?</i> \n'
-               '🖊️ <b><i>Message us:</i></b>  <a href="{support}">•Tap to connect•</a>\n'
-               '🔥 <b>Together we will make this service even better and bigger!</b>').format(
-            support=config.tg_bot.bot_info.support_link,
-            ton_wallet=config.tg_bot.wallets.ton_wallet,
-            trc_wallet=config.tg_bot.wallets.trc_wallet,
-        ),
-        reply_markup=await get_donation_kb()
+    random_image = await get_random_image(bot, cache_manager, "uploads/handlers_images")
+    print(f"Результат get_random_image: {random_image}")
+    text = _('<b>ℹ️ Info</b>\n\n'
+             '<i>Explore crypto games and bonuses with our bot — stay ahead and earn more! </i>💪\n\n'
+             '📊 <b>Check Progress:</b>\n'
+             '• Track your achievements. 🎯\n'
+             '• Raise your status and unlock new privileges! 🚀\n\n'
+             '🎰 <b>GAME CENTER</b>:\n• Earn and grow with exclusive opportunities! 🎗️\n\n'
+             '💡 <i>Enjoy the bot?</i> <b>Support us!</b> Payment info — <i>/paysupport</i>\n\n'
+             '<b>USDT/Ton (TON):</b> <code>{ton_wallet}</code>\n'
+             '<b>USDT (TRC20):</b> <code>{trc_wallet}</code>\n'
+             '<i>(Tap to copy)</i> 📋\n\n'
+             '📬 <i>Got questions or suggestions?</i> \n'
+             '🖊️ <b><i>Message us:</i></b>  <a href="{support}">•Tap to connect•</a>\n'
+             '🔥 <b>Together we will make this service even better and bigger!</b>').format(
+        support=config.tg_bot.bot_info.support_link,
+        ton_wallet=config.tg_bot.wallets.ton_wallet,
+        trc_wallet=config.tg_bot.wallets.trc_wallet,
     )
+    if random_image:
+        await callback_query.message.answer_photo(photo=random_image, caption=text)
+    else:
+        print("Изображение не найдено, отправляю только текст.")
+        await callback_query.message.answer(text=text)
+    # await callback_query.message.answer(
+    #     ,
+    #     reply_markup=await get_donation_kb()
+    # )
 
 
 @router.callback_query(IsBannedFilter(), F.data == 'settings_menu')

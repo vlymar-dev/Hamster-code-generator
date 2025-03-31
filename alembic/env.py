@@ -5,8 +5,12 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.models import Base as AppBase
-from bot.db_handler.models import Base as BotBase
+from infrastructure.models.base import Base
+from infrastructure.models.user import User
+from infrastructure.models.announcement_model import Announcement, AnnouncementTranslation
+from infrastructure.models.referral import Referral
+from infrastructure.models.promo_code import PromoCode
+from infrastructure.models.game_task import GameTask
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -25,7 +29,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [AppBase.metadata, BotBase.metadata]
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

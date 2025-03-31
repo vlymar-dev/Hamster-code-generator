@@ -35,6 +35,5 @@ HAMSTER_GAMES_LIST = [
     'CountMasters',
     'InfectedFrontier',
     'AmongWater',
-    'FactoryWorld',
-    'DICK BIG !'
+    'FactoryWorld'
 ]
