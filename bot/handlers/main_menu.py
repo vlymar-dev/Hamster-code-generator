@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message, Union
 from aiogram.utils.i18n import gettext as _
 
-from bot.filters.is_banned_filter import IsBannedFilter
+from bot.filters import IsBannedFilter
 from bot.keyboards.main_menu_kb import get_main_menu_kb
 
 main_menu_router = Router()

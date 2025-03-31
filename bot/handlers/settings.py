@@ -4,7 +4,7 @@ from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.common.static_data import LANGUAGES_DICT
-from bot.filters.is_banned_filter import IsBannedFilter
+from bot.filters import IsBannedFilter
 from bot.handlers.main_menu import send_main_menu
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.keyboards.settings.notifications_kb import notifications_kb

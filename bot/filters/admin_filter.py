@@ -1,18 +1,19 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.repositories.user_repo import UserRepository
-from tgbot.config import config
-from tgbot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
+from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
+from core import config
+from db.repositories import UserRepository
 
 
 class AdminFilter(BaseFilter):
-    async def __call__(self, message: Message, user_repo: UserRepository):
+    async def __call__(self, message: Message, session: AsyncSession):
         user_id = message.from_user.id
-        user_role = await user_repo.get_user_role(user_id)
+        user_role = await UserRepository.get_user_role(session, user_id)
 
-        if user_id == config.tg_bot.bot_settings.admin_id:
+        if user_id in config.telegram.ADMIN_ACCESS_IDs:
             return True
 
         if user_role != 'admin':

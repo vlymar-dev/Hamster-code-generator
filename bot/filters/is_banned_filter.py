@@ -1,16 +1,17 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import CallbackQuery, Message, TelegramObject
 from aiogram.utils.i18n import gettext as _
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.repositories.user_repo import UserRepository
+from db.repositories import UserRepository
 
 
 class IsBannedFilter(BaseFilter):
-    async def __call__(self, obj: TelegramObject, user_repo: UserRepository) -> bool:
+    async def __call__(self, obj: TelegramObject, session: AsyncSession) -> bool:
         user_id = obj.from_user.id if hasattr(obj, 'from_user') else None
         if not user_id:
             return False
-        is_banned = await user_repo.is_user_banned(user_id)
+        is_banned = await UserRepository.is_user_banned(session, user_id)
         if is_banned:
             text = _('🚫 You are blocked.')
             if isinstance(obj, Message):

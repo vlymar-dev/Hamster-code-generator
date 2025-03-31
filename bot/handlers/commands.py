@@ -4,7 +4,7 @@ from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.filters.admin_filter import AdminFilter
+from bot.filters import AdminFilter
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.services.admin_panel.admin_panel_service import AdminPanelService
