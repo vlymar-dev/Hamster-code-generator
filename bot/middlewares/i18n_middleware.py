@@ -1,29 +1,26 @@
-from typing import Any, Optional
+from typing import Any
 
-from aiogram.types import TelegramObject, Update
-from aiogram.utils.i18n import I18n, SimpleI18nMiddleware
+from aiogram.types import TelegramObject
+from aiogram.utils.i18n import I18n, I18nMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.repositories.user_repo import UserRepository
+from db.repositories import UserRepository
 
 
-class CustomI18nMiddleware(SimpleI18nMiddleware):
+class CustomI18nMiddleware(I18nMiddleware):
+
     def __init__(self, domain: str, path: str):
         self.i18n = I18n(path=path, default_locale='en', domain=domain)
         super().__init__(self.i18n)
 
     async def get_locale(self, event: TelegramObject, data: dict[str, Any]) -> str:
-        user_repo: UserRepository = data.get('user_repo')
-        user_id: Optional[int] = None
+        session: AsyncSession = data.get('session')
 
-        if isinstance(event, Update):
-            if event.message:
-                user_id = event.message.from_user.id
-            elif event.callback_query:
-                user_id = event.callback_query.from_user.id
+        if not event.from_user or not session:
+            return self.i18n.default_locale
 
-        if user_repo and user_id:
-            user_language = await user_repo.get_user_language(user_id)
-            if user_language:
-                return user_language
+        return await self._fetch_user_language(session, event.from_user.id)
 
-        return self.i18n.default_locale
+    async def _fetch_user_language(self, session: AsyncSession, user_id: int) -> str:
+        """Fetches the user's language from the database."""
+        return await UserRepository.get_user_language(session,user_id) or self.i18n.default_locale
