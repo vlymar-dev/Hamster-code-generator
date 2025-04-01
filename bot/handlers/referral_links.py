@@ -4,10 +4,10 @@ from aiogram.utils.i18n import gettext as _
 
 from bot.keyboards.referral_kb import referral_links_kb
 
-game_center_router = Router()
+referral_links_router = Router()
 
 
-@game_center_router.callback_query(F.data == 'referral_links')
+@referral_links_router.callback_query(F.data == 'referral_links')
 async def referral_links_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
     await callback_query.answer()

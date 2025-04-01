@@ -9,8 +9,8 @@ from db.repositories import UserRepository
 
 class CustomI18nMiddleware(I18nMiddleware):
 
-    def __init__(self, domain: str, path: str):
-        self.i18n = I18n(path=path, default_locale='en', domain=domain)
+    def __init__(self, path: str, default_locale: str, domain: str):
+        self.i18n = I18n(path=path, default_locale=default_locale, domain=domain)
         super().__init__(self.i18n)
 
     async def get_locale(self, event: TelegramObject, data: dict[str, Any]) -> str:

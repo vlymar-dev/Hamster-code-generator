@@ -2,8 +2,8 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
-from bot.config import config
 from bot.keyboards.donation.donation_kb import get_donation_kb
+from core import config
 
 info_router = Router()
 
@@ -23,9 +23,9 @@ async def user_info_handler(callback_query: CallbackQuery) -> None:
              '📬 <i>Got questions or suggestions?</i> \n'
              '🖊️ <b><i>Message us:</i></b>  <a href="{support}">•Tap to connect•</a>\n'
              '🔥 <b>Together we will make this service even better and bigger!</b>').format(
-        support=config.tg_bot.bot_info.support_link,
-        ton_wallet=config.tg_bot.wallets.ton_wallet,
-        trc_wallet=config.tg_bot.wallets.trc_wallet,
+        support=config.telegram.SUPPORT_LINK,
+        ton_wallet=config.wallets.TON,
+        trc_wallet=config.wallets.TRC,
     )
     await callback_query.message.delete()
     await callback_query.answer()
