@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.shemas import UserProgresSchema, UserProgressData
-from db.repositories import UserRepository
+from db.repositories import ReferralsRepository, UserRepository
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +24,7 @@ class ProgressService:
     async def get_user_progres(self, session: AsyncSession, user_id: int):
         user_data: UserProgresSchema = await UserRepository.get_user_progress(session, user_id)
 
-        # TODO: Получать реальные рефералы из бд
-        referrals = 2
+        referrals = await ReferralsRepository.get_count_user_referrals_by_user_id(session, user_id)
 
         days_in_bot = (datetime.now().date() - user_data.registration_date.date()).days
 
