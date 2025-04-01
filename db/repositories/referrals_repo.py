@@ -1,10 +1,26 @@
+import logging
+
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.shemas.referral import ReferralCreateSchema
 from db.models import Referral
 
+logger = logging.getLogger(__name__)
 
 class ReferralsRepository:
+
+    @staticmethod
+    async def add_referral(session: AsyncSession, referrals_data: ReferralCreateSchema):
+        try:
+            new_instance = Referral(**referrals_data.model_dump())
+            session.add(new_instance)
+            await session.commit()
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logger.error(f'Database error occurred while adding referral: {e}')
+            raise
 
     @staticmethod
     async def get_count_user_referrals_by_user_id(session: AsyncSession, user_id: int) -> int | None:
