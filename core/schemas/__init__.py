@@ -1,5 +1,6 @@
-from core.shemas.referral import ReferralAddingSchema
-from core.shemas.user import (
+from core.schemas.promo_code import PromoCodeReceiveSchema
+from core.schemas.referral import ReferralAddingSchema
+from core.schemas.user import (
     RemainingTimeSchema,
     UserActivitySchema,
     UserCreateSchema,
@@ -9,6 +10,7 @@ from core.shemas.user import (
 )
 
 __all__ = [
+    'PromoCodeReceiveSchema',
     'RemainingTimeSchema',
     'UserActivitySchema',
     'ReferralAddingSchema',
