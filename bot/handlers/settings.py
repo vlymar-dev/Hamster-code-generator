@@ -10,7 +10,8 @@ from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.keyboards.settings.notifications_kb import notifications_kb
 from bot.keyboards.settings.settings_kb import get_settings_kb
 from bot.middlewares import CustomI18nMiddleware
-from db.repositories import UserRepository
+from core import config
+from db.repositories import ReferralsRepository, UserRepository
 
 settings_router = Router()
 
@@ -87,14 +88,17 @@ async def subscribe_confirm_handler(callback_query: CallbackQuery, session: Asyn
 
 @settings_router.callback_query(F.data == 'unsubscribe')
 async def unsubscribe_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
-    # ====
-    # TODO: getting referrals from the db
-    referrals_count = 1
-    required_number_of_referrals = 1
-    # ====
+    referrals_count = await ReferralsRepository.get_count_user_referrals_by_user_id(
+        session,
+        callback_query.from_user.id
+    )
+    required_number_of_referrals = config.telegram.REFERRAL_THRESHOLD
     if referrals_count < required_number_of_referrals:
         await callback_query.answer(
-            text=_('You do not meet the requirements to unsubscribe from notifications.'),
+            text=_('You do not meet the requirements to unsubscribe from notifications. 🚫\n'
+                   'You must have at least {} referrals to unsubscribe from notifications 🫂').format(
+                required_number_of_referrals
+            ),
             show_alert=True
         )
         return await send_main_menu(callback_query)

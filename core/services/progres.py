@@ -24,22 +24,26 @@ class ProgressService:
     async def get_user_progres(self, session: AsyncSession, user_id: int):
         user_data: UserProgresSchema = await UserRepository.get_user_progress(session, user_id)
 
-        referrals = await ReferralsRepository.get_count_user_referrals_by_user_id(session, user_id)
+        referrals_count = await ReferralsRepository.get_count_user_referrals_by_user_id(session, user_id)
 
         days_in_bot = (datetime.now().date() - user_data.registration_date.date()).days
 
-        current_level, next_level = self.calculate_achievement(user_data.total_keys_generated, referrals, days_in_bot)
+        current_level, next_level = self.calculate_achievement(
+            user_data.total_keys_generated,
+            referrals_count,
+            days_in_bot
+        )
 
         next_thresholds = ACHIEVEMENTS.get(next_level, {})
         keys_progress = self.generate_progress_bar(user_data.total_keys_generated, next_thresholds.get('keys', 0))
-        referrals_progress = self.generate_progress_bar(referrals, next_thresholds.get('referrals', 0))
+        referrals_progress = self.generate_progress_bar(referrals_count, next_thresholds.get('referrals', 0))
         days_progress = self.generate_progress_bar(days_in_bot, next_thresholds.get('days', 0))
 
         return UserProgressData(
             total_keys=user_data.total_keys_generated,
             user_status=user_data.user_status,
             days_in_bot=days_in_bot,
-            referrals=referrals,
+            referrals=referrals_count,
             current_level=current_level,
             next_level=next_level,
             keys_progress=keys_progress,
