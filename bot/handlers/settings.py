@@ -62,7 +62,7 @@ async def update_language_handler(
         text=_('🌐 Language updated to: {}').format(selected_language_name),
         show_alert=True
     )
-    await send_main_menu(callback_query.message)
+    await send_main_menu(callback_query.message, session)
 
 
 @settings_router.callback_query(F.data == 'notifications')
@@ -84,7 +84,7 @@ async def subscribe_confirm_handler(callback_query: CallbackQuery, session: Asyn
         text=_('You have successfully Subscribed for notifications.'),
         show_alert=True
     )
-    await send_main_menu(callback_query)
+    await send_main_menu(callback_query, session)
 
 @settings_router.callback_query(F.data == 'unsubscribe')
 async def unsubscribe_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
@@ -101,11 +101,11 @@ async def unsubscribe_handler(callback_query: CallbackQuery, session: AsyncSessi
             ),
             show_alert=True
         )
-        return await send_main_menu(callback_query)
+        return await send_main_menu(callback_query, session)
 
     await UserRepository.update_subscription_status(session=session, user_id=callback_query.from_user.id, is_subscribed=False)
     await callback_query.answer(
         text=_('You have successfully unsubscribed from notifications.'),
         show_alert=True
     )
-    await send_main_menu(callback_query)
+    await send_main_menu(callback_query, session)

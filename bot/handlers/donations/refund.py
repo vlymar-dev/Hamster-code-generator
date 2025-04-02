@@ -4,6 +4,7 @@ from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.handlers.main_menu import send_main_menu
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
@@ -12,7 +13,7 @@ refund_router = Router()
 
 
 @refund_router.message(F.text.startswith('/refund_stars'))
-async  def refund_stars_command_handler(message: Message) -> None:
+async  def refund_stars_command_handler(message: Message, session: AsyncSession) -> None:
     transaction_id: str = message.text.split(' ')[1] if len(message.text.split()) > 1 else None
 
     if not transaction_id:
@@ -39,7 +40,7 @@ async  def refund_stars_command_handler(message: Message) -> None:
                 _('⚠️ <b>This transaction has already been refunded!!</b>')
             )
             await asyncio.sleep(2)
-            await send_main_menu(message)
+            await send_main_menu(message, session)
         else:
             await message.answer(
                 _('❗️ <b>Error:</b> {error}').format(error=error.message)
