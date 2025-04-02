@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.shemas.referral import ReferralCreateSchema
+from core.shemas.referral import ReferralAddingSchema
 from db.models import Referral
 
 logger = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class ReferralsRepository:
 
     @staticmethod
-    async def add_referral(session: AsyncSession, referrals_data: ReferralCreateSchema):
+    async def add_referral(session: AsyncSession, referrals_data: ReferralAddingSchema):
         try:
             new_instance = Referral(**referrals_data.model_dump())
             session.add(new_instance)

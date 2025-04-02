@@ -8,9 +8,9 @@ from bot.filters import AdminFilter
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.services.admin_panel.admin_panel_service import AdminPanelService
-from core.shemas.referral import ReferralCreateSchema
+from core.services import UserService
 from core.shemas.user import UserCreateSchema
-from db.repositories import ReferralsRepository, UserRepository
+from db.repositories import UserRepository
 
 commands_router = Router()
 
@@ -18,35 +18,27 @@ commands_router = Router()
 @commands_router.message(CommandStart())
 async def handle_start_command(message: Message, session: AsyncSession, bot: Bot) -> None:
     user_id: int = message.from_user.id
-    exists_user: bool = await UserRepository.check_user_exists(session, user_id)
-    if not exists_user:
-        user: UserCreateSchema = UserCreateSchema(
-            id=user_id,
-            first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name,
-            username=message.from_user.username,
-            language_code=message.from_user.language_code
-        )
-        await UserRepository.add_user(session, user)
+    n, n, ref_id = message.text.partition(' ')
+    referrer_id = int(ref_id) if ref_id.isdigit() and int(ref_id) != user_id else None
+    user: UserCreateSchema = UserCreateSchema(
+        id=user_id,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name,
+        username=message.from_user.username,
+        language_code=message.from_user.language_code
+    )
 
-        try:
-            # Adding a referral
-            args = message.text.split(maxsplit=1)
-            referrer_id = int(args[1])
-            exists_referrer: bool = await UserRepository.check_user_exists(session, referrer_id)
-            if len(args) > 1 and args[1].isdigit() and exists_referrer:
-                referrals_data = ReferralCreateSchema(
-                    referrer_id=referrer_id,
-                    referred_id=user_id
-                )
-                await ReferralsRepository.add_referral(session, referrals_data)
-                referrer_message = _(
-                            f'🎉 User {message.from_user.full_name} with ID <b>{message.from_user.id}</b> '
-                            f'registered using your referral link!'
-                        )
-                await bot.send_message(referrer_id, referrer_message)
-        except Exception:
-            ...
+    new_user_registered = await UserService.user_registration(session=session, user_id=user_id, user=user)
+    if new_user_registered and referrer_id:
+        referrer_id = await UserService.referral_adding(session=session, referrer_id=referrer_id, referred_id=user_id)
+        if referrer_id:
+            await bot.send_message(
+                chat_id=referrer_id,
+                text=_(
+                    '🎉 User {full_name} with ID <b>{user_id}</b> '
+                    'registered using your referral link!'
+                ).format(full_name=message.from_user.full_name, user_id=message.from_user.id)
+            )
 
     await message.answer(
         text=_('👋 Hello, <b>{first_name}</b>!\n'
