@@ -8,8 +8,8 @@ from bot.filters import AdminFilter
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.services.admin_panel.admin_panel_service import AdminPanelService
+from core.schemas.user import UserCreateSchema
 from core.services import UserService
-from core.shemas.user import UserCreateSchema
 from db.repositories import UserRepository
 
 commands_router = Router()

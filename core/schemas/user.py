@@ -11,12 +11,13 @@ class UserCreateSchema(BaseModel):
     language_code: str
 
 
-class UserProgresSchema(BaseModel):
+class UserProgressSchema(BaseModel):
     registration_date: datetime
     user_status: str
     total_keys_generated: int
 
-class UserProgressData(BaseModel):
+
+class UserProgressDataSchema(BaseModel):
     total_keys: int
     user_status: str
     days_in_bot: int
@@ -26,3 +27,20 @@ class UserProgressData(BaseModel):
     keys_progress: str
     referrals_progress: str
     days_progress: str
+
+
+class UserActivitySchema(BaseModel):
+    daily_requests_count: int
+    last_request_datetime: datetime | None
+    user_status: str
+
+
+class RemainingTimeSchema(BaseModel):
+    minutes: int = 0
+    seconds: int = 0
+
+
+class UserKeyGenerationSchema(BaseModel):
+    can_generate: bool = False
+    daily_limit_exceeded: bool = False
+    remaining_time: RemainingTimeSchema | None = None
