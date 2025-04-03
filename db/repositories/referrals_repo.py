@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.shemas.referral import ReferralAddingSchema
+from core.schemas import ReferralAddingSchema
 from db.models import Referral
 
 logger = logging.getLogger(__name__)

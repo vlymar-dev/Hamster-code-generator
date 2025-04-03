@@ -1,3 +1,4 @@
+from core.schemas.game_tasks import GameTaskResponsePaginateSchema, GameTaskResponseSchema
 from core.schemas.promo_code import PromoCodeReceiveSchema
 from core.schemas.referral import ReferralAddingSchema
 from core.schemas.user import (
@@ -10,6 +11,8 @@ from core.schemas.user import (
 )
 
 __all__ = [
+    'GameTaskResponsePaginateSchema',
+    'GameTaskResponseSchema',
     'PromoCodeReceiveSchema',
     'RemainingTimeSchema',
     'UserActivitySchema',
