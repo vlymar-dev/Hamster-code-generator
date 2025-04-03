@@ -62,14 +62,26 @@ class UserRepository:
             return True
 
     @staticmethod
-    async def get_user_role(session: AsyncSession, user_id: int) -> str:
+    async def get_user_role(session: AsyncSession, target_user_id: int) -> str | None:
         try:
-            result = await session.execute(select(User.user_role).where(User.id == user_id))
+            result = await session.execute(select(User.user_role).where(User.id == target_user_id))
             user_role = result.scalar_one_or_none()
-            return user_role if user_role else 'user'
+            return user_role if user_role else None
         except SQLAlchemyError as e:
-            logger.error(f'Database error occurred while getting role for user_id={user_id}: {e}')
-            return 'user'
+            logger.error(f'Database error occurred while getting role for user_id={target_user_id}: {e}')
+            return None
+
+    @staticmethod
+    async def update_user_role(session: AsyncSession, user_id: int, new_user_role: str) -> None:
+        try:
+            await session.execute(
+                update(User).where(User.id == user_id).values(user_role=new_user_role)
+            )
+            await session.commit()
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logger.error(f'Database error occurred while changing role for user_id={user_id}: {e}')
+            return None
 
     @staticmethod
     async def update_user_language(session: AsyncSession, user_id: int, selected_language_code: str) -> bool:
@@ -190,4 +202,13 @@ class UserRepository:
             return today_keys if today_keys else 0
         except SQLAlchemyError as e:
             logger.error(f'Database error occurred while calculating total keys: {e}')
+            return 0
+
+    @staticmethod
+    async def get_users_count(session: AsyncSession) -> int:
+        try:
+            result = await session.execute(select(func.count()).select_from(User).select_from(User))
+            return result.scalar_one()
+        except SQLAlchemyError as e:
+            logger.error(f'Database error occurred while counting users: {e}')
             return 0

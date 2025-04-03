@@ -5,9 +5,10 @@ from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.filters import AdminFilter
+from bot.handlers.admin_panel import show_admin_panel
+from bot.keyboards.admin_panel.admin_panel_kb import admin_panel_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
-from bot.services.admin_panel.admin_panel_service import AdminPanelService
 from core.schemas.user import UserCreateSchema
 from core.services import UserService
 from db.repositories import UserRepository
@@ -74,4 +75,4 @@ async def paysupport_command(message: Message) -> None:
 
 @commands_router.message(Command('admin'), AdminFilter())
 async def admin_command(message: Message) -> None:
-    await AdminPanelService.show_admin_panel(message)
+    await show_admin_panel(message)

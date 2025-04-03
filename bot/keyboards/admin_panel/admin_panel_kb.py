@@ -2,7 +2,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.common.static_data import ROLES_DICT
+from bot.keyboards.main_menu_kb import back_to_main_menu_button
 
 
 def admin_panel_kb() -> InlineKeyboardMarkup:
@@ -19,16 +20,24 @@ def admin_panel_kb() -> InlineKeyboardMarkup:
 def admin_panel_users_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=_('👑 Add Role'), callback_data='add_role'))
+    builder.row(InlineKeyboardButton(text=_('👑 Change Role'), callback_data='change_role'))
     builder.row(back_to_admin_panel_button())
     return builder.as_markup()
 
 
-def admin_panel_user_role_kb() -> InlineKeyboardMarkup:
+def admin_panel_user_role_kb(current_user_role: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=_('Admin'), callback_data='change_role_to_admin'),
-                InlineKeyboardButton(text=_('User'), callback_data='change_role_to_user'))
+    for role, title in ROLES_DICT.items():
+        if role == current_user_role:
+            continue
+
+        builder.button(
+            text=title,
+            callback_data=f'change_role_to_{role}'
+        )
+
+    builder.adjust(2)
     builder.row(back_to_admin_panel_button())
     return builder.as_markup()
 

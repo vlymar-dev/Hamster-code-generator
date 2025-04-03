@@ -1,3 +1,7 @@
+from bot.handlers.admin_panel.admin_handlers import admin_router
+from bot.handlers.admin_panel.announcements_handlers import announcements_router
+from bot.handlers.admin_panel.game_codes_handlers import game_codes_router
+from bot.handlers.callback_data import PaginationCallbackData
 from bot.handlers.commands import commands_router
 from bot.handlers.donations.donations import donations_router
 from bot.handlers.donations.refund import refund_router
@@ -9,6 +13,9 @@ from bot.handlers.referral_links import referral_links_router
 from bot.handlers.settings import settings_router
 
 ROUTERS = [
+    admin_router,
+    announcements_router,
+    game_codes_router,
     commands_router,
     donations_router,
     refund_router,
@@ -20,4 +27,4 @@ ROUTERS = [
     settings_router
 ]
 
-__all__ = ['ROUTERS']
+__all__ = ['ROUTERS', 'PaginationCallbackData']

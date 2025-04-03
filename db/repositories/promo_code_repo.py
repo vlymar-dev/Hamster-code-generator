@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,4 +37,24 @@ class PromoCodeRepository:
         except SQLAlchemyError as e:
             await session.rollback()
             logger.error(f'Database error when deleting promo codes: {e}')
+            raise
+
+    @staticmethod
+    async def get_code_counts_for_games(session: AsyncSession, game_names: list[str]) -> dict[str, int]:
+        try:
+            result = await session.execute(
+                select(
+                    PromoCode.game_name,
+                    func.count(PromoCode.id).label('count')
+                )
+                .where(PromoCode.game_name.in_(game_names))
+                .group_by(PromoCode.game_name)
+            )
+            counts = {row.game_name: row.count for row in result.fetchall()}
+            for game_name in game_names:
+                if game_name not in counts:
+                    counts[game_name] = 0
+            return counts
+        except SQLAlchemyError as e:
+            logger.error(f'Database error when retrieving code counts for games: {e}')
             raise
