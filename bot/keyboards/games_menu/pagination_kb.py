@@ -2,8 +2,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.handlers.callback_data import PaginationCallbackData
-from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.handlers import PaginationCallbackData
+from bot.keyboards.main_menu_kb import back_to_main_menu_button
 
 
 def get_pagination_kb(current_page: int, total_pages: int, game_name: str) -> InlineKeyboardMarkup:
@@ -23,7 +23,7 @@ def get_pagination_kb(current_page: int, total_pages: int, game_name: str) -> In
                 current_page=current_page,
                 total_pages=total_pages
             ),
-            callback_data="noop"
+            callback_data='noop'
         )
     )
 
