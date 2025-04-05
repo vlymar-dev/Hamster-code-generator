@@ -2,21 +2,22 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.i18n import gettext as _
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.repositories.game_task_repo import GameTaskRepository
-from tgbot.keyboards.admin_panel.game_codes_kb import (
+from bot.keyboards.admin_panel.game_codes_kb import (
     get_admin_panel_codes_kb,
     get_cancel_game_code_action_kb,
     get_confirm_deletion_task_kb,
     get_game_codes_actions_kb,
 )
-from tgbot.services.game_task_service import GameTaskService
-from tgbot.states.game_code_state import GameCodeManagement
+from bot.states import GameCodeManagement
+from core.schemas import GameTaskSchema
+from db.repositories import GameTaskRepository
 
-router = Router()
+game_codes_router = Router()
 
 
-@router.callback_query(F.data == 'manage_codes')
+@game_codes_router.callback_query(F.data == 'manage_codes')
 async def manage_codes_handler(callback_query: CallbackQuery) -> None:
     await callback_query.answer()
     await callback_query.message.delete()
@@ -26,7 +27,7 @@ async def manage_codes_handler(callback_query: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(F.data.startswith('admin_codes_for_'))
+@game_codes_router.callback_query(F.data.startswith('admin_codes_for_'))
 async def actions_with_game_codes_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     game_name: str = callback_query.data.split('_')[-1]
     await state.update_data(selected_game=game_name)
@@ -39,7 +40,7 @@ async def actions_with_game_codes_handler(callback_query: CallbackQuery, state: 
     )
 
 
-@router.callback_query(F.data == 'add_code')
+@game_codes_router.callback_query(F.data == 'add_code')
 async def add_game_code_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
     if 'selected_game' not in data:
@@ -56,7 +57,7 @@ async def add_game_code_handler(callback_query: CallbackQuery, state: FSMContext
     )
 
 
-@router.message(GameCodeManagement.WaitingForTask)
+@game_codes_router.message(GameCodeManagement.WaitingForTask)
 async def process_task_input_handler(message: Message, state: FSMContext) -> None:
     task = message.text
     if len(task) < 1:
@@ -73,10 +74,10 @@ async def process_task_input_handler(message: Message, state: FSMContext) -> Non
     )
 
 
-@router.message(GameCodeManagement.WaitingForAnswer)
-async def process_answer_input_handler(message: Message, state: FSMContext, game_task_repo: GameTaskRepository) -> None:
+@game_codes_router.message(GameCodeManagement.WaitingForAnswer)
+async def process_answer_input_handler(message: Message, state: FSMContext, session: AsyncSession) -> None:
     answer = message.text
-    if len(answer) < 1:
+    if len(answer) <= 1:
         await message.answer(
             text=_('⚠️ The length of a answer must be longer than one character!'),
             reply_markup=get_cancel_game_code_action_kb()
@@ -84,30 +85,29 @@ async def process_answer_input_handler(message: Message, state: FSMContext, game
         return
 
     data = await state.get_data()
-    game_name: str = data['selected_game']
-    task = data['task']
 
-    new_code = await GameTaskService.create_task(
-        game_name=game_name,
-        task=task,
-        answer=answer,
-        game_task_repo=game_task_repo
-    )
+    game_task = GameTaskSchema(
+            game_name=data['selected_game'],
+            task=data['task'],
+            answer=answer
+        )
+    await GameTaskRepository.add_task(session, game_task)
+
     await state.clear()
     await message.answer(
         text=_('✅ <i>Code for the game <b>{game}</b> successfully added!</i>\n\n'
                '🐥 <i>Task: <b>{task}</b></i>\n'
                '⛱️ <i>Answer: <b>{answer}</b></i>\n\n'
                'Select a game to add a new code or go back to the main menu:').format(
-            game=new_code.game_name,
-            task=new_code.task,
-            answer=new_code.answer
+            game=game_task.game_name,
+            task=game_task.task,
+            answer=game_task.answer
         ),
         reply_markup=get_admin_panel_codes_kb()
     )
 
-@router.callback_query(F.data == 'delete_code')
-async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext, game_task_repo: GameTaskRepository) -> None:
+@game_codes_router.callback_query(F.data == 'delete_code')
+async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
     if 'selected_game' not in data:
         await callback_query.answer(
@@ -126,8 +126,8 @@ async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext, 
     )
 
 
-@router.message(GameCodeManagement.WaitingForIDToDelete)
-async def process_delete_task_by_id_handler(message: Message, state: FSMContext, game_task_repo: GameTaskRepository):
+@game_codes_router.message(GameCodeManagement.WaitingForIDToDelete)
+async def process_delete_task_by_id_handler(message: Message, state: FSMContext, session: AsyncSession):
     try:
         task_id = int(message.text)
     except ValueError:
@@ -137,7 +137,7 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
         )
         return
     await state.update_data(task_id=task_id)
-    task = await GameTaskService.get_task_by_id(task_id=task_id, game_task_repo=game_task_repo)
+    task: GameTaskSchema = await GameTaskRepository.get_task_by_id(session, task_id)
     if not task:
         await message.answer(
             text=_('⚠️ Task with ID <b>{task_id}</b> not found.\n\nRepeat input:').format(task_id=task_id),
@@ -145,32 +145,32 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
         )
         return
     await message.answer(
-        text=_('⚠️ <b>Confirm the deletion of the task:</b>\n'
+        text=_('⚠️ <b>Confirm the deletion of the task:</b>\n\n'
                '📋 <b>ID:</b> {id}\n'
-               '🐥 <b>Task:</b> {task}\n'
-               '⛱️ <b>Answer:</b> {answer}').format(id=task.id, task=task.task, answer=task.answer),
+               '<b>Task:</b> {task}\n'
+               '<b>Answer:</b> {answer}').format(
+            id=task_id,
+            task=task.task,
+            answer=task.answer
+        ),
         reply_markup=get_confirm_deletion_task_kb()
     )
 
 
-@router.callback_query(F.data == 'confirm_deletion')
-async def confirmation_deletion_handler(message: Message, state: FSMContext, game_task_repo: GameTaskRepository) -> None:
+@game_codes_router.callback_query(F.data == 'confirm_deletion')
+async def confirmation_deletion_handler(message: Message, state: FSMContext, session: AsyncSession) -> None:
     data = await state.get_data()
-    game_name = data['selected_game']
     task_id = data['task_id']
 
-    success = await GameTaskService.delete_task(
-        task_id=task_id,
-        game_name=game_name,
-        task_repo=game_task_repo
-    )
-
-    if success:
+    try:
+        await GameTaskRepository.delete_task_by_id(session, task_id)
         await message.answer(
             text=_('✅ Task with ID <b>{id}</b> successfully deleted!').format(id=task_id),
             reply_markup=get_admin_panel_codes_kb()
         )
-    else:
+    except Exception as e:
+        # TODO: logging
+        print(f'Error while deleting a record: {e}')
         await message.answer(
             text=_('❌ Task with ID <b>{id}</b> not found or could not be deleted.').format(id=task_id),
             reply_markup=get_cancel_game_code_action_kb()
@@ -178,7 +178,7 @@ async def confirmation_deletion_handler(message: Message, state: FSMContext, gam
     await state.clear()
 
 
-@router.callback_query(F.data == 'back_to_admin_game_menu')
+@game_codes_router.callback_query(F.data == 'back_to_admin_game_menu')
 async def back_to_admin_game_menu_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
     await show_game_selection_menu(callback_query)
@@ -191,7 +191,3 @@ async def show_game_selection_menu(callback_query: CallbackQuery) -> None:
         text=_('<b>📲 Choose a game:</b>'),
         reply_markup=get_admin_panel_codes_kb()
     )
-
-
-def register_admin_panel_game_codes_handlers(dp) -> None:
-    dp.include_router(router)

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class GameTaskResponseSchema(BaseModel):
+class GameTaskSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     game_name: str
@@ -9,6 +9,6 @@ class GameTaskResponseSchema(BaseModel):
     answer: str
 
 class GameTaskResponsePaginateSchema(BaseModel):
-    tasks: list[GameTaskResponseSchema]
+    tasks: list[GameTaskSchema]
     page: int
     total_pages: int
