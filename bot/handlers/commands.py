@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.filters import AdminFilter
 from bot.handlers.admin_panel import show_admin_panel
-from bot.keyboards.admin_panel.admin_panel_kb import admin_panel_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from core.schemas.user import UserCreateSchema

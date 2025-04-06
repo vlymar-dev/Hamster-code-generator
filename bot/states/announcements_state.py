@@ -2,16 +2,17 @@ from aiogram.fsm.state import State, StatesGroup
 
 
 class CreateAnnouncement(StatesGroup):
-    Title = State()
-    Image = State()
+    title = State()
+    image = State()
 
 
 class AnnouncementDetails(StatesGroup):
-    ID = State()
-    Languages = State()
-    LanguageCode = State()
-    TranslationText = State()
+    id = State()
+    languages = State()
+    language_code = State()
+    translation_text = State()
+    edit_translation_text = State()
 
 
 class DeleteAnnouncement(StatesGroup):
-    ID = State()
+    id = State()

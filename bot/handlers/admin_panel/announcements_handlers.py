@@ -4,11 +4,10 @@ from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message
 from aiogram.utils.i18n import gettext as _
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.repositories.announcement_repo import AnnouncementRepository
-from infrastructure.repositories.user_repo import UserRepository
-from tgbot.common.staticdata import LANGUAGES_DICT
-from tgbot.keyboards.admin_panel.announcements_kb import (
+from bot.common.static_data import LANGUAGES_DICT
+from bot.keyboards.admin_panel.announcements_kb import (
     get_announcement_menu_kb,
     get_announcements_kb,
     get_back_to_announcement_details_kb,
@@ -17,17 +16,19 @@ from tgbot.keyboards.admin_panel.announcements_kb import (
     get_confirmation_broadcast_kb,
     get_languages_kb,
 )
-from tgbot.services.admin_panel.announcements_service import AnnouncementService
-from tgbot.states.announcements_state import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement
+from bot.states import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement
+from core.schemas import AnnouncementCreateSchema, AnnouncementTranslationCreateSchema
+from core.services import AdminPanelService
+from db.repositories import AnnouncementRepository
 
 logger = logging.getLogger(__name__)
 
-router = Router()
+announcements_router = Router()
 
 
-@router.callback_query(F.data == 'manage_announcements')
-async def manage_announcements_handler(callback_query: CallbackQuery, announcement_repo: AnnouncementRepository) -> None:
-    text = await show_announcements_text(announcement_repo)
+@announcements_router.callback_query(F.data == 'manage_announcements')
+async def manage_announcements_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
+    text = await show_announcements_text(session)
     await callback_query.answer()
     await callback_query.message.delete()
     await callback_query.message.answer(
@@ -36,7 +37,7 @@ async def manage_announcements_handler(callback_query: CallbackQuery, announceme
     )
 
 
-@router.callback_query(F.data == 'create_announcement')
+@announcements_router.callback_query(F.data == 'create_announcement')
 async def create_announcement_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
@@ -44,13 +45,13 @@ async def create_announcement_handler(callback_query: CallbackQuery, state: FSMC
         text=_('📝 Enter the announcement title:'),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(CreateAnnouncement.Title)
+    await state.set_state(CreateAnnouncement.title)
 
 
-@router.message(CreateAnnouncement.Title)
+@announcements_router.message(CreateAnnouncement.title)
 async def process_announcement_title_handler(message: Message, state: FSMContext) -> None:
-    await state.update_data(Title=message.html_text)
-    await state.set_state(CreateAnnouncement.Image)
+    await state.update_data(title=message.html_text)
+    await state.set_state(CreateAnnouncement.image)
     await message.answer(
         text=_('📝 <b>Title:</b>\n{title}\n\n'
                'Send an image or type <code>no_image</code> to skip.').format(title=message.html_text),
@@ -58,24 +59,22 @@ async def process_announcement_title_handler(message: Message, state: FSMContext
     )
 
 
-
-@router.message(CreateAnnouncement.Image)
-async def process_announcement_image_handler(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository, bot: Bot) -> None:
+@announcements_router.message(CreateAnnouncement.image)
+async def process_announcement_image_handler(message: Message, state: FSMContext, session: AsyncSession, bot: Bot) -> None:
     data = await state.get_data()
 
     if message.photo:
         try:
             photo = message.photo[-1]
-            image_url = await AnnouncementService.process_and_save_image(photo, bot)
-            announcement = await AnnouncementService.create_announcement_without_text_translation(
-                title=data['Title'],
-                created_by=message.from_user.id,
-                image_url=image_url,
-                announcement_repo=announcement_repo
-            )
-            await state.clear()
+            image_url = await AdminPanelService.process_and_save_image(photo, bot)
+            data = AnnouncementCreateSchema(
+                    title=data['title'],
+                    created_by=message.from_user.id,
+                    image_url=image_url
+                )
+            await AnnouncementRepository.add_announcement(session, data)
             await message.answer(
-                text=_('✅ Announcement "{title}" with image created.').format(title=announcement.title),
+                text=_('✅ Announcement "{title}" with image created.').format(title=data.title),
                 reply_markup=get_back_to_announcements_kb()
             )
         except ValueError:
@@ -85,14 +84,14 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
             )
 
     elif message.text.lower().strip() in ['no_image']:
-        announcement = await AnnouncementService.create_announcement_without_text_translation(
-            title=data['Title'],
-            created_by=message.from_user.id,
-            announcement_repo=announcement_repo
+        data = AnnouncementCreateSchema(
+            title=data['title'],
+            created_by=message.from_user.id
         )
-        await state.clear()
+        await AnnouncementRepository.add_announcement(session, data)
+
         await message.answer(
-            text=_('✅ Announcement "{title}" without image created.').format(title=announcement.title),
+            text=_('✅ Announcement "{title}" without image created.').format(title=data.title),
             reply_markup=get_back_to_announcements_kb()
         )
     else:
@@ -100,9 +99,10 @@ async def process_announcement_image_handler(message: Message, state: FSMContext
             text=_('Please submit an image or enter <code>no_image</code> to skip.'),
             reply_markup=get_cancel_announcement_action_kb()
         )
+    await state.clear()
 
 
-@router.callback_query(F.data == 'view_announcement_detail')
+@announcements_router.callback_query(F.data == 'view_announcement_detail')
 async def view_announcement_detail_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
@@ -110,18 +110,18 @@ async def view_announcement_detail_handler(callback_query: CallbackQuery, state:
         text=_('📝 Enter the announcement id:'),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(AnnouncementDetails.ID)
+    await state.set_state(AnnouncementDetails.id)
 
 
-@router.message(AnnouncementDetails.ID)
-async def process_announcement_id_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+@announcements_router.message(AnnouncementDetails.id)
+async def process_announcement_id_input(message: Message, state: FSMContext, session: AsyncSession) -> None:
     try:
         announcement_id = int(message.text)
 
         await show_announcement_details(
             target=message,
             announcement_id=announcement_id,
-            announcement_repo=announcement_repo,
+            session=session,
             state=state
         )
     except ValueError as e:
@@ -130,21 +130,18 @@ async def process_announcement_id_input(message: Message, state: FSMContext, ann
             reply_markup=get_cancel_announcement_action_kb()
         )
 
-@router.callback_query(F.data == 'create_announcement_translation')
+
+@announcements_router.callback_query(F.data == 'create_announcement_translation')
 async def create_translation_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
 
-    languages_dict = AnnouncementService.filter_languages(
-        languages=LANGUAGES_DICT,
-        text_languages=data['Languages'],
-        include=False,
-    )
+    available_languages = {key: value for key, value in LANGUAGES_DICT.items() if key not in data['languages']}
     await callback_query.message.delete()
     await callback_query.answer()
-    if languages_dict:
+    if available_languages:
         await callback_query.message.answer(
             text=_('🌏 Select a language from the available languages:'),
-            reply_markup=get_languages_kb(languages_dict, 'add_translation_text_')
+            reply_markup=get_languages_kb(available_languages, 'add_translation_text_')
         )
         return
     await callback_query.message.answer(
@@ -153,40 +150,42 @@ async def create_translation_handler(callback_query: CallbackQuery, state: FSMCo
     )
 
 
-@router.callback_query(F.data.startswith('add_translation_text_'))
+@announcements_router.callback_query(F.data.startswith('add_translation_text_'))
 async def get_add_translation_text_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     language_code: str = callback_query.data.split('_')[-1]
-    await state.update_data(LanguageCode=language_code)
+    await state.update_data(language_code=language_code)
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=_('📝 Enter the announcement text for {language_code}:').format(language_code=language_code),
+        text=_('📝 Enter the announcement text for "{language_code}":').format(
+            language_code=LANGUAGES_DICT.get(language_code)
+        ),
         reply_markup=get_back_to_announcement_details_kb()
     )
-    await state.set_state(AnnouncementDetails.TranslationText)
+    await state.set_state(AnnouncementDetails.translation_text)
 
 
-@router.message(AnnouncementDetails.TranslationText)
-async def process_translation_text_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+@announcements_router.message(AnnouncementDetails.translation_text)
+async def process_translation_text_input(message: Message, state: FSMContext, session: AsyncSession) -> None:
     data = await state.get_data()
-    announcement_id = int(data['ID'])
-    language_code = data['LanguageCode']
-    translation_text = message.html_text
+    language_code = data['language_code']
 
     try:
-        translation_text = await AnnouncementService.create_translation_for_announcement(
-            announcement_id=announcement_id,
-            language_code=language_code,
-            text=translation_text,
-            announcement_repo=announcement_repo,
+        await AnnouncementRepository.add_translation_by_announcement_id(
+            session=session,
+            translation=AnnouncementTranslationCreateSchema(
+                announcement_id=int(data['id']),
+                text=message.html_text,
+                language_code=language_code
+            )
         )
         await message.answer(
             text=_('✅ Translation for: \'{language}\' created').format(
-                language=translation_text.language_code
+                language=LANGUAGES_DICT.get(language_code)
             ),
             reply_markup=get_back_to_announcement_details_kb()
         )
-        data.pop('LanguageCode', None)
+        data.pop('language_code', None)
         await state.update_data(**data)
     except ValueError as e:
         await message.answer(
@@ -195,21 +194,17 @@ async def process_translation_text_input(message: Message, state: FSMContext, an
         )
 
 
-@router.callback_query(F.data == 'edit_announcement_translation')
-async def edit_announcement_translation_handler(callback_query: CallbackQuery, state: FSMContext, ) -> None:
+@announcements_router.callback_query(F.data == 'edit_announcement_translation')
+async def edit_announcement_translation_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
+    available_languages = {key: value for key, value in LANGUAGES_DICT.items() if key in data['languages']}
 
-    languages_dict = AnnouncementService.filter_languages(
-        languages=LANGUAGES_DICT,
-        text_languages=data['Languages'],
-        include=True,
-    )
     await callback_query.message.delete()
     await callback_query.answer()
-    if languages_dict:
+    if available_languages:
         await callback_query.message.answer(
             text=_('🌏 Select the language available for editing:'),
-            reply_markup=get_languages_kb(languages_dict, 'edit_translation_text_')
+            reply_markup=get_languages_kb(available_languages, 'edit_translation_text_')
         )
         return
     await callback_query.message.answer(
@@ -217,44 +212,55 @@ async def edit_announcement_translation_handler(callback_query: CallbackQuery, s
         reply_markup=get_back_to_announcement_details_kb()
     )
 
-@router.callback_query(F.data.startswith('edit_translation_text_'))
-async def get_edit_translation_text_handler(callback_query: CallbackQuery, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+@announcements_router.callback_query(F.data.startswith('edit_translation_text_'))
+async def get_edit_translation_text_handler(
+        callback_query: CallbackQuery,
+        state: FSMContext,
+        session: AsyncSession
+) -> None:
     language_code: str = callback_query.data.split('_')[-1]
     data = await state.get_data()
-    announcement_id = int(data['ID'])
-    text: str = await AnnouncementService.get_translation_for_language(announcement_id,language_code,announcement_repo)
-    await state.update_data(LanguageCode=language_code)
+
+    text = await AnnouncementRepository.get_translation_by_language_code(
+        session=session,
+        announcement_id=int(data['id']),
+        language_code=language_code
+    )
+    await state.update_data(language_code=language_code)
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=_('📙 <b>Text: </b>\n') + f'{text}\n\n' +
-        _('📝 Enter new announcement text for {language_code}:').format(language_code=language_code),
+        text=_('📙 <b>Text: </b>\n')
+             + f'{text.text}\n\n'
+             + _('📝 Enter new announcement text for "{language_code}":').format(
+            language_code=LANGUAGES_DICT.get(language_code)),
         reply_markup=get_back_to_announcement_details_kb()
     )
-    await state.set_state(AnnouncementDetails.TranslationText)
+    await state.set_state(AnnouncementDetails.edit_translation_text)
 
 
-@router.message(AnnouncementDetails.TranslationText)
-async def process_edit_translation_text_input(message: Message, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+@announcements_router.message(AnnouncementDetails.edit_translation_text)
+async def process_edit_translation_text_input(message: Message, state: FSMContext, session: AsyncSession) -> None:
     data = await state.get_data()
-    announcement_id = int(data['ID'])
-    language_code = data['LanguageCode']
-    new_translation_text = message.html_text
+    language_code = data['language_code']
 
     try:
-        translation_text = await AnnouncementService.update_translation_for_announcement(
-            announcement_id=announcement_id,
-            language_code=language_code,
-            text=new_translation_text,
-            announcement_repo=announcement_repo,
+        await AnnouncementRepository.update_translation(
+            session=session,
+            translation=AnnouncementTranslationCreateSchema(
+                announcement_id=int(data['id']),
+                text=message.html_text,
+                language_code=language_code
+            )
         )
+
         await message.answer(
             text=_('✅ Translation updated <b>successfully</b> for: \'{language}\'.').format(
-                language=translation_text.language_code
+                language=LANGUAGES_DICT.get(language_code)
             ),
             reply_markup=get_back_to_announcement_details_kb()
         )
-        data.pop('LanguageCode', None)
+        data.pop('language_code', None)
         await state.update_data(**data)
     except ValueError as e:
         await message.answer(
@@ -263,7 +269,7 @@ async def process_edit_translation_text_input(message: Message, state: FSMContex
         )
 
 
-@router.callback_query(F.data == 'delete_announcement')
+@announcements_router.callback_query(F.data == 'delete_announcement')
 async def delete_announcement_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
     await callback_query.message.delete()
@@ -272,16 +278,14 @@ async def delete_announcement_handler(callback_query: CallbackQuery, state: FSMC
         text=_('📝 Enter the announcement id to delete:'),
         reply_markup=get_cancel_announcement_action_kb()
     )
-    await state.set_state(DeleteAnnouncement.ID)
+    await state.set_state(DeleteAnnouncement.id)
 
 
-
-@router.message(DeleteAnnouncement.ID)
-async def process_delete_announcement_handler(message: Message, announcement_repo: AnnouncementRepository, state: FSMContext) -> None:
+@announcements_router.message(DeleteAnnouncement.id)
+async def process_delete_announcement_handler(message: Message, session: AsyncSession, state: FSMContext) -> None:
     try:
         announcement_id = int(message.text)
-
-        await AnnouncementService.delete_announcement(announcement_id, announcement_repo)
+        await AnnouncementRepository.delete_announcement_by_id(session, announcement_id)
         await state.clear()
         await message.answer(
             text=_('✅ Announcement with ID: <b>{id}</b> has been deleted.').format(id=announcement_id),
@@ -301,15 +305,11 @@ async def process_delete_announcement_handler(message: Message, announcement_rep
         logger.error(f'Error in delete_announcement_handler: {e}')
 
 
-@router.callback_query(F.data == 'view_announcement_translation')
+@announcements_router.callback_query(F.data == 'view_announcement_translation')
 async def view_announcement_translation_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
 
-    languages_dict = AnnouncementService.filter_languages(
-        languages=LANGUAGES_DICT,
-        text_languages=data['Languages'],
-        include=True,
-    )
+    languages_dict = {key: value for key, value in LANGUAGES_DICT.items() if key in data['languages']}
     await callback_query.message.delete()
     await callback_query.answer()
     if languages_dict:
@@ -323,21 +323,27 @@ async def view_announcement_translation_handler(callback_query: CallbackQuery, s
         reply_markup=get_back_to_announcement_details_kb()
     )
 
-@router.callback_query(F.data.startswith('view_translation_text_'))
-async def get_view_translation_text_handler(callback_query: CallbackQuery, announcement_repo: AnnouncementRepository, state: FSMContext) -> None:
+@announcements_router.callback_query(F.data.startswith('view_translation_text_'))
+async def get_view_translation_text_handler(
+        callback_query: CallbackQuery,
+        session: AsyncSession,
+        state: FSMContext
+) -> None:
     data = await state.get_data()
-    announcement_id=int(data['ID'])
-    language_code: str = callback_query.data.split('_')[-1]
-    text: str = await AnnouncementService.get_translation_for_language(announcement_id,language_code,announcement_repo)
+    text = await AnnouncementRepository.get_translation_by_language_code(
+        session=session,
+        announcement_id=int(data['id']),
+        language_code=callback_query.data.split('_')[-1]
+    )
     await callback_query.message.delete()
     await callback_query.answer()
     await callback_query.message.answer(
-        text=text,
+        text=text.text,
         reply_markup=get_back_to_announcement_details_kb()
     )
 
 
-@router.callback_query(F.data == 'broadcast_announcement')
+@announcements_router.callback_query(F.data == 'broadcast_announcement')
 async def broadcast_announcement_request_handler(callback_query: CallbackQuery) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
@@ -346,21 +352,24 @@ async def broadcast_announcement_request_handler(callback_query: CallbackQuery) 
         reply_markup=get_confirmation_broadcast_kb()
     )
 
-@router.callback_query(F.data == 'confirm_broadcast')
-async def confirm_broadcast_handler(callback_query: CallbackQuery, state: FSMContext, user_repo: UserRepository, announcement_repo: AnnouncementRepository, bot: Bot
+
+@announcements_router.callback_query(F.data == 'confirm_broadcast')
+async def confirm_broadcast_handler(
+        callback_query: CallbackQuery,
+        state: FSMContext,
+        session: AsyncSession,
+        bot: Bot
 ) -> None:
     await callback_query.message.delete()
     await callback_query.answer()
 
     data = await state.get_data()
-    announcement_id = data.get('ID')
-
+    announcement_id = data.get('id')
     try:
-        stats = await AnnouncementService.broadcast_announcement(
-            announcement_id=announcement_id,
-            user_repo=user_repo,
-            announcement_repo=announcement_repo,
-            bot=bot
+        stats = await AdminPanelService.broadcast_announcement(
+            session=session,
+            bot=bot,
+            announcement_id=announcement_id
         )
         await callback_query.message.answer(
             text=_(
@@ -377,9 +386,9 @@ async def confirm_broadcast_handler(callback_query: CallbackQuery, state: FSMCon
         await callback_query.message.answer('❌ An unexpected error occurred.')
 
 
-@router.callback_query(F.data == 'back_to_announcements')
-async def back_to_announcements_handler(callback_query: CallbackQuery, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
-    text = await show_announcements_text(announcement_repo)
+@announcements_router.callback_query(F.data == 'back_to_announcements')
+async def back_to_announcements_handler(callback_query: CallbackQuery, state: FSMContext, session: AsyncSession) -> None:
+    text = await show_announcements_text(session)
     await state.clear()
     await callback_query.message.delete()
     await callback_query.answer()
@@ -389,11 +398,15 @@ async def back_to_announcements_handler(callback_query: CallbackQuery, state: FS
     )
 
 
-@router.callback_query(F.data == 'back_to_announcement_details')
-async def back_to_announcement_details_handler(callback_query: CallbackQuery, state: FSMContext, announcement_repo: AnnouncementRepository) -> None:
+@announcements_router.callback_query(F.data == 'back_to_announcement_details')
+async def back_to_announcement_details_handler(
+        callback_query: CallbackQuery,
+        state: FSMContext,
+        session: AsyncSession
+) -> None:
     try:
         data = await state.get_data()
-        announcement_id = data.get('ID')
+        announcement_id = data.get('id')
         if not announcement_id:
             await callback_query.message.answer(
                 text=_('⚠️ Announcement ID not found. Please select it again.'),
@@ -404,7 +417,7 @@ async def back_to_announcement_details_handler(callback_query: CallbackQuery, st
         await show_announcement_details(
             target=callback_query.message,
             announcement_id=announcement_id,
-            announcement_repo=announcement_repo,
+            session=session,
             state=state
         )
         await callback_query.answer()
@@ -417,14 +430,21 @@ async def back_to_announcement_details_handler(callback_query: CallbackQuery, st
         )
 
 
-async def show_announcement_details(target, announcement_id: int, announcement_repo: AnnouncementRepository,
+async def show_announcement_details(target, announcement_id: int, session: AsyncSession,
                                     state: FSMContext = None, reply_markup=None) -> None:
     try:
-        title, english_text, language_codes, image_url = await AnnouncementService.get_announcement_details(
-            announcement_id, announcement_repo
+        announcement = await AnnouncementRepository.get_announcement_by_id(session, announcement_id)
+        english_text = next(
+            (translation.text for translation in announcement.languages if translation.language_code == 'en'),
+            None
         )
+        language_codes = [translation.language_code for translation in announcement.languages]
+
         if state:
-            await state.update_data(ID=announcement_id, Languages=language_codes)
+            await state.update_data(
+                id=announcement_id,
+                languages=language_codes
+            )
 
         text = _(
             '🔅 <b>ID: {announcement_id}</b>\n'
@@ -432,23 +452,25 @@ async def show_announcement_details(target, announcement_id: int, announcement_r
             '🌏 <b>Languages:</b> {languages}\n\n'
             '📙 <b>Text:</b> {text}'
         ).format(
-            announcement_id=announcement_id,
-            title=title,
+            announcement_id=announcement.id,
+            title=announcement.title,
             languages=', '.join(language_codes),
             text=english_text or _('No text available.')
         )
 
-        if image_url:
-            await target.answer_photo(
-                photo=FSInputFile(image_url),
-                caption=text,
-                reply_markup=reply_markup or get_announcement_menu_kb()
-            )
-        else:
+        if not announcement.image_url:
             await target.answer(
                 text=text,
                 reply_markup=reply_markup or get_announcement_menu_kb()
             )
+            return
+
+        await target.answer_photo(
+            photo=FSInputFile(announcement.image_url),
+            caption=text,
+            reply_markup=reply_markup or get_announcement_menu_kb()
+        )
+
     except ValueError as e:
         await target.answer(
             text=_('⚠️ {error}').format(error=str(e)),
@@ -462,26 +484,21 @@ async def show_announcement_details(target, announcement_id: int, announcement_r
         )
 
 
-async def show_announcements_text(announcement_repo: AnnouncementRepository) -> str:
-    announcements = await AnnouncementService.show_announcements_with_languages(announcement_repo)
+async def show_announcements_text(session: AsyncSession) -> str:
+    announcements = await AnnouncementRepository.get_all_announcements_with_languages(session)
 
-    if announcements:
-        posts = '\n\n'.join(
-            _(
-                '🔅 <b>ID:</b> <code>{id}</code>\n'
-                '🔖 <b>Title:</b> {title}\n'
-                '🌏 <b>Languages:</b> {languages}'
-            ).format(
-                id=announcement['id'],
-                title=announcement['title'],
-                languages=', '.join(announcement['languages']) if announcement['languages'] else _('No translations available')
-            )
-            for announcement in announcements
-        )
-        return _('📌 <b><i>All announcements:</i></b>\n\n') + posts
-    else:
+    if not announcements:
         return _('No announcements yet.')
+    posts = []
+    for ann in announcements:
+        lang_list = (
+            ', '.join(lang.language_code for lang in ann.languages
+            ) if ann.languages else _('No translations available')
+        )
+        posts.append(_(
+            '🔅 <b>ID:</b> <code>{id}</code>\n'
+            '🔖 <b>Title:</b> {title}\n'
+            '🌏 <b>Languages:</b> {languages}'
+        ).format(id=ann.id, title=ann.title, languages=lang_list))
 
-
-def register_announcements_handlers(dp) -> None:
-    dp.include_router(router)
+    return _('📌 <b><i>All announcements:</i></b>\n\n') + '\n\n'.join(posts)
