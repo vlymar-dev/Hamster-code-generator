@@ -14,7 +14,7 @@ class AnnouncementTranslationCreateSchema(BaseModel):
 
 
 class AnnouncementTranslationSchema(BaseModel):
-    language_code: str
+    language_code: str | None = None
     text: str | None = None
 
 

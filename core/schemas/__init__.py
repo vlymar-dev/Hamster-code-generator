@@ -9,6 +9,7 @@ from core.schemas.promo_code import PromoCodeReceiveSchema
 from core.schemas.referral import ReferralAddingSchema
 from core.schemas.user import (
     RemainingTimeSchema,
+    SubscribedUsersSchema,
     UserActivitySchema,
     UserCreateSchema,
     UserKeyGenerationSchema,
@@ -28,6 +29,7 @@ __all__ = [
     'UserActivitySchema',
     'ReferralAddingSchema',
     'UserCreateSchema',
+    'SubscribedUsersSchema',
     'UserKeyGenerationSchema',
     'UserProgressSchema',
     'UserProgressDataSchema'

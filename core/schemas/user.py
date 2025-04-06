@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class UserCreateSchema(BaseModel):
@@ -8,6 +8,13 @@ class UserCreateSchema(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     username: str | None = None
+    language_code: str
+
+
+class SubscribedUsersSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
     language_code: str
 
 

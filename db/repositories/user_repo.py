@@ -5,7 +5,7 @@ from sqlalchemy import Date, cast, func, select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.schemas import UserActivitySchema, UserCreateSchema, UserProgressSchema
+from core.schemas import UserActivitySchema, UserCreateSchema, UserProgressSchema, SubscribedUsersSchema
 from infrastructure.models.user import User
 
 logger = logging.getLogger(__name__)
@@ -212,3 +212,16 @@ class UserRepository:
         except SQLAlchemyError as e:
             logger.error(f'Database error occurred while counting users: {e}')
             return 0
+
+    @staticmethod
+    async def get_subscribed_users(session: AsyncSession) -> list[SubscribedUsersSchema]:
+        try:
+            result = await session.execute(
+                select(User)
+                .where(User.is_subscribed)
+            )
+            users = result.scalars().all()
+            return [SubscribedUsersSchema.model_validate(user) for user in users]
+        except SQLAlchemyError as e:
+            logger.error(f'Database error occurred while fetching all users data: {e}')
+            return []

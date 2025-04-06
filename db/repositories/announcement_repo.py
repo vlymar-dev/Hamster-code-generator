@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -63,6 +63,7 @@ class AnnouncementRepository:
                 return AnnouncementWithLanguagesSchema(
                     id=announcement.id,
                     title=announcement.title,
+                    image_url=announcement.image_url,
                     languages=languages
                 )
             return None
@@ -105,6 +106,43 @@ class AnnouncementRepository:
         except SQLAlchemyError as e:
             logger.error(f'Database error occurred while fetching announcements with languages: {e}')
             return []
+
+    @staticmethod
+    async def get_translation_by_language_code(
+            session: AsyncSession,
+            announcement_id: int,
+            language_code: str
+    ) -> AnnouncementTranslationSchema:
+        try:
+            result = await session.execute(
+                select(AnnouncementTranslation)
+                .where(
+                    AnnouncementTranslation.announcement_id == announcement_id,
+                    AnnouncementTranslation.language_code == language_code
+                )
+            )
+            announcement_translation = result.scalar_one_or_none()
+            return AnnouncementTranslationSchema(
+                text=announcement_translation.text
+            )
+        except SQLAlchemyError as e:
+            logger.error(f'Database error occurred while fetching translation for announcement ID={announcement_id}, '
+                         f'language={language_code}: {e}')
+
+    @staticmethod
+    async def update_translation(session: AsyncSession, translation: AnnouncementTranslationCreateSchema) -> None:
+        try:
+            await session.execute(
+                update(AnnouncementTranslation)
+                .where(AnnouncementTranslation.announcement_id == translation.announcement_id,
+                       AnnouncementTranslation.language_code == translation.language_code)
+                .values(text=translation.text)
+            )
+            await session.commit()
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logger.error(f'Database error occurred while updating translation for announcement '
+                         f'ID={translation.announcement_id}, language={translation.language_code}: {e}')
 
     @staticmethod
     async def delete_announcement_by_id(session: AsyncSession, announcement_id: int) -> None:
