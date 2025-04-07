@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.keyboards.admin_panel.admin_panel_kb import back_to_admin_panel_button
+from bot.keyboards.admin_panel.admin_panel_kb import back_to_admin_panel_button
 
 
 def get_announcements_kb() -> InlineKeyboardMarkup:

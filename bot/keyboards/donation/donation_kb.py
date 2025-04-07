@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.keyboards.main_menu_kb import back_to_main_menu_button
 
 
 async def get_donation_kb() -> InlineKeyboardMarkup:

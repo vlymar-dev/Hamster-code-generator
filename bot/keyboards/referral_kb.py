@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.common.referral import REFERRAL_LINKS
-from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.common.referral import REFERRAL_LINKS
+from bot.keyboards.main_menu_kb import back_to_main_menu_button
 
 
 def referral_links_kb() -> InlineKeyboardMarkup:

@@ -1,14 +1,17 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tgbot.common.staticdata import LANGUAGES_DICT
-from tgbot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.common.static_data import LANGUAGES_DICT
+from bot.keyboards.main_menu_kb import back_to_main_menu_button
 
 
-def get_change_language_kb() -> InlineKeyboardMarkup:
+def get_change_language_kb(current_language_code: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for lang_code, language_name in LANGUAGES_DICT.items():
+        if lang_code == current_language_code:
+            continue
+
         builder.button(
             text=language_name,
             callback_data=f'set_lang:{lang_code}'
