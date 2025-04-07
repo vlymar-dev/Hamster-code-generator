@@ -1,5 +1,4 @@
 REFERRAL_LINKS = {
-    '🐾 PAWS': 'https://t.me/PAWSOG_bot/PAWS?startapp=HEgfPVLq',
     '👾 Not Pixel': 'https://t.me/notpixel/app?startapp=f452792586',
     '💣 BOMBIE': 'https://t.me/catizenbot/bombie?startapp=g_1002_4704153',
     'Cats 🐈‍⬛': 't.me/catsgang_bot/join?startapp=Lv39AXNhcBvwK6ZWcoGpD',

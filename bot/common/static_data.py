@@ -3,6 +3,11 @@ LANGUAGES_DICT = {
     'ru': 'Русский',
 }
 
+ROLES_DICT = {
+    'user': 'User',
+    'admin': 'Admin'
+}
+
 STATUS_LIMITS = {
     'free': {'daily_limit': 4, 'interval_minutes': 1},
     'friend': {'daily_limit': 20, 'interval_minutes': 1},
