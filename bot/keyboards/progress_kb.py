@@ -11,7 +11,7 @@ def get_progress_keyboard(user_id: int) -> InlineKeyboardMarkup:
     referral_link = config.telegram.generate_referral_link(user_id)
 
     builder.row(InlineKeyboardButton(
-        text=_('📤 Share with friends'),
+        text=_('📤 Share your referral link'),
         switch_inline_query=_(' 📌\n'
                             'Hi! 🌟 Join me in this awesome bot! 🚀\n'
                             '🎮 Unlock achievements\n'

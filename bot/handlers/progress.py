@@ -26,7 +26,7 @@ async def user_progress_handler(callback_query: CallbackQuery, session: AsyncSes
     days_progress = progress_text.format_progress(user_progress.days_progress, user_progress.next_level)
 
     text = _(
-        '🏆 <b>Progress:</b>\n\n'
+        '👤 <b>Profile:</b>\n\n'
         '{achievement_name}\n\n'
         '🔝 <b>To the next level:</b>\n'
         '🔑 <i>Keys:</i> {keys_progress}\n'
