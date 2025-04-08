@@ -5,12 +5,25 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.schemas import PromoCodeReceiveSchema
+from core.schemas.promo_code import PromoCodeCreateSchema
 from db.models import PromoCode
 
 logger = logging.getLogger(__name__)
 
 
 class PromoCodeRepository:
+
+    @staticmethod
+    async def add_promo_code(session: AsyncSession, data: PromoCodeCreateSchema) -> PromoCode:
+        try:
+            code = PromoCode(**data.model_dump())
+            session.add(code)
+            await session.commit()
+            await session.refresh(code)
+            return code
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logger.error(f'Database error when adding a promo code: {e}')
 
     @staticmethod
     async def get_promo_codes(session: AsyncSession, game_names: list[str]) -> list[PromoCodeReceiveSchema]:
