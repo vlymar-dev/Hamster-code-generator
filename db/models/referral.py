@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
-from infrastructure.models.base import Base
+from db.models.base import Base
 
 
 class Referral(Base):

@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from infrastructure.models.base import Base
+from db.models.base import Base
 
 
 class GameTask(Base):

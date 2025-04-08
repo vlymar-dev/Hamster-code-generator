@@ -1,7 +1,7 @@
 from sqlalchemy import Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from infrastructure.models.base import Base
+from db.models.base import Base
 
 
 class PromoCode(Base):

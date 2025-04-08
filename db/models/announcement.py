@@ -4,13 +4,13 @@ from typing import Optional
 from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from infrastructure.models.base import Base
+from db.models.base import Base
 
 
 class Announcement(Base):
     __tablename__ = 'announcements'
 
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     image_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -30,9 +30,9 @@ class AnnouncementTranslation(Base):
         UniqueConstraint('announcement_id', 'language_code', name='uc_announcement_language'),
     )
 
-    id = mapped_column(Integer, primary_key=True)
-    announcement_id = mapped_column(Integer, ForeignKey('announcements.id'), nullable=False)
-    language_code = mapped_column(String(10), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    announcement_id: Mapped[int] = mapped_column(Integer, ForeignKey('announcements.id'), nullable=False)
+    language_code: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
     text: Mapped[str] = mapped_column(String(3500), nullable=False)
 
     announcement = relationship('Announcement', back_populates='translations_text')
