@@ -156,7 +156,7 @@ proxy_keys = list(proxies)
 # Check if there are enough proxies
 total_proxies_needed = sum(config['copies'] for config in game_configs)
 if len(proxy_keys) < total_proxies_needed:
-    raise ValueError(f"Not enough proxies: {len(proxy_keys)} provided, but {total_proxies_needed} needed.")
+    raise ValueError(f'Not enough proxies: {len(proxy_keys)} provided, but {total_proxies_needed} needed.')
 
 # Variable to track the current proxy index
 proxy_index = 0
@@ -168,8 +168,8 @@ for config in game_configs:
     for i in range(config['copies']):
         if proxy_index >= len(proxies):
             raise ValueError(
-                f"Not enough proxies for game copies: {config['name']} needs {config['copies']} copies, "
-                f"but only {len(proxies)} proxies are available.")
+                f'Not enough proxies for game copies: {config['name']} needs {config['copies']} copies, '
+                f'but only {len(proxies)} proxies are available.')
 
         game_copy = {
             'name': config['name'],

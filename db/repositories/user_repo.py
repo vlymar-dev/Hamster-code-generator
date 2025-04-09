@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.schemas import SubscribedUsersSchema, UserActivitySchema, UserCreateSchema, UserProgressSchema
-from infrastructure.models.user import User
+from db.models.user import User
 
 logger = logging.getLogger(__name__)
 
