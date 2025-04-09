@@ -1,4 +1,5 @@
 from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, Union
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,8 +13,9 @@ main_menu_router = Router()
 
 
 @main_menu_router.callback_query(IsBannedFilter(), F.data == 'back_to_main_menu')
-async def back_to_main_menu_handler(callback_query: CallbackQuery, session: AsyncSession):
+async def back_to_main_menu_handler(callback_query: CallbackQuery, session: AsyncSession, state: FSMContext):
     await callback_query.answer()
+    await state.clear()
     await send_main_menu(callback_query, session)
 
 

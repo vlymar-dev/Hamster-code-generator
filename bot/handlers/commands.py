@@ -4,7 +4,7 @@ from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.filters import AdminFilter
+from bot.filters import AdminFilter, IsBannedFilter
 from bot.handlers.admin_panel import show_admin_panel
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
@@ -60,7 +60,7 @@ async def change_language_command(message: Message, session: AsyncSession):
     await message.answer(text=_('Please choose a language:'), reply_markup= get_change_language_kb(current_language_code))
 
 
-@commands_router.message(Command('paysupport'))
+@commands_router.message(Command('paysupport'), IsBannedFilter())
 async def paysupport_command(message: Message) -> None:
     await message.delete()
     await message.answer(
@@ -72,6 +72,6 @@ async def paysupport_command(message: Message) -> None:
     )
 
 
-@commands_router.message(Command('admin'), AdminFilter())
+@commands_router.message( Command('admin'), IsBannedFilter(), AdminFilter())
 async def admin_command(message: Message) -> None:
     await show_admin_panel(message)
