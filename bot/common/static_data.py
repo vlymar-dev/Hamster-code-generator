@@ -42,3 +42,5 @@ HAMSTER_GAMES_LIST = [
     'AmongWater',
     'FactoryWorld'
 ]
+
+SUPPORTED_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif', '.webp')
