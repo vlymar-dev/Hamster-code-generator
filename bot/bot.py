@@ -8,8 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from bot.common import ImageManager
 from bot.handlers import ROUTERS
-from bot.middlewares import CustomI18nMiddleware, DatabaseMiddleware
-from bot.middlewares.image_manager_middleware import ImageManagerMiddleware
+from bot.middlewares import CustomI18nMiddleware, DatabaseMiddleware, ImageManagerMiddleware
 from core import BASE_DIR, config, setup_logging
 
 setup_logging(app_name='bot')

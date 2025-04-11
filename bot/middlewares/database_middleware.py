@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
@@ -5,8 +6,11 @@ from aiogram.types import CallbackQuery, Message
 
 from db.database import async_session_maker
 
+logger = logging.getLogger(__name__)
+
 
 class DatabaseMiddleware(BaseMiddleware):
+    """Provides database session management for request handlers."""
 
     async def __call__(
             self,
@@ -14,16 +18,17 @@ class DatabaseMiddleware(BaseMiddleware):
             event: Message | CallbackQuery,
             data: dict[str, Any]
     ) -> Any:
-        """
-
-        Args:
-            handler (Callable): The next middleware or handler function.
-            event (Message | CallbackQuery): The incoming Telegram event.
-            data (dict[str, Any]): Context data passed through middlewares.
-
-        Returns:
-            Any: The result of the handler execution.
-        """
+        """Manages database session lifecycle for the request."""
+        logger.debug(f'Initializing database session for {event.event_type} event (ID: {event.event_id})')
         async with async_session_maker() as session:
             data['session'] = session
-            return await handler(event, data)
+            try:
+                logger.debug(f'Database session {id(session)} opened')
+                result = await handler(event, data)
+                logger.debug(f'Database session {id(session)} closed successfully')
+                return result
+            except Exception as e:
+                logger.error(f'Database error in session {id(session)}: {str(e)}')
+                raise
+            finally:
+                logger.debug(f'Finalizing database session {id(session)}')
