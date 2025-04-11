@@ -32,6 +32,7 @@ from db.repositories.promo_code_repo import PromoCodeRepository
 
 logger = logging.getLogger(__name__)
 
+
 class GamePromo:
     def __init__(self, game):
         self.game = game

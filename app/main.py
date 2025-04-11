@@ -3,9 +3,9 @@ import logging
 
 from app.game_promo_manager import gen
 from app.games import games
-from logging_config import setup_logging
+from core import setup_logging
 
-setup_logging('app')
+setup_logging(app_name='app')
 
 logger = logging.getLogger(__name__)
 
