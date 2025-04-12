@@ -1,8 +1,7 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from pathlib import Path
 
-from infrastructure import config
+from infrastructure import BASE_DIR, config
 
 
 def setup_logging(
@@ -46,7 +45,7 @@ def setup_logging(
     if file_log_level is None:
         file_log_level = logging.INFO if config.PROD_MODE else logging.DEBUG
 
-    log_dir = Path(__file__).parent.parent / 'logs' / app_name
+    log_dir = BASE_DIR / 'var' / 'logs' / app_name
     try:
         log_dir.mkdir(parents=True, exist_ok=True)
     except (PermissionError, OSError) as e:

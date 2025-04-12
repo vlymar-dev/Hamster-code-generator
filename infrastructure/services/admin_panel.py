@@ -23,7 +23,7 @@ class AdminPanelService:
     async def process_and_save_image(photo: PhotoSize, bot: Bot) -> str:
         """Processes and saves an image in WEBP format."""
         filename = f'{uuid.uuid4()}.webp'
-        image_dir = BASE_DIR / 'uploads' / 'announcement_images'
+        image_dir = BASE_DIR / 'var' / 'storage' / 'uploads' / 'announcement_images'
         image_dir.mkdir(parents=True, exist_ok=True)
         image_path = image_dir / filename
         logger.debug(f'Processing image: {filename}')
@@ -51,7 +51,7 @@ class AdminPanelService:
             raise
         finally:
             await file.close()
-        image_url = f'uploads/announcement_images/{filename}'
+        image_url = f'var/storage/uploads/announcement_images/{filename}'
         return image_url
 
     @staticmethod

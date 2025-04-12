@@ -15,7 +15,7 @@ class ImageManager:
         self.categories: dict[str, list[Path]] = {}
 
     def load_category(self, name: str, subfolder: str) -> None:
-        path = self.base_dir / 'uploads' / subfolder
+        path = self.base_dir / 'var' / 'storage' / 'uploads' / subfolder
         if not path.exists():
             logger.error(f'Directory {path} not found for category "{name}"')
             self.categories[name] = []
