@@ -19,7 +19,6 @@ class DatabaseMiddleware(BaseMiddleware):
             data: dict[str, Any]
     ) -> Any:
         """Manages database session lifecycle for the request."""
-        logger.debug(f'Initializing database session for {event.event_type} event (ID: {event.event_id})')
         async with async_session_maker() as session:
             data['session'] = session
             try:

@@ -31,7 +31,6 @@ class ImageManagerMiddleware(BaseMiddleware):
             logger.error(
                 f'ImageManager failure in {event_type}. '
                 f'Error: {str(e)}. '
-                f'Handler: {handler.__name__}'
             )
             logger.debug(f'Error details - Event data: {event.model_dump_json()}')
             raise
