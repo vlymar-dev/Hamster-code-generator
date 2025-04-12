@@ -56,5 +56,5 @@ async  def refund_stars_command_handler(message: Message, session: AsyncSession,
                 _('❗️ <b>Error:</b> {error}').format(error=error.message)
             )
     except Exception as e:
-        logger.error(f'Refund undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Refund undefined error for user {user_id}: {e}', exc_info=True)
         raise

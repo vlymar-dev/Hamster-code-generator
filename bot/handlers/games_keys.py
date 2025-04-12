@@ -44,7 +44,7 @@ async def get_games_handler(callback_query: CallbackQuery, image_manager: ImageM
                 reply_markup=get_games_codes_and_keys_kb()
             )
     except Exception as e:
-        logger.error(f'Games list error for {user_id}: {str(e)}')
+        logger.error(f'Games list error for {user_id}: {e}', exc_info=True)
         raise
 
 
@@ -52,7 +52,7 @@ async def get_games_handler(callback_query: CallbackQuery, image_manager: ImageM
 async def get_tasks_handler(callback_query: CallbackQuery, session: AsyncSession):
     """Initiate tasks pagination for selected game."""
     game_name = callback_query.data.split('_')[-1]
-    logger.info(f'User {callback_query.from_user.id} requested tasks for {game_name}')
+    logger.debug(f'User {callback_query.from_user.id} requested tasks for {game_name}')
 
     await process_tasks_page(
         callback_query=callback_query,
@@ -120,7 +120,7 @@ async def process_tasks_page(
             )
         )
     except Exception as e:
-        logger.error(f'Tasks processing error for {user_id}: {str(e)}')
+        logger.error(f'Tasks processing error for {user_id}: {e}', exc_info=True)
         raise
 
 
@@ -158,7 +158,7 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
             promo_codes = await PromoCodeService.consume_promo_codes(session, HAMSTER_GAMES_LIST)
             logger.info(f'Generated {len(promo_codes)} codes for user {user_id}')
         except Exception as e:
-            logger.error(f'Promo code error for {user_id}: {str(e)}')
+            logger.error(f'Promo code error for {user_id}: {e}', exc_info=True)
             await callback_query.answer(
                 text=_('An error occurred while retrieving promo codes. Please try again later.'),
                 show_alert=True
@@ -188,5 +188,5 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
         )
         logger.debug(f'Successfully sent codes to user {user_id}')
     except Exception as e:
-        logger.error(f'Hamster keys error for {user_id}: {str(e)}')
+        logger.error(f'Hamster keys error for {user_id}: {e}', exc_info=True)
         raise

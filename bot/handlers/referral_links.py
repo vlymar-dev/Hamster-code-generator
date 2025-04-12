@@ -42,5 +42,5 @@ async def referral_links_handler(callback_query: CallbackQuery, image_manager: I
                 reply_markup=referral_links_kb()
             )
     except Exception as e:
-        logger.error(f'Error processing referral links request for {callback_query.from_user.id}: {str(e)}')
+        logger.error(f'Error processing referral links request for {user_id}: {e}', exc_info=True)
         raise

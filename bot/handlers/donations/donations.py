@@ -30,7 +30,7 @@ async def custom_donate_handler(callback_query: CallbackQuery, state: FSMContext
         )
         await state.set_state(PaymentState.amount_entry)
     except Exception as e:
-        logger.error(f'Custom donate undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Custom donate undefined error for user {user_id}: {e}', exc_info=True)
 
 
 @donations_router.message(PaymentState.amount_entry)
@@ -68,7 +68,7 @@ async def process_custom_donate(message: Message, state: FSMContext) -> None:
                 _('❗️ <b>Error:</b> {error}').format(error=error.message)
             )
     except Exception as e:
-        logger.error(f' Process donate undefined error for user {user_id}: {str(e)}')
+        logger.error(f' Process donate undefined error for user {user_id}: {e}', exc_info=True)
 
 
 @donations_router.callback_query(F.data.startswith('donate_'))
@@ -82,7 +82,7 @@ async def donate_callback_handler(callback_query: CallbackQuery) -> None:
         await callback_query.answer()
         await send_invoice_message(callback_query.message, amount)
     except Exception as e:
-        logger.error(f'Predefined donation undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Predefined donation undefined error for user {user_id}: {e}', exc_info=True)
 
 
 @donations_router.pre_checkout_query()
@@ -93,7 +93,7 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery):
     try:
         await pre_checkout_query.answer(ok=True)
     except Exception as e:
-        logger.error(f'Pre-checkout undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Pre-checkout undefined error for user {user_id}: {e}', exc_info=True)
 
 
 @donations_router.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
@@ -107,7 +107,7 @@ async def success_payment_handler(message: Message) -> None:
             reply_markup=get_back_to_main_menu_keyboard()
         )
     except Exception as e:
-        logger.error(f'Success payment undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Success payment undefined error for user {user_id}: {e}', exc_info=True)
 
 
 async def send_invoice_message(message: Message, amount: int) -> None:
@@ -127,7 +127,7 @@ async def send_invoice_message(message: Message, amount: int) -> None:
             reply_markup=await get_confirm_donation_kb(),
         )
     except Exception as e:
-        logger.error(f'Send invoice undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Send invoice undefined error for user {user_id}: {e}', exc_info=True)
 
 
 @donations_router.callback_query(F.data == 'cancel_payment')
@@ -140,4 +140,4 @@ async def cancel_payment_handler(callback_query: CallbackQuery, state: FSMContex
         await state.clear()
         await user_info_handler(callback_query)
     except Exception as e:
-        logger.error(f'Cancellation payment undefined error for user {user_id}: {str(e)}')
+        logger.error(f'Cancellation payment undefined error for user {user_id}: {e}', exc_info=True)

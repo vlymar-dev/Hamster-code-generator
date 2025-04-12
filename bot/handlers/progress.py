@@ -71,7 +71,7 @@ async def user_progress_handler(
                 reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id)
             )
     except Exception as e:
-        logger.error(f'Error processing progress request for {user_id}: {str(e)}')
+        logger.error(f'Error processing progress request for {user_id}: {e}', exc_info=True)
         raise
 
 

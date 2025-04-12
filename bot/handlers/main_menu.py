@@ -81,5 +81,5 @@ async def send_main_menu(
                 reply_markup=get_main_menu_kb()
             )
     except Exception as e:
-        logger.error(f'Failed to send main menu to user {event.from_user.id}: {str(e)}')
+        logger.error(f'Failed to send main menu to user {event.from_user.id}: {e}', exc_info=True)
         raise

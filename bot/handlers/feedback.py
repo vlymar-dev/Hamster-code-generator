@@ -44,7 +44,7 @@ async def start_feedback_handler(callback_query: CallbackQuery, state: FSMContex
             )
         await state.set_state(UserLeaveFeedback.writing_feedback)
     except Exception as e:
-        logger.error(f'Feedback init error for user {callback_query.from_user.id}: {str(e)}')
+        logger.error(f'Feedback init error for user {callback_query.from_user.id}: {e}', exc_info=True)
         raise
 
 @feedback_router.message(UserLeaveFeedback.writing_feedback)
@@ -89,14 +89,14 @@ async def process_user_feedback_message(message: Message, bot: Bot, image_manage
                     )
                 )
             except Exception as e:
-                print(f'Failed to notify admin {admin_id}: {str(e)}')
+                print(f'Failed to notify admin {admin_id}: {e}', exc_info=True)
 
         if hasattr(message, 'react'):
             logger.debug(f'Adding reaction to message {message.message_id}')
             emoji = ReactionTypeEmoji(emoji='👀')
             await message.react([emoji])
     except Exception as e:
-        logger.error(f'Feedback processing error for user {message.from_user.id}: {str(e)}')
+        logger.error(f'Feedback processing error for user {message.from_user.id}: {e}', exc_info=True)
         raise
 
 
@@ -117,7 +117,7 @@ async def start_admin_reply_handler(callback_query: CallbackQuery, state: FSMCon
         await state.set_state(AdminReplyToFeedback.waiting_for_reply)
         await state.update_data(user_id=user_id)
     except Exception as e:
-        logger.error(f'Admin reply init error: {str(e)}')
+        logger.error(f'Admin reply init error: {e}', exc_info=True)
         raise
 
 
@@ -160,5 +160,5 @@ async def process_send_admin_reply(message: Message, bot: Bot, state: FSMContext
             await state.clear()
             logger.debug(f'State cleared for admin {admin_id}')
     except Exception as e:
-        logger.error(f'Admin reply processing error: {str(e)}')
+        logger.error(f'Admin reply processing error: {e}', exc_info=True)
         raise

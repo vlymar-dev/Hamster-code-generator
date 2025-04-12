@@ -79,7 +79,7 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
 @commands_router.message(Command('change_language'))
 async def change_language_command(message: Message, session: AsyncSession):
     """Handle language change command."""
-    logger.info(f'Language change request from user {message.from_user.id}')
+    logger.debug(f'Language change request from user {message.from_user.id}')
 
     try:
         user_id = message.from_user.id
@@ -92,14 +92,14 @@ async def change_language_command(message: Message, session: AsyncSession):
             reply_markup= get_change_language_kb(current_language_code)
         )
     except Exception as e:
-        logger.error(f'Language change error for user {message.from_user.id}: {str(e)}')
+        logger.error(f'Language change error for user {message.from_user.id}: {e}', exc_info=True)
         raise
 
 
 @commands_router.message(Command('paysupport'), IsBannedFilter())
 async def paysupport_command(message: Message) -> None:
     """Handle donation information command."""
-    logger.info(f'Paysupport command from user {message.from_user.id}')
+    logger.debug(f'Paysupport command from user {message.from_user.id}')
     
     try:
         await message.delete()
@@ -111,17 +111,17 @@ async def paysupport_command(message: Message) -> None:
             reply_markup=get_back_to_main_menu_keyboard()
         )
     except Exception as e:
-        logger.error(f'Paysupport command error: {str(e)}')
+        logger.error(f'Paysupport command error: {e}', exc_info=True)
         raise
 
 
 @commands_router.message( Command('admin'), IsBannedFilter(), AdminFilter())
 async def admin_command(message: Message) -> None:
     """Handle admin panel access."""
-    logger.info(f'Admin access request from user {message.from_user.id}')
+    logger.debug(f'Admin access request from user {message.from_user.id}')
     try:
         await show_admin_panel(message)
         logger.info(f'Admin panel displayed for user {message.from_user.id}')
     except Exception as e:
-        logger.error(f'Admin command error: {str(e)}')
+        logger.error(f'Admin command error: {e}', exc_info=True)
         raise

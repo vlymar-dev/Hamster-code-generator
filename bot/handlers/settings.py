@@ -49,7 +49,7 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
                 reply_markup=get_settings_kb()
             )
     except Exception as e:
-        logger.error(f'Settings menu error for {user_id}: {str(e)}', exc_info=True)
+        logger.error(f'Settings menu error for {user_id}: {e}', exc_info=True)
         raise
 
 @settings_router.callback_query(F.data == 'change_language')
@@ -72,7 +72,7 @@ async def change_language_handler(callback_query: CallbackQuery, session: AsyncS
         )
         logger.info(f'Sent language options to {user_id}')
     except Exception as e:
-        logger.error(f'Language change error for {user_id}: {str(e)}', exc_info=True)
+        logger.error(f'Language change error for {user_id}: {e}', exc_info=True)
         raise
 
 @settings_router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
@@ -103,7 +103,7 @@ async def update_language_handler(
         )
         await send_main_menu(callback_query.message, session, image_manager)
     except Exception as e:
-        logger.error(f'Language update failed for {user_id}: {str(e)}', exc_info=True)
+        logger.error(f'Language update failed for {user_id}: {e}', exc_info=True)
         raise
 
 
@@ -123,7 +123,7 @@ async def notifications_handler(callback_query: CallbackQuery, session: AsyncSes
             reply_markup = notifications_kb(is_subscribed)
         )
     except Exception as e:
-        logger.error(f'Notifications error for {user_id}: {str(e)}', exc_info=True)
+        logger.error(f'Notifications error for {user_id}: {e}', exc_info=True)
         raise
 
 
@@ -145,7 +145,7 @@ async def subscribe_confirm_handler(
         )
         await send_main_menu(callback_query, session, image_manager)
     except Exception as e:
-        logger.error(f'Subscription error for {user_id}: {str(e)}', exc_info=True)
+        logger.error(f'Subscription error for {user_id}: {e}', exc_info=True)
         raise
 
 @settings_router.callback_query(F.data == 'unsubscribe')
@@ -182,5 +182,5 @@ async def unsubscribe_handler(
         )
         await send_main_menu(callback_query, session, image_manager)
     except Exception as e:
-        logger.error(f'Unsubscribe error for {user_id}: {str(e)}', exc_info=True)
+        logger.error(f'Unsubscribe error for {user_id}: {e}', exc_info=True)
         raise
