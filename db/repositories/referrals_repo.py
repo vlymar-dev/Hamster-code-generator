@@ -24,8 +24,12 @@ class ReferralsRepository:
 
     @staticmethod
     async def get_count_user_referrals_by_user_id(session: AsyncSession, user_id: int) -> int | None:
-        result = await session.execute(
-            select(func.count(Referral.id)).where(Referral.referrer_id == user_id)
-        )
-        total_refs = result.scalar_one_or_none()
-        return total_refs if total_refs else 0
+        try:
+            result = await session.execute(
+                select(func.count(Referral.id)).where(Referral.referrer_id == user_id)
+            )
+            total_refs = result.scalar_one_or_none()
+            return total_refs if total_refs else 0
+        except SQLAlchemyError as e:
+            logger.error(f'Database error occurred while getting count referrals by user_id= {user_id}: {e}')
+            raise

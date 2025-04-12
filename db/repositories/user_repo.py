@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 class UserRepository:
 
     @staticmethod
-    async def add_user(session: AsyncSession, user: UserCreateSchema) -> None:
+    async def add_user(session: AsyncSession, user_data: UserCreateSchema) -> None:
         try:
-            new_instance = User(**user.model_dump())
+            new_instance = User(**user_data.model_dump())
             session.add(new_instance)
             await session.flush()
             await session.commit()
@@ -30,7 +30,11 @@ class UserRepository:
 
     @staticmethod
     async def check_user_exists(session: AsyncSession, user_id: int) -> bool:
-        return await session.get(User, user_id) is not None
+        try:
+            return await session.get(User, user_id) is not None
+        except SQLAlchemyError as e:
+            logger.error(f'Database error occurred while checking user exists: {e}')
+            raise
 
     @staticmethod
     async def get_user_language(session: AsyncSession, user_id: int) -> str:
