@@ -8,6 +8,7 @@ class GameTaskSchema(BaseModel):
     task: str
     answer: str
 
+
 class GameTaskResponsePaginateSchema(BaseModel):
     tasks: list[GameTaskSchema]
     page: int

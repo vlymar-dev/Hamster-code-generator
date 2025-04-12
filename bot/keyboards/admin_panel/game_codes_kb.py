@@ -35,6 +35,7 @@ def get_cancel_game_code_action_kb() -> InlineKeyboardMarkup:
         ]
     )
 
+
 def get_confirm_deletion_task_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 

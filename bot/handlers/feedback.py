@@ -47,6 +47,7 @@ async def start_feedback_handler(callback_query: CallbackQuery, state: FSMContex
         logger.error(f'Feedback init error for user {callback_query.from_user.id}: {e}', exc_info=True)
         raise
 
+
 @feedback_router.message(UserLeaveFeedback.writing_feedback)
 async def process_user_feedback_message(message: Message, bot: Bot, image_manager: ImageManager) -> None:
     """Process user feedback with image support for admin notifications."""
@@ -62,7 +63,7 @@ async def process_user_feedback_message(message: Message, bot: Bot, image_manage
         # User confirmation
         image = image_manager.get_random_image('handlers')
         response_text = _('💖 Thank you for your feedback!\n'
-                   'We really appreciate you taking the time to share your thoughts with us. 💕')
+                          'We really appreciate you taking the time to share your thoughts with us. 💕')
 
         if image:
             await message.answer_photo(
@@ -133,8 +134,8 @@ async def process_send_admin_reply(message: Message, bot: Bot, state: FSMContext
 
         image = image_manager.get_random_image('handlers')
         response_text = _('👋 The admin has responded to your feedback:\n\n'
-                       '{text}\n\n'
-                       'Thanks again for reaching out to us! 💖').format(text=message.text)
+                          '{text}\n\n'
+                          'Thanks again for reaching out to us! 💖').format(text=message.text)
         try:
             if image:
                 await bot.send_photo(

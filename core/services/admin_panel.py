@@ -45,7 +45,7 @@ class AdminPanelService:
                     await file.write(output_io.getvalue())
                 logger.info(f'Image saved: {image_path}')
         except UnidentifiedImageError:
-                raise ValueError('The provided file is not a supported image.')
+            raise ValueError('The provided file is not a supported image.')
         except Exception as e:
             logger.error(f'Image processing error: {e}', exc_info=True)
             raise

@@ -16,7 +16,7 @@ refund_router = Router()
 
 
 @refund_router.message(F.text.startswith('/refund_stars'))
-async  def refund_stars_command_handler(message: Message, session: AsyncSession, image_manager: ImageManager) -> None:
+async def refund_stars_command_handler(message: Message, session: AsyncSession, image_manager: ImageManager) -> None:
     """Process star refund requests with transaction validation."""
     user_id = message.from_user.id
     logger.debug(f'Refund request from user {user_id}')

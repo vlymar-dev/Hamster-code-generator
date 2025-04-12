@@ -9,6 +9,7 @@ from db.models import Referral
 
 logger = logging.getLogger(__name__)
 
+
 class ReferralsRepository:
 
     @staticmethod

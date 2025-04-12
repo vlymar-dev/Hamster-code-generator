@@ -65,8 +65,8 @@ class ProgressService:
 
         for i, level in enumerate(levels):
             thresholds = ACHIEVEMENTS[level]
-            if total_keys < thresholds['keys'] or referrals < thresholds['referrals'] or days_in_bot < thresholds[
-                'days']:
+            if (total_keys < thresholds['keys'] or referrals < thresholds['referrals']
+                    or days_in_bot < thresholds['days']):
                 return levels[max(i - 1, 0)], level
 
         logger.debug('Maximum achievement level reached')

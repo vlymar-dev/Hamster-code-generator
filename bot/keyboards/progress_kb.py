@@ -13,10 +13,10 @@ def get_progress_keyboard(user_id: int) -> InlineKeyboardMarkup:
     builder.row(InlineKeyboardButton(
         text=_('📤 Share your referral link'),
         switch_inline_query=_(' 📌\n'
-                            'Hi! 🌟 Join me in this awesome bot! 🚀\n'
-                            '🎮 Unlock achievements\n'
-                            '🎁 Collect rewards\n'
-                            '👉 Start now: {ref_link}').format(ref_link=referral_link)
+                              'Hi! 🌟 Join me in this awesome bot! 🚀\n'
+                              '🎮 Unlock achievements\n'
+                              '🎁 Collect rewards\n'
+                              '👉 Start now: {ref_link}').format(ref_link=referral_link)
     ))
     builder.row(back_to_main_menu_button())
     return builder.as_markup()

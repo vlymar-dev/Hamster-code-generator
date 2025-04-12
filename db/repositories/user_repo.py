@@ -52,8 +52,8 @@ class UserRepository:
             result = await session.execute(select(User.is_banned).where(User.id == user_id))
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
-             logger.error(f'Database error occurred while checking ban status for user_id={user_id}: {e}')
-             return True
+            logger.error(f'Database error occurred while checking ban status for user_id={user_id}: {e}')
+            return True
 
     @staticmethod
     async def get_subscription_status(session: AsyncSession, user_id: int) -> bool:
@@ -115,10 +115,10 @@ class UserRepository:
             if result.rowcount:
                 await session.commit()
         except SQLAlchemyError as e:
-            logger.error(f'Database error occurred while trying to update_subscription_status for user_id={user_id}: {e}')
+            logger.error(f'Database error occurred while trying to update_subscription for user_id={user_id}: {e}')
 
     @staticmethod
-    async def get_user_progress(session: AsyncSession, user_id: int)-> UserProgressSchema | None:
+    async def get_user_progress(session: AsyncSession, user_id: int) -> UserProgressSchema | None:
         try:
             result = await session.execute(
                 select(
@@ -165,7 +165,12 @@ class UserRepository:
             return None
 
     @staticmethod
-    async def update_user_activity(session: AsyncSession, user_id: int, increment_keys: int = 1, increment_requests: int = 1) -> None:
+    async def update_user_activity(
+            session: AsyncSession,
+            user_id: int,
+            increment_keys: int = 1,
+            increment_requests: int = 1
+    ) -> None:
         """Updates the number of keys, queries, and the time of the last query."""
         try:
             await session.execute(

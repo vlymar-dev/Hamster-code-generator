@@ -25,4 +25,3 @@ class AnnouncementWithLanguagesSchema(BaseModel):
     title: str
     languages: list[AnnouncementTranslationSchema]
     image_url: str | None = None
-

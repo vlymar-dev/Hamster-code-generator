@@ -87,18 +87,22 @@ class ProgresText:
                 '🌱 <b>Level:</b>\n<i>Newcomer</i> — <i>You\'ve just begun your journey! '
                 'Keep going, there are many opportunities ahead!</i> 🚀'),
             'adventurer': _(
-                '🎩 <b>Level:</b>\n<i>Adventurer</i> — <i>You\'ve unlocked a few doors, but more valuable keys await you.</i> 💎'),
+                '🎩 <b>Level:</b>\n<i>Adventurer</i> — '
+                '<i>You\'ve unlocked a few doors, but more valuable keys await you.</i> 💎'),
             'bonus_hunter': _(
-                '🎯 <b>Level:</b>\n<i>Bonus Hunter</i> — <i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁'),
+                '🎯 <b>Level:</b>\n<i>Bonus Hunter</i> — '
+                '<i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁'),
             'code_expert': _(
-                '🧠 <b>Level:</b>\n<i>Code Expert</i> — <i>You already know how the system works. Keep improving!</i> 📈'),
+                '🧠 <b>Level:</b>\n<i>Code Expert</i> — '
+                '<i>You already know how the system works. Keep improving!</i> 📈'),
             'game_legend': _(
-                '🌟 <b>Level:</b>\n<i>Game Legend</i> — <i>You\'ve achieved almost everything! Stay at the top and collect all the keys!</i> 🏅'),
+                '🌟 <b>Level:</b>\n<i>Game Legend</i> — '
+                '<i>You\'ve achieved almost everything! Stay at the top and collect all the keys!</i> 🏅'),
             'absolute_leader': _(
-                '👑 <b>Level:</b>\n<i>Absolute Leader</i> — <i>You\'re at the top! All the keys are at your disposal, and you\'re a role model for everyone!</i> 🌍')
+                '👑 <b>Level:</b>\n<i>Absolute Leader</i> — '
+                '<i>You\'re at the top! All keys are at your disposal, and you\'re a role model for everyone!</i> 🌍')
         }
         return achievements.get(self.achievement_key, achievements['newcomer'])
-
 
     def get_status_text(self) -> str:
         """Returns the translated status text by key."""

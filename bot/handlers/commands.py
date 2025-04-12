@@ -54,11 +54,11 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
                 )
         image = image_manager.get_random_image('handlers')
         response_text = _('👋 Hello, <b>{first_name}</b>!\n'
-                 '🛳️ <i>Welcome aboard!</i>\n\n'
-                 '🌊 Join the adventure with us — pick an action below and start playing! 🚀 \n'
-                 '🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for active players.\n'
-                 '🏆 Play, progress, and unlock new rewards with every step! \n\n'
-                 '📖 <i>Terms of use are available in the <b>Info</b> section.</i>')
+                          '🛳️ <i>Welcome aboard!</i>\n\n'
+                          '🌊 Join the adventure with us — pick an action below and start playing! 🚀 \n'
+                          '🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for active players.\n'
+                          '🏆 Play, progress, and unlock new rewards with every step! \n\n'
+                          '📖 <i>Terms of use are available in the <b>Info</b> section.</i>')
 
         if image:
             await message.answer_photo(
@@ -69,8 +69,8 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
         else:
             logger.warning(f'No images available in /start for user {user_id}')
             await message.answer(text=response_text.format(first_name=message.from_user.first_name),
-                reply_markup=get_main_menu_kb()
-            )
+                                 reply_markup=get_main_menu_kb()
+                                 )
     except Exception as e:
         logger.error(f'Error processing /start for user {message.from_user.id}: {e}', exc_info=True)
         raise
@@ -89,7 +89,7 @@ async def change_language_command(message: Message, session: AsyncSession):
         logger.debug(f'Current language: {current_language_code} for user {user_id}')
         await message.answer(
             text=_('Please choose a language:'),
-            reply_markup= get_change_language_kb(current_language_code)
+            reply_markup=get_change_language_kb(current_language_code)
         )
     except Exception as e:
         logger.error(f'Language change error for user {message.from_user.id}: {e}', exc_info=True)
@@ -100,7 +100,7 @@ async def change_language_command(message: Message, session: AsyncSession):
 async def paysupport_command(message: Message) -> None:
     """Handle donation information command."""
     logger.debug(f'Paysupport command from user {message.from_user.id}')
-    
+
     try:
         await message.delete()
         await message.answer(
@@ -115,7 +115,7 @@ async def paysupport_command(message: Message) -> None:
         raise
 
 
-@commands_router.message( Command('admin'), IsBannedFilter(), AdminFilter())
+@commands_router.message(Command('admin'), IsBannedFilter(), AdminFilter())
 async def admin_command(message: Message) -> None:
     """Handle admin panel access."""
     logger.debug(f'Admin access request from user {message.from_user.id}')

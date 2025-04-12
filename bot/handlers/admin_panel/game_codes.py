@@ -148,6 +148,7 @@ async def process_answer_input_handler(message: Message, state: FSMContext, sess
     except Exception as e:
         logger.error(f'Answer input undefined error for admin {admin_id}: {e}', exc_info=True)
 
+
 @game_codes_router.callback_query(F.data == 'delete_code')
 async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext) -> None:
     """Initiate process of deleting game code."""
@@ -220,7 +221,11 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
 
 
 @game_codes_router.callback_query(F.data == 'confirm_deletion')
-async def confirmation_deletion_handler(callback_query: CallbackQuery, state: FSMContext, session: AsyncSession) -> None:
+async def confirmation_deletion_handler(
+        callback_query: CallbackQuery,
+        state: FSMContext,
+        session: AsyncSession
+) -> None:
     """Handle final confirmation of task deletion."""
     admin_id = callback_query.from_user.id
     logger.debug(f'Admin {admin_id} confirmed deletion')

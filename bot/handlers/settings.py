@@ -32,10 +32,12 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
 
         image = image_manager.get_random_image('handlers')
         response_text = _('⚙️ <b>Settings</b>\n\n'
-                   '🎮 <i>Adjust the bot to fit your preferences! Choose an option below to customize your experience:</i>\n\n'
-                   '🌐 <b>Change Language</b> — Switch to your preferred language for a smoother experience.\n'
-                   '🔕 <b>Unsubscribe from Notifications</b> — Manage your subscriptions and stay in control of what you receive.\n\n'
-                   '🎨 Personalize to make your time here more enjoyable and tailored just for you!')
+                          '🎮 <i>Adjust the bot to fit your preferences! '
+                          'Choose an option below to customize your experience:</i>\n\n'
+                          '🌐 <b>Change Language</b> — Switch to your preferred language for a smoother experience.\n'
+                          '🔕 <b>Unsubscribe from Notifications</b> — '
+                          'Manage your subscriptions and stay in control of what you receive.\n\n'
+                          '🎨 Personalize to make your time here more enjoyable and tailored just for you!')
         if image:
             await callback_query.message.answer_photo(
                 photo=image,
@@ -51,6 +53,7 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
     except Exception as e:
         logger.error(f'Settings menu error for {user_id}: {e}', exc_info=True)
         raise
+
 
 @settings_router.callback_query(F.data == 'change_language')
 async def change_language_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
@@ -68,12 +71,13 @@ async def change_language_handler(callback_query: CallbackQuery, session: AsyncS
         await callback_query.message.answer(
             text=_('Current language: <b>{}</b>\n\n'
                    '🌐 Select a language from the available languages:').format(current_language),
-            reply_markup= get_change_language_kb(current_language_code)
+            reply_markup=get_change_language_kb(current_language_code)
         )
         logger.info(f'Sent language options to {user_id}')
     except Exception as e:
         logger.error(f'Language change error for {user_id}: {e}', exc_info=True)
         raise
+
 
 @settings_router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
 async def update_language_handler(
@@ -120,7 +124,7 @@ async def notifications_handler(callback_query: CallbackQuery, session: AsyncSes
         await callback_query.answer()
         await callback_query.message.answer(
             text=_('Your subscription status: {}').format(status),
-            reply_markup = notifications_kb(is_subscribed)
+            reply_markup=notifications_kb(is_subscribed)
         )
     except Exception as e:
         logger.error(f'Notifications error for {user_id}: {e}', exc_info=True)
@@ -136,9 +140,13 @@ async def subscribe_confirm_handler(
     """Confirm and activate notification subscription."""
     user_id = callback_query.from_user.id
     logger.debug(f'User {user_id} confirming subscription')
-    
+
     try:
-        await UserRepository.update_subscription_status(session=session, user_id=callback_query.from_user.id, is_subscribed=True)
+        await UserRepository.update_subscription_status(
+            session=session,
+            user_id=callback_query.from_user.id,
+            is_subscribed=True
+        )
         await callback_query.answer(
             text=_('You have successfully Subscribed for notifications.'),
             show_alert=True
@@ -147,6 +155,7 @@ async def subscribe_confirm_handler(
     except Exception as e:
         logger.error(f'Subscription error for {user_id}: {e}', exc_info=True)
         raise
+
 
 @settings_router.callback_query(F.data == 'unsubscribe')
 async def unsubscribe_handler(
@@ -175,7 +184,11 @@ async def unsubscribe_handler(
             )
             return await send_main_menu(callback_query, session, image_manager)
 
-        await UserRepository.update_subscription_status(session=session, user_id=callback_query.from_user.id, is_subscribed=False)
+        await UserRepository.update_subscription_status(
+            session=session,
+            user_id=callback_query.from_user.id,
+            is_subscribed=False
+        )
         await callback_query.answer(
             text=_('You have successfully unsubscribed from notifications.'),
             show_alert=True

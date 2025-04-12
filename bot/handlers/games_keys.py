@@ -131,13 +131,15 @@ async def noop_handler(callback_query: CallbackQuery) -> None:
 
 
 @games_keys_router.callback_query(F.data == 'hamster_keys')
-async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession) -> None:
+async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession) -> None:  # noqa C901
     """Generate and display hamster game promo codes."""
     user_id: int = callback_query.from_user.id
     logger.debug(f'Hamster keys request from user {user_id}')
 
     try:
-        validation_result: UserKeyGenerationSchema = await UserService.get_hamster_keys_request_validation(session, user_id)
+        validation_result: UserKeyGenerationSchema = await UserService.get_hamster_keys_request_validation(
+            session, user_id
+        )
         if not validation_result.can_generate:
             if validation_result.daily_limit_exceeded:
                 logger.info(f'Daily limit exceeded for user {user_id}')
@@ -149,7 +151,9 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
                 seconds = validation_result.remaining_time.seconds
                 time_text = _('⏱️ Wait for {minutes} min {seconds} sec before getting the next key.').format(
                     minutes=minutes, seconds=seconds
-                    ) if minutes else _('⏱️ Wait for {seconds} sec before getting the next key.').format(seconds=seconds)
+                    ) if minutes else _('⏱️ Wait for {seconds} sec before getting the next key.').format(
+                    seconds=seconds
+                )
                 await callback_query.answer(time_text, show_alert=True)
                 return
 

@@ -344,10 +344,10 @@ async def get_edit_translation_text_handler(
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('📙 <b>Text: </b>\n')
-                 + f'{text.text}\n\n'
-                 + _('📝 Enter new announcement text for "{language_code}":').format(
-                language_code=LANGUAGES_DICT.get(language_code)),
+            text=(_('📙 <b>Text: </b>\n')
+                  + f'{text.text}\n\n'
+                  + _('📝 Enter new announcement text for "{language_code}":').format(
+                        language_code=LANGUAGES_DICT.get(language_code))),
             reply_markup=get_back_to_announcement_details_kb()
         )
         await state.set_state(AnnouncementDetails.edit_translation_text)
@@ -713,8 +713,8 @@ async def show_announcements_text(session: AsyncSession) -> str:
         posts = []
         for ann in announcements:
             lang_list = (
-                ', '.join(lang.language_code for lang in ann.languages
-                ) if ann.languages else _('No translations available')
+                ', '.join(lang.language_code for lang in ann.languages)
+                if ann.languages else _('No translations available')
             )
             posts.append(_(
                 '🔅 <b>ID:</b> <code>{id}</code>\n'

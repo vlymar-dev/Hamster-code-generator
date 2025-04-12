@@ -105,7 +105,6 @@ async def process_change_role_handler(message: Message, state: FSMContext, sessi
             )
             return
 
-
         await state.update_data(
             current_user_role=current_user_role,
             target_user_id=target_user_id
@@ -153,7 +152,7 @@ async def select_role_handler(callback_query: CallbackQuery, state: FSMContext, 
         await callback_query.answer()
         await callback_query.message.answer(
             text=_('🤩 <b>User role <i>updated!</i></b>\n\nNew role for user ID: <b>{target_user_id}</b> — '
-                         '<b><i>\'{new_user_role}\'</i></b>').format(
+                   '<b><i>\'{new_user_role}\'</i></b>').format(
                 target_user_id=target_user_id,
                 new_user_role=new_user_role.capitalize()
             ),

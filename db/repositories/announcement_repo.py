@@ -85,7 +85,7 @@ class AnnouncementRepository:
             )
             result = await session.execute(query)
 
-            grouped = defaultdict(lambda : {'title': None, 'languages': set()})
+            grouped = defaultdict(lambda: {'title': None, 'languages': set()})
 
             for announcement_id, title, lang in result.all():
                 grouped[announcement_id]['title'] = title

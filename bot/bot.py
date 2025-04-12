@@ -21,7 +21,7 @@ async def main():
     try:
         logger.info('Starting bot initialization...')
         logger.debug(f'Using storage: {type(MemoryStorage()).__name__}')
-        
+
         bot = Bot(
             token=config.telegram.TOKEN.get_secret_value(),
             default=DefaultBotProperties(parse_mode=ParseMode.HTML)

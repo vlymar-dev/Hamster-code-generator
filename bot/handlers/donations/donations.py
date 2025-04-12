@@ -38,7 +38,7 @@ async def process_custom_donate(message: Message, state: FSMContext) -> None:
     """Validate and process custom donation amount."""
     user_id = message.from_user.id
     logger.debug(f'Processing custom amount from user {user_id}')
-    
+
     try:
         try:
             amount: int = int(message.text)
@@ -50,7 +50,7 @@ async def process_custom_donate(message: Message, state: FSMContext) -> None:
                     reply_markup=get_cancel_donation_kb(),
                 )
                 return
-    
+
         except ValueError:
             await message.delete()
             await message.answer(
@@ -114,7 +114,7 @@ async def send_invoice_message(message: Message, amount: int) -> None:
     """Generate and send payment invoice."""
     user_id = message.from_user.id
     logger.debug(f'Sending invoice for {amount} to user {user_id}')
-    
+
     try:
         prices = [LabeledPrice(label="XTR", amount=amount)]
         await message.answer_invoice(

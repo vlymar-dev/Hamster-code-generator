@@ -11,6 +11,7 @@ from db.repositories import ReferralsRepository, UserRepository
 
 logger = logging.getLogger(__name__)
 
+
 class UserService:
     """Service handling user registration, referrals, and key generation validation"""
 
@@ -37,12 +38,12 @@ class UserService:
         if not await UserRepository.check_user_exists(session, referrer_id):
             logger.warning(f'Invalid referrer {referrer_id}, user not found')
             return None
-        
+
         try:
             referrals_data = ReferralAddingSchema(referrer_id=referrer_id, referred_id=referred_id)
             await ReferralsRepository.add_referral(session, referrals_data)
             logger.info(f'Added referral {referrer_id} -> {referred_id}')
-    
+
             return referrer_id
         except Exception as e:
             logger.error(f'Failed to add referral: {e}', exc_info=True)
@@ -68,7 +69,6 @@ class UserService:
         except Exception as e:
             logger.error(f'Validation failed for user {user_id}: {e}', exc_info=True)
             raise
-
 
     @staticmethod
     async def _reset_daily_request_if_needed(session: AsyncSession, user_id: int, last_request_datetime: datetime):

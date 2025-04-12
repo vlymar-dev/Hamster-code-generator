@@ -58,12 +58,13 @@ async def send_main_menu(
         logger.debug(f'Calculated keys: {keys_with_coefficient} for user {user_id}')
 
         response_text = _('What’s next? 🤔\n\n'
-                   '🎮 <b>Play and earn!</b> — Discover new combos, exciting games, and exclusive giveaways.  \n'
-                   '💥 <b>Stay tuned</b> for the latest news and events.\n'
-                   '📱 <b>Get your chance</b> for exclusive rewards!\n\n'
-                   '<b>Today users received:</b>\n'
-                   '🔹 <b>{keys_today}</b> <i>keys</i> 🔑\n\n'
-                   '🔥 <b>Choose an action below to keep climbing the leaderboard and join the elite players!</b>').format(
+                          '🎮 <b>Play and earn!</b> — Discover new combos, exciting games, and exclusive giveaways.  \n'
+                          '💥 <b>Stay tuned</b> for the latest news and events.\n'
+                          '📱 <b>Get your chance</b> for exclusive rewards!\n\n'
+                          '<b>Today users received:</b>\n'
+                          '🔹 <b>{keys_today}</b> <i>keys</i> 🔑\n\n'
+                          '🔥 <b>Choose an action below to keep climbing the '
+                          'leaderboard and join the elite players!</b>').format(
                 keys_today=keys_with_coefficient,
             )
 

@@ -1,0 +1,293 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-11-12 07:24+0100\n"
+"PO-Revision-Date: 2024-11-12 07:28+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: tgbot/handlers/callback_queries.py:25
+msgid "Language updated!"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:37
+msgid ""
+"<b>Hello!</b> Explore crypto games and bonuses with our bot — stay ahead "
+"and earn more! 💪\n"
+"\n"
+"📊 <b>Check Progress:</b>\n"
+"• Track your achievements. 🎯\n"
+"• Raise your status and unlock new privileges! 🚀\n"
+"\n"
+"🎰 <b>GAMECENTER</b>:\n"
+"• Earn and grow with exclusive opportunities! 🎗️\n"
+"\n"
+"💡 <i>Enjoy the bot?</i> <b>Support us!</b> Payment info — "
+"<i>/paysupport</i>\n"
+"\n"
+"<b>USDT/Ton (TON):</b> <code>{ton_wallet}</code>\n"
+"<b>USDT (TRC20):</b> <code>{trc_wallet}</code>\n"
+"<i>(Tap to copy)</i> 📋\n"
+"\n"
+"📬 <i>Got questions or suggestions?</i> \n"
+"🖊️ <b><i>Message us:</i></b>  <a href=\"{support}\">•Tap to connect•</a>\n"
+"🔥 <b>Together we will make this service even better and bigger!</b>"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:62
+msgid "Settings menu here"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:69
+msgid "Select a language from the available languages"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:70 tgbot/handlers/commands.py:65
+msgid "Please choose a language:"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:82
+msgid ""
+"📊 <b>Progress:</b>\n"
+"\n"
+"🏆 <b><u>Level:</u></b>\n"
+"<i>{achievement_name}</i> — You're moving up! Keep going for exclusive "
+"rewards! 💥\n"
+"\n"
+"🔑 <b><i>Total Keys Generated:</i></b> <i>{keys_total}</i>\n"
+"🤝 <b><i>Referrals:</i></b> <i>{referrals}</i>\n"
+"\n"
+"🚀 <b>Invite friends, earn keys, and reach new heights with us!</b> 🌍"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:101
+msgid "Here keys"
+msgstr ""
+
+#: tgbot/handlers/callback_queries.py:111
+msgid "Best projects 💣"
+msgstr ""
+
+#: tgbot/handlers/commands.py:17
+msgid ""
+"👋 Hello, <b>{first_name}</b>!\n"
+"🛳️ <i>Welcome aboard!</i>\n"
+"\n"
+"🌊 Join the adventure with us — pick an action below and start playing! 🚀"
+" \n"
+"🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for "
+"active players.\n"
+"🏆 Play, progress, and unlock new rewards with every step! \n"
+"\n"
+"📖 <i>Terms of use are available in the <b>Info</b> section.</i>"
+msgstr ""
+
+#: tgbot/handlers/commands.py:29
+msgid ""
+"🎉 You’ve joined through the referral link of user ID "
+"<b>{referrer_id}</b>!\n"
+"\n"
+msgstr ""
+
+#: tgbot/handlers/commands.py:39
+msgid "Oops! 🚫 You can’t use your own referral link!"
+msgstr ""
+
+#: tgbot/handlers/commands.py:72
+msgid ""
+"💡 <b>Your donation helps us make the bot better and add exciting new "
+"features!\n"
+"Thank you for supporting us!💪</b>\n"
+"<i>Please note that donations are voluntary and non-refundable.</i>\n"
+"If you have any questions, contact us. 📞"
+msgstr ""
+
+#: tgbot/handlers/messages.py:19
+msgid ""
+"What’s next? 🤔\n"
+"\n"
+"🎮 <b>Play and earn!</b> — Discover new combos, exciting games, and "
+"exclusive giveaways.  \n"
+"💥 <b>Stay tuned</b> for the latest news and events.\n"
+"📱 <b>Get your chance</b> for exclusive rewards!\n"
+"\n"
+"<b>Today users received:</b>\n"
+"🔹 <b>{keys_today}</b> <i>keys</i> 🔑\n"
+"\n"
+"💬 <b>Share your referral link and earn more!</b>\n"
+"<code>{referral_code}</code>\n"
+"(copy and share!) 📋\n"
+"\n"
+"🔥 <b>Choose an action below to keep climbing the leaderboard and join the"
+" elite players!</b>"
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:18
+msgid "💫 Enter Your Amount"
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:33
+msgid ""
+"❗️ Enter an amount from <b>1</b> to <b>2500</b>. We appreciate your "
+"support!"
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:41
+msgid ""
+"⚠️ Oops! That doesn’t seem to be a valid number. Please try again to "
+"support us."
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:50
+#: tgbot/handlers/donation/refund_command.py:45
+msgid "❗️ <b>Error:</b> {error}"
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:70
+msgid "🥳 <b>Thank you! Your support helps us improve!</b> 🤗"
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:78
+msgid "Support Our Community 🚀"
+msgstr ""
+
+#: tgbot/handlers/donation/donation_handlers.py:79
+msgid "Your contribution of {amount} 🌟 helps us"
+msgstr ""
+
+#: tgbot/handlers/donation/refund_command.py:20
+msgid ""
+"To refund ⭐️ use the command <code><b>/refund_stars "
+"<i>transaction_id</i></b></code>"
+msgstr ""
+
+#: tgbot/handlers/donation/refund_command.py:29
+msgid "Return transaction completed ⏎"
+msgstr ""
+
+#: tgbot/handlers/donation/refund_command.py:35
+msgid "❌ <b>Transaction with this number not found. Please check your input!</b>"
+msgstr ""
+
+#: tgbot/handlers/donation/refund_command.py:39
+msgid "⚠️ <b>This transaction has already been refunded!!</b>"
+msgstr ""
+
+#: tgbot/keyboards/main_menu_kb.py:19
+msgid "🎰 GAMECENTER"
+msgstr ""
+
+#: tgbot/keyboards/main_menu_kb.py:24
+msgid "🔑 GET Keys"
+msgstr ""
+
+#: tgbot/keyboards/main_menu_kb.py:25
+msgid "⚙️ Settings"
+msgstr ""
+
+#: tgbot/keyboards/main_menu_kb.py:26
+msgid "📊 Check Progress"
+msgstr ""
+
+#: tgbot/keyboards/main_menu_kb.py:27
+msgid "ℹ Info"
+msgstr ""
+
+#: tgbot/keyboards/main_menu_kb.py:36
+msgid "🔙 Back to main menu"
+msgstr ""
+
+#: tgbot/keyboards/settings_kb.py:11
+msgid "Change language 🌍"
+msgstr ""
+
+#: tgbot/keyboards/donation/donation_kb.py:16
+msgid "💫 Enter a Different Amount"
+msgstr ""
+
+#: tgbot/keyboards/donation/donation_kb.py:24
+msgid "Give money"
+msgstr ""
+
+#: tgbot/keyboards/donation/donation_kb.py:25
+msgid "No it's scam"
+msgstr ""
+
+#: tgbot/keyboards/donation/donation_kb.py:34
+msgid "Cancel payment"
+msgstr ""
+
+#: tgbot/services/generate_user_stats.py:32
+msgid ""
+"🌱 <b>Newcomer</b> — <i>You've just begun your journey! Keep going, there "
+"are many opportunities ahead!</i> 🚀"
+msgstr ""
+"🌱 <b>Новичок</b> — <i>Ты только начал свой путь! Продолжай, впереди много возможностей!</i> 🚀"
+
+#: tgbot/services/generate_user_stats.py:33
+msgid ""
+"🔑 <b>Adventurer</b> — <i>You've unlocked a few doors, but more valuable "
+"keys await you.</i> 💎"
+msgstr ""
+"🔑 <b>Искатель ключей</b> — <i>Ты уже открыл несколько дверей, но впереди ждут более ценные ключи.</i> 💎"
+
+#: tgbot/services/generate_user_stats.py:34
+msgid ""
+"🎯 <b>Bonus Hunter</b> — <i>With each new key, you grow stronger. Unlock "
+"bonuses!</i> 🎁"
+msgstr ""
+"🎯 <b>Охотник за бонусами</b> — <i>С каждым новым ключом ты становишься сильнее. Открывай бонусы!</i> 🎁"
+
+#: tgbot/services/generate_user_stats.py:35
+msgid ""
+"🧠 <b>Code Expert</b> — <i>You already know how the system works. Keep "
+"improving!</i> 📈"
+msgstr ""
+"🧠 <b>Знаток кодов</b> — <i>Ты уже знаешь, как работает система. Продолжай улучшаться!</i> 📈"
+
+#: tgbot/services/generate_user_stats.py:36
+msgid ""
+"🌟 <b>Game Legend</b> — <i>You've achieved almost everything! Stay at the "
+"top and collect all the keys!</i> 🏅"
+msgstr ""
+"🌟 <b>Легенда игр</b> — <i>Ты достиг почти всего! Оставайся в топе и собери все ключи!</i> 🏅"
+
+#: tgbot/services/generate_user_stats.py:37
+msgid ""
+"👑 <b>Absolute Leader</b> — <i>You're at the top! All the keys are at your"
+" disposal, and you're a role model for everyone!</i> 🌍"
+msgstr ""
+"👑 <b>Абсолютный лидер</b> — <i>Ты на вершине! Все ключи в твоем распоряжении, и ты пример для всех!</i> 🌍"
+
+#: tgbot/services/generate_user_stats.py:47
+msgid "🎮 <b>Regular Player</b> — Get keys and open doors to become stronger. 🚀"
+msgstr ""
+"🎮 <b>Обычный игрок</b> — Получай ключи и открывай двери, чтобы стать сильнее. 🚀"
+
+#: tgbot/services/generate_user_stats.py:48
+msgid ""
+"🤝 <b>Friend of the Project</b> — You have access to exclusive features, "
+"but there's more ahead! 🔥"
+msgstr ""
+"🤝 <b>Друг проекта</b> — Тебе доступны эксклюзивные возможности, но впереди ещё больше! 🔥"
+
+#: tgbot/services/generate_user_stats.py:49
+msgid ""
+"👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive "
+"content. ✨"
+msgstr ""
+"👑 <b>Элитный игрок!</b> Используй все свои привилегии и наслаждайся эксклюзивным контентом. ✨"
+
