@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot.common import ImageManager
 from bot.filters import IsBannedFilter
 from bot.keyboards.main_menu_kb import get_main_menu_kb
-from core import config
-from db.repositories import UserRepository
+from infrastructure import config
+from infrastructure.db.repositories import UserRepository
 
 logger = logging.getLogger(__name__)
 main_menu_router = Router()

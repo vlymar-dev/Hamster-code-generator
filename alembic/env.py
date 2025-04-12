@@ -5,9 +5,9 @@ from sqlalchemy import pool
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from core import config
-from db.models import Base
-from db.models import Announcement, AnnouncementTranslation, GameTask, PromoCode, Referral, User  # noqa
+from infrastructure import config
+from infrastructure.db.models import Base
+from infrastructure.db.models import Announcement, AnnouncementTranslation, GameTask, PromoCode, Referral, User  # noqa
 
 DATABASE_URL = config.database.database_url
 

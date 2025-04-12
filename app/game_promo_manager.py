@@ -26,9 +26,9 @@ from urllib.parse import urlparse
 
 import aiohttp
 
-from core.schemas.promo_code import PromoCodeCreateSchema
-from db.database import async_session_maker
-from db.repositories.promo_code_repo import PromoCodeRepository
+from infrastructure.db.accessor import async_session_maker
+from infrastructure.db.repositories.promo_code_repo import PromoCodeRepository
+from infrastructure.schemas.promo_code import PromoCodeCreateSchema
 
 logger = logging.getLogger(__name__)
 

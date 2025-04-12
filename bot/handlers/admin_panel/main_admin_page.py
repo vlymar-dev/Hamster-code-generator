@@ -14,7 +14,7 @@ from bot.keyboards.admin_panel import (
     get_back_to_admin_panel_kb,
 )
 from bot.states import AdminPanelState
-from db.repositories import PromoCodeRepository, UserRepository
+from infrastructure.db.repositories import PromoCodeRepository, UserRepository
 
 logger = logging.getLogger(__name__)
 admin_router = Router()

@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery, Message, TelegramObject
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.repositories import UserRepository
+from infrastructure.db.repositories import UserRepository
 
 logger = logging.getLogger(__name__)
 

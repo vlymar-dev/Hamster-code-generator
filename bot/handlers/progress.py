@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot.common import ImageManager
 from bot.filters import IsBannedFilter
 from bot.keyboards.progress_kb import get_progress_keyboard
-from core.services import progres_service
+from infrastructure.services import progres_service
 
 logger = logging.getLogger(__name__)
 progress_router = Router()

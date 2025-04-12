@@ -11,9 +11,9 @@ from bot.filters import AdminFilter, IsBannedFilter
 from bot.handlers.admin_panel import show_admin_panel
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
-from core.schemas.user import UserCreateSchema
-from core.services import UserService
-from db.repositories import UserRepository
+from infrastructure.db.repositories import UserRepository
+from infrastructure.schemas.user import UserCreateSchema
+from infrastructure.services import UserService
 
 logger = logging.getLogger(__name__)
 commands_router = Router()

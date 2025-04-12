@@ -3,7 +3,7 @@ import logging
 
 from app.game_promo_manager import gen
 from app.games import games
-from core import setup_logging
+from infrastructure import setup_logging
 
 setup_logging(app_name='app')
 

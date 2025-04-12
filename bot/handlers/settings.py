@@ -13,8 +13,8 @@ from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.keyboards.settings.notifications_kb import notifications_kb
 from bot.keyboards.settings.settings_kb import get_settings_kb
 from bot.middlewares import CustomI18nMiddleware
-from core import config
-from db.repositories import ReferralsRepository, UserRepository
+from infrastructure import config
+from infrastructure.db.repositories import ReferralsRepository, UserRepository
 
 logger = logging.getLogger(__name__)
 settings_router = Router()

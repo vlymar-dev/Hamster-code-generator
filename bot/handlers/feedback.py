@@ -9,7 +9,7 @@ from bot.common import ImageManager
 from bot.keyboards.feedback_kb import get_admin_feedback_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
 from bot.states import AdminReplyToFeedback, UserLeaveFeedback
-from core import config
+from infrastructure import config
 
 logger = logging.getLogger(__name__)
 feedback_router = Router()

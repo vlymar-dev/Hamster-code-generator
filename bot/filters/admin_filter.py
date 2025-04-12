@@ -6,8 +6,8 @@ from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
-from core import config
-from db.repositories import UserRepository
+from infrastructure import config
+from infrastructure.db.repositories import UserRepository
 
 logger = logging.getLogger(__name__)
 

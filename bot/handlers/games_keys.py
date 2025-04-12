@@ -11,9 +11,9 @@ from bot.handlers import PaginationCallbackData
 from bot.keyboards.games_menu.games_menu import get_games_codes_and_keys_kb
 from bot.keyboards.games_menu.pagination_kb import get_pagination_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
-from core.schemas import UserKeyGenerationSchema
-from core.services import GameTaskService, PromoCodeService, UserService
-from db.repositories import UserRepository
+from infrastructure.db.repositories import UserRepository
+from infrastructure.schemas import UserKeyGenerationSchema
+from infrastructure.services import GameTaskService, PromoCodeService, UserService
 
 games_keys_router = Router()
 logger = logging.getLogger(__name__)

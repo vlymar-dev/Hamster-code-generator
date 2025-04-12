@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable
 from aiogram import BaseMiddleware
 from aiogram.types import CallbackQuery, Message
 
-from db.database import async_session_maker
+from infrastructure.db.accessor import async_session_maker
 
 logger = logging.getLogger(__name__)
 

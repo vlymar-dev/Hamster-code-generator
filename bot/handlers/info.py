@@ -6,7 +6,7 @@ from aiogram.utils.i18n import gettext as _
 
 from bot.common import ImageManager
 from bot.keyboards.donation.donation_kb import get_donation_kb
-from core import config
+from infrastructure import config
 
 logger = logging.getLogger(__name__)
 info_router = Router()

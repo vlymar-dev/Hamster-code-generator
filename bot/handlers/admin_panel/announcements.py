@@ -17,12 +17,11 @@ from bot.keyboards.admin_panel.announcements_kb import (
     get_languages_kb,
 )
 from bot.states import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement
-from core.schemas import AnnouncementCreateSchema, AnnouncementTranslationCreateSchema
-from core.services import AdminPanelService
-from db.repositories import AnnouncementRepository
+from infrastructure.db.repositories import AnnouncementRepository
+from infrastructure.schemas import AnnouncementCreateSchema, AnnouncementTranslationCreateSchema
+from infrastructure.services import AdminPanelService
 
 logger = logging.getLogger(__name__)
-
 announcements_router = Router()
 
 

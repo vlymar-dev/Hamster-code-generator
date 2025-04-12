@@ -3,7 +3,7 @@ from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.keyboards.main_menu_kb import back_to_main_menu_button
-from core import config
+from infrastructure import config
 
 
 def get_progress_keyboard(user_id: int) -> InlineKeyboardMarkup:

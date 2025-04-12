@@ -13,8 +13,8 @@ from bot.keyboards.admin_panel.game_codes_kb import (
     get_game_codes_actions_kb,
 )
 from bot.states import GameCodeManagement
-from core.schemas import GameTaskSchema
-from db.repositories import GameTaskRepository
+from infrastructure.db.repositories import GameTaskRepository
+from infrastructure.schemas import GameTaskSchema
 
 logger = logging.getLogger(__name__)
 game_codes_router = Router()
