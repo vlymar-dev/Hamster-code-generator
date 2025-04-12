@@ -61,7 +61,6 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
                  '📖 <i>Terms of use are available in the <b>Info</b> section.</i>')
 
         if image:
-            logger.debug(f'Selected image: {image.filename}')
             await message.answer_photo(
                     photo=image,
                     caption=response_text.format(first_name=message.from_user.first_name),

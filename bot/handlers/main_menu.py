@@ -75,7 +75,7 @@ async def send_main_menu(
                 reply_markup=get_main_menu_kb()
             )
         else:
-            logger.warning(f'No images found for user {user_id}')
+            logger.warning(f'No images available in main menu for user {user_id}')
             await send_method(
                 text=response_text,
                 reply_markup=get_main_menu_kb()
