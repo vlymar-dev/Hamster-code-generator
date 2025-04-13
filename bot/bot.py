@@ -4,12 +4,14 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.storage.redis import RedisStorage
+from redis.asyncio import Redis
 
 from bot.common import ImageManager
 from bot.handlers import ROUTERS
-from bot.middlewares import CustomI18nMiddleware, DatabaseMiddleware, ImageManagerMiddleware
+from bot.middlewares import CacheServiceMiddleware, CustomI18nMiddleware, DatabaseMiddleware, ImageManagerMiddleware
 from infrastructure import BASE_DIR, config, setup_logging
+from infrastructure.services import CacheService
 
 setup_logging(app_name='bot')
 
@@ -18,15 +20,30 @@ logger = logging.getLogger(__name__)
 
 async def main():
     bot = None
+    redis_client = None
+
     try:
         logger.info('Starting bot initialization...')
-        logger.debug(f'Using storage: {type(MemoryStorage()).__name__}')
+
+        # Cache Redis initialization
+        redis_client = Redis.from_url(
+            config.redis.dsn,
+            decode_responses=True,
+        )
+        await redis_client.ping()
+        logger.info('✅ Redis connection established')
 
         bot = Bot(
             token=config.telegram.TOKEN.get_secret_value(),
             default=DefaultBotProperties(parse_mode=ParseMode.HTML)
         )
-        dp = Dispatcher(storage=MemoryStorage())
+        storage = RedisStorage(
+            redis=redis_client,
+            state_ttl=config.redis.FSM_TTL or 3600,
+            data_ttl=config.redis.DATA_TTL or 7200
+        )
+        logger.debug(f'Using storage: {type(storage).__name__}')
+        dp = Dispatcher(storage=storage)
 
         # ImageManager initialization
         image_manager = ImageManager(BASE_DIR)
@@ -36,8 +53,15 @@ async def main():
             len(image_manager.categories.get('handlers', []))
         ))
 
+        # CacheService initialization
+        cache_service = CacheService(
+            redis=redis_client,
+            default_ttl=config.redis.TTL
+        )
+
         # Middleware setup
         logger.debug('Setting up middlewares...')
+        dp.update.outer_middleware(CacheServiceMiddleware(cache_service))
         dp.update.outer_middleware(ImageManagerMiddleware(image_manager))
         dp.update.outer_middleware(DatabaseMiddleware())
         CustomI18nMiddleware(
@@ -63,6 +87,10 @@ async def main():
         raise
     finally:
         logger.info('🛑 Bot shutdown completed')
+        if redis_client:
+            await redis_client.close()
+        if bot:
+            await bot.session.close()
         await bot.session.close()
 
 if __name__ == '__main__':
