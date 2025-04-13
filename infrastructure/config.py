@@ -71,7 +71,9 @@ class RedisConfig(BaseSettings):
     DB: int = Field(0)
     USERNAME: str | None = None
     PASSWORD: SecretStr | None = None
-    TTL: int | None = Field(None, description='Default TTL in seconds')
+    TTL: int | None = Field(3600, description='Default TTL in seconds')
+    FSM_TTL: int | None = Field(3600)
+    DATA_TTL: int | None = Field(7200)
 
     @property
     def dsn(self) -> str:
