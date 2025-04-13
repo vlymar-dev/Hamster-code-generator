@@ -6,10 +6,55 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot.common.static_data import STATUS_LIMITS
 from bot.common.utils import get_current_date, get_current_time
 from infrastructure.db.repositories import ReferralsRepository, UserRepository
-from infrastructure.schemas import RemainingTimeSchema, UserActivitySchema, UserCreateSchema, UserKeyGenerationSchema
+from infrastructure.schemas import (
+    RemainingTimeSchema,
+    UserActivitySchema,
+    UserCreateSchema,
+    UserKeyGenerationSchema,
+    UserLanguageCacheSchema,
+)
 from infrastructure.schemas.referral import ReferralAddingSchema
+from infrastructure.services import CacheService
+from infrastructure.services.cache import CacheKeys
 
 logger = logging.getLogger(__name__)
+
+
+class UserCacheService:
+    """Service for caching user data."""
+
+    @staticmethod
+    async def get_user_language(
+            cache_service: CacheService,
+            session: AsyncSession,
+            user_id: int
+    ) -> UserLanguageCacheSchema:
+        """Get user language from cache or database."""
+        logger.debug(f'Getting language for user {user_id}')
+        return await cache_service.get_or_set(
+            key=CacheKeys.USER_DATA.format(user_id=user_id),
+            model=UserLanguageCacheSchema,
+            fetch_func=UserRepository.get_user_language,
+            session=session,
+            user_id=user_id
+        )
+
+    @staticmethod
+    async def update_user_language(
+            cache_service: CacheService,
+            session: AsyncSession,
+            user_id: int,
+            selected_language_code: str
+    ) -> UserLanguageCacheSchema:
+        """Update user language in both cache and database."""
+        logger.debug(f'Updating language for user {user_id} to {selected_language_code}')
+        return await cache_service.refresh(
+            key=CacheKeys.USER_DATA.format(user_id=user_id),
+            fetch_func=UserRepository.update_user_language,
+            session=session,
+            user_id=user_id,
+            selected_language_code=selected_language_code
+        )
 
 
 class UserService:

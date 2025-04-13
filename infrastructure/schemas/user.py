@@ -3,6 +3,10 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
+class UserLanguageCacheSchema(BaseModel):
+    language_code: str
+
+
 class UserCreateSchema(BaseModel):
     id: int
     first_name: str | None = None

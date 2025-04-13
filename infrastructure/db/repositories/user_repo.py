@@ -6,7 +6,13 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from infrastructure.db.models.user import User
-from infrastructure.schemas import SubscribedUsersSchema, UserActivitySchema, UserCreateSchema, UserProgressSchema
+from infrastructure.schemas import (
+    SubscribedUsersSchema,
+    UserActivitySchema,
+    UserCreateSchema,
+    UserLanguageCacheSchema,
+    UserProgressSchema,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +43,14 @@ class UserRepository:
             raise
 
     @staticmethod
-    async def get_user_language(session: AsyncSession, user_id: int) -> str:
+    async def get_user_language(session: AsyncSession, user_id: int) -> UserLanguageCacheSchema | None:
         try:
             result = await session.execute(select(User.language_code).where(User.id == user_id))
-            language = result.scalar_one_or_none()
-            return language if language else 'en'
+            language_code = result.scalar_one_or_none()
+            return UserLanguageCacheSchema(language_code=language_code)
         except SQLAlchemyError as e:
             logger.error(f'Database error occurred while getting language for user_id={user_id}: {e}')
-            return 'en'
+            return None
 
     @staticmethod
     async def is_user_banned(session: AsyncSession, user_id: int) -> bool:
@@ -88,21 +94,23 @@ class UserRepository:
             return None
 
     @staticmethod
-    async def update_user_language(session: AsyncSession, user_id: int, selected_language_code: str) -> bool:
+    async def update_user_language(
+            session: AsyncSession,
+            user_id: int,
+            selected_language_code: str
+    ) -> UserLanguageCacheSchema:
         try:
             result = await session.execute(
                 update(User)
                 .where(User.id == user_id)
                 .values(language_code=selected_language_code)
+                .returning(User.language_code)
             )
-            if result.rowcount:
-                await session.commit()
-                return True
-            return False
+            await session.commit()
+            return UserLanguageCacheSchema(language_code=result.scalar_one())
         except SQLAlchemyError as e:
             await session.rollback()
             logger.error(f'Database error occurred while updating user language for user_id={user_id}: {e}')
-            return False
 
     @staticmethod
     async def update_subscription_status(session: AsyncSession, user_id: int, is_subscribed: bool) -> None:
