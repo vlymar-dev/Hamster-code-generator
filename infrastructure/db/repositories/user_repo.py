@@ -9,6 +9,7 @@ from infrastructure.db.models.user import User
 from infrastructure.schemas import (
     SubscribedUsersSchema,
     UserActivitySchema,
+    UserAuthCache,
     UserCreateSchema,
     UserLanguageCacheSchema,
     UserProgressSchema,
@@ -53,15 +54,6 @@ class UserRepository:
             return None
 
     @staticmethod
-    async def is_user_banned(session: AsyncSession, user_id: int) -> bool:
-        try:
-            result = await session.execute(select(User.is_banned).where(User.id == user_id))
-            return result.scalar_one_or_none()
-        except SQLAlchemyError as e:
-            logger.error(f'Database error occurred while checking ban status for user_id={user_id}: {e}')
-            return True
-
-    @staticmethod
     async def get_subscription_status(session: AsyncSession, user_id: int) -> bool:
         try:
             result = await session.execute(select(User.is_subscribed).where(User.id == user_id))
@@ -72,26 +64,29 @@ class UserRepository:
             return True
 
     @staticmethod
-    async def get_user_role(session: AsyncSession, target_user_id: int) -> str | None:
+    async def get_user_auth(session: AsyncSession, user_id: int) -> UserAuthCache:
         try:
-            result = await session.execute(select(User.user_role).where(User.id == target_user_id))
-            user_role = result.scalar_one_or_none()
-            return user_role if user_role else None
+            query = await session.execute(select(User.user_role, User.is_banned).where(User.id == user_id))
+            result = query.mappings().one()
+            return UserAuthCache.model_validate(result)
         except SQLAlchemyError as e:
-            logger.error(f'Database error occurred while getting role for user_id={target_user_id}: {e}')
-            return None
+            logger.error(f'Database error occurred while getting data for user_id={user_id}: {e}')
 
     @staticmethod
-    async def update_user_role(session: AsyncSession, user_id: int, new_user_role: str) -> None:
+    async def update_user_role(session: AsyncSession, user_id: int, new_user_role: str) -> UserAuthCache:
         try:
-            await session.execute(
-                update(User).where(User.id == user_id).values(user_role=new_user_role)
+            query = await session.execute(
+                update(User)
+                .where(User.id == user_id)
+                .values(user_role=new_user_role)
+                .returning(User.user_role, User.is_banned)
             )
             await session.commit()
+            result = query.mappings().one()
+            return UserAuthCache.model_validate(result)
         except SQLAlchemyError as e:
             await session.rollback()
             logger.error(f'Database error occurred while changing role for user_id={user_id}: {e}')
-            return None
 
     @staticmethod
     async def update_user_language(

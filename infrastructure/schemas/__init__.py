@@ -11,8 +11,10 @@ from infrastructure.schemas.user import (
     RemainingTimeSchema,
     SubscribedUsersSchema,
     UserActivitySchema,
+    UserAuthCache,
     UserCreateSchema,
     UserKeyGenerationSchema,
+    UserLanguageCacheSchema,
     UserProgressDataSchema,
     UserProgressSchema,
 )
@@ -27,10 +29,12 @@ __all__ = [
     'PromoCodeReceiveSchema',
     'RemainingTimeSchema',
     'UserActivitySchema',
+    'UserAuthCache',
     'ReferralAddingSchema',
     'UserCreateSchema',
     'SubscribedUsersSchema',
     'UserKeyGenerationSchema',
     'UserProgressSchema',
+    'UserLanguageCacheSchema',
     'UserProgressDataSchema'
 ]

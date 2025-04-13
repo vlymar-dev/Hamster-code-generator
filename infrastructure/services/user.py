@@ -9,6 +9,7 @@ from infrastructure.db.repositories import ReferralsRepository, UserRepository
 from infrastructure.schemas import (
     RemainingTimeSchema,
     UserActivitySchema,
+    UserAuthCache,
     UserCreateSchema,
     UserKeyGenerationSchema,
     UserLanguageCacheSchema,
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserCacheService:
-    """Service for caching user data."""
+    """User data caching operations."""
 
     @staticmethod
     async def get_user_language(
@@ -54,6 +55,37 @@ class UserCacheService:
             session=session,
             user_id=user_id,
             selected_language_code=selected_language_code
+        )
+
+    @staticmethod
+    async def get_user_auth_data(
+            cache_service: CacheService,
+            session: AsyncSession,
+            user_id: int
+    ):
+        """Get cached auth data (roles, permissions)."""
+        return await cache_service.get_or_set(
+            key=CacheKeys.USER_DATA.format(user_id=user_id),
+            model=UserAuthCache,
+            fetch_func=UserRepository.get_user_auth,
+            session=session,
+            user_id=user_id
+        )
+
+    @staticmethod
+    async def update_user_auth_data(
+            cache_service: CacheService,
+            session: AsyncSession,
+            user_id: int,
+            new_user_role: str
+    ):
+        """Update user auth data in cache and DB."""
+        return await cache_service.refresh(
+            key=CacheKeys.USER_DATA.format(user_id=user_id),
+            fetch_func=UserRepository.update_user_role,
+            session=session,
+            user_id=user_id,
+            new_user_role=new_user_role
         )
 
 

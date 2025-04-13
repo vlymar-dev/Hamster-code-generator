@@ -15,6 +15,7 @@ from bot.keyboards.admin_panel import (
 )
 from bot.states import AdminPanelState
 from infrastructure.db.repositories import PromoCodeRepository, UserRepository
+from infrastructure.services import CacheService, UserCacheService
 
 logger = logging.getLogger(__name__)
 admin_router = Router()
@@ -82,7 +83,12 @@ async def add_role_handler(callback_query: CallbackQuery, state: FSMContext) -> 
 
 
 @admin_router.message(AdminPanelState.target_user_id)
-async def process_change_role_handler(message: Message, state: FSMContext, session: AsyncSession) -> None:
+async def process_change_role_handler(
+        message: Message,
+        state: FSMContext,
+        session: AsyncSession,
+        cache_service: CacheService
+) -> None:
     """Process user ID input for role change."""
     admin_id = message.from_user.id
     logger.debug(f'Admin {admin_id} processing role change input')
@@ -91,7 +97,12 @@ async def process_change_role_handler(message: Message, state: FSMContext, sessi
         target_user_id = int(message.text)
         logger.info(f'Admin {admin_id} attempting to change role for user {target_user_id}')
 
-        current_user_role = await UserRepository.get_user_role(session, target_user_id)
+        user_data = await UserCacheService.get_user_auth_data(
+            cache_service=cache_service,
+            session=session,
+            user_id=target_user_id
+        )
+        current_user_role = user_data.user_role
         if not current_user_role:
             logger.warning(f'User {target_user_id} not found by admin {admin_id}')
             await message.delete()
@@ -110,7 +121,7 @@ async def process_change_role_handler(message: Message, state: FSMContext, sessi
             target_user_id=target_user_id
         )
         await message.answer(
-            text=_('👤\n\n<i>Current role:\n• <b>{current_role}</b></i>\n'
+            text=_('👤\n\n<i>Current role:\n• <b>{current_role}</b></i>\n\n'
                    '<i>Select a new role for user ID:\n• <b>{target_user_id}</b></i>').format(
                 current_role=current_user_role,
                 target_user_id=target_user_id
@@ -132,7 +143,12 @@ async def process_change_role_handler(message: Message, state: FSMContext, sessi
 
 
 @admin_router.callback_query(F.data.startswith('change_role_to_'))
-async def select_role_handler(callback_query: CallbackQuery, state: FSMContext, session: AsyncSession) -> None:
+async def select_role_handler(
+        callback_query: CallbackQuery,
+        state: FSMContext,
+        session: AsyncSession,
+        cache_service: CacheService
+) -> None:
     """Apply new user role changes."""
     admin_id = callback_query.from_user.id
     logger.debug(f'Admin {admin_id} confirming role change')
@@ -143,7 +159,8 @@ async def select_role_handler(callback_query: CallbackQuery, state: FSMContext, 
         target_user_id = int(data.get('target_user_id'))
         logger.info(f'Admin {admin_id} changing role for user {target_user_id} to {new_user_role}')
 
-        await UserRepository.update_user_role(
+        await UserCacheService.update_user_auth_data(
+            cache_service=cache_service,
             session=session,
             user_id=target_user_id,
             new_user_role=new_user_role

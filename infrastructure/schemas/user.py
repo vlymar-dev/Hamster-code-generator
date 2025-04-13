@@ -7,6 +7,11 @@ class UserLanguageCacheSchema(BaseModel):
     language_code: str
 
 
+class UserAuthCache(BaseModel):
+    is_banned: bool
+    user_role: str
+
+
 class UserCreateSchema(BaseModel):
     id: int
     first_name: str | None = None
