@@ -11,9 +11,8 @@ from bot.filters import AdminFilter, IsBannedFilter
 from bot.handlers.admin_panel import show_admin_panel
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
-from infrastructure.db.repositories import UserRepository
 from infrastructure.schemas.user import UserCreateSchema
-from infrastructure.services import UserService
+from infrastructure.services import CacheService, UserCacheService, UserService
 
 logger = logging.getLogger(__name__)
 commands_router = Router()
@@ -77,15 +76,19 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
 
 
 @commands_router.message(Command('change_language'))
-async def change_language_command(message: Message, session: AsyncSession):
+async def change_language_command(message: Message, session: AsyncSession, cache_service: CacheService):
     """Handle language change command."""
     logger.debug(f'Language change request from user {message.from_user.id}')
 
     try:
         user_id = message.from_user.id
         logger.debug(f'Fetching current language for user {user_id}')
-        current_language_code: str = await UserRepository.get_user_language(session, user_id)
-
+        language_data = await UserCacheService.get_user_language(
+            cache_service=cache_service,
+            session=session,
+            user_id=user_id
+        )
+        current_language_code = language_data.language_code
         logger.debug(f'Current language: {current_language_code} for user {user_id}')
         await message.answer(
             text=_('Please choose a language:'),

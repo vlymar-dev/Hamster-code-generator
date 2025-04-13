@@ -32,7 +32,7 @@ class UserCacheService:
         """Get user language from cache or database."""
         logger.debug(f'Getting language for user {user_id}')
         return await cache_service.get_or_set(
-            key=CacheKeys.USER_DATA.format(user_id=user_id),
+            key=CacheKeys.LANGUAGE.format(user_id=user_id),
             model=UserLanguageCacheSchema,
             fetch_func=UserRepository.get_user_language,
             session=session,
@@ -49,7 +49,7 @@ class UserCacheService:
         """Update user language in both cache and database."""
         logger.debug(f'Updating language for user {user_id} to {selected_language_code}')
         return await cache_service.refresh(
-            key=CacheKeys.USER_DATA.format(user_id=user_id),
+            key=CacheKeys.LANGUAGE.format(user_id=user_id),
             fetch_func=UserRepository.update_user_language,
             session=session,
             user_id=user_id,

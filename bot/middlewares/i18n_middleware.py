@@ -5,13 +5,17 @@ from aiogram.types import TelegramObject
 from aiogram.utils.i18n import I18n, I18nMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.db.repositories import UserRepository
+from infrastructure.services import CacheService, UserCacheService
 
 logger = logging.getLogger(__name__)
 
 
 class CustomI18nMiddleware(I18nMiddleware):
-    """Provides localization using user preferences from database."""
+    """Middleware for providing localization based on user preferences.
+
+    Uses cache service as primary source for language preferences with fallback
+    to database if needed. If no user language is found, uses default locale.
+    """
 
     def __init__(self, path: str, default_locale: str, domain: str):
         """Initializes localization engine with provided settings."""
@@ -19,7 +23,7 @@ class CustomI18nMiddleware(I18nMiddleware):
         super().__init__(self.i18n)
 
     async def get_locale(self, event: TelegramObject, data: dict[str, Any]) -> str:
-        """Determines user locale from database or uses default."""
+        """Determine user locale from cache/database or use default."""
         if not event.from_user:
             logger.warning(
                 f'Localization failed - no user in event. Event type: {type(event).__name__}'
@@ -27,9 +31,11 @@ class CustomI18nMiddleware(I18nMiddleware):
             return self.i18n.default_locale
 
         session: AsyncSession = data.get('session')
-        if not session:
+        cache_service: CacheService = data.get('cache_service')
+        if not session or not cache_service:
             logger.error(
-                f'Localization failed for user {event.from_user.id} - no database session'
+                f'Localization failed for user {event.from_user.id} - '
+                f'missing required services (session: {bool(session)}, cache: {bool(cache_service)})'
             )
             return self.i18n.default_locale
 
@@ -37,27 +43,16 @@ class CustomI18nMiddleware(I18nMiddleware):
         logger.debug(f'Starting locale detection for user {user_id}')
 
         try:
-            locale = await self._fetch_user_language(session, user_id)
+            language_data = await UserCacheService.get_user_language(cache_service, session, user_id)
+            locale = language_data.language_code
             if locale:
-                logger.debug(f'Found locale "{locale}" for user {user_id}')
+                logger.debug(f'Resolved locale "{locale}" for user {user_id}')
+                return locale
             else:
                 logger.debug(f'Using default locale for user {user_id}')
-            return locale or self.i18n.default_locale
+                return self.i18n.default_locale
         except Exception as e:
             logger.error(
                 f'Locale detection failed for user {user_id}. Error: {str(e)}'
-            )
-            return self.i18n.default_locale
-
-    async def _fetch_user_language(self, session: AsyncSession, user_id: int) -> str:
-        """Fetches user's language preference from the database."""
-        logger.debug(f'Querying language for user {user_id}')
-        try:
-            result = await UserRepository.get_user_language(session, user_id)
-            logger.debug(f'Language query result for user {user_id}: {result}')
-            return result or self.i18n.default_locale
-        except Exception as e:
-            logger.error(
-                f'Database error during language query for user {user_id}. Error: {str(e)}'
             )
             return self.i18n.default_locale

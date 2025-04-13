@@ -15,6 +15,7 @@ from bot.keyboards.settings.settings_kb import get_settings_kb
 from bot.middlewares import CustomI18nMiddleware
 from infrastructure import config
 from infrastructure.db.repositories import ReferralsRepository, UserRepository
+from infrastructure.services import CacheService, UserCacheService
 
 logger = logging.getLogger(__name__)
 settings_router = Router()
@@ -56,26 +57,34 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
 
 
 @settings_router.callback_query(F.data == 'change_language')
-async def change_language_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
-    """Show language selection interface with current language."""
+async def change_language_handler(
+        callback_query: CallbackQuery,
+        session: AsyncSession,
+        cache_service: CacheService
+) -> None:
+    """Show language selection menu with current language."""
     user_id = callback_query.from_user.id
-    logger.debug(f'User {user_id} requested language change')
+    logger.debug(f'Language change requested by user {user_id}')
 
     try:
-        current_language_code: str = await UserRepository.get_user_language(session, callback_query.from_user.id)
-        current_language = LANGUAGES_DICT.get(current_language_code)
-        logger.debug(f'Current language for {user_id}: {current_language}')
+        language_data = await UserCacheService.get_user_language(
+            cache_service=cache_service,
+            session=session,
+            user_id=user_id
+        )
+        current_language = LANGUAGES_DICT.get(language_data.language_code)
+        logger.debug(f'User {user_id} current language: {current_language}')
 
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
             text=_('Current language: <b>{}</b>\n\n'
                    '🌐 Select a language from the available languages:').format(current_language),
-            reply_markup=get_change_language_kb(current_language_code)
+            reply_markup=get_change_language_kb(language_data.language_code)
         )
-        logger.info(f'Sent language options to {user_id}')
+        logger.info(f'Language selection interface shown to user {user_id}')
     except Exception as e:
-        logger.error(f'Language change error for {user_id}: {e}', exc_info=True)
+        logger.error(f'Failed to show language options for user {user_id}: {e}', exc_info=True)
         raise
 
 
@@ -84,30 +93,35 @@ async def update_language_handler(
         callback_query: CallbackQuery,
         session: AsyncSession,
         i18n: CustomI18nMiddleware,
-        image_manager: ImageManager
+        image_manager: ImageManager,
+        cache_service: CacheService
 ) -> None:
-    """Update user's language preference and refresh main menu."""
+    """Process language update and refresh interface."""
     user_id = callback_query.from_user.id
     selected_language_code: str = callback_query.data.split(':')[1]
     logger.debug(f'User {user_id} selecting language: {selected_language_code}')
 
     try:
-        selected_language_name = LANGUAGES_DICT.get(selected_language_code)
-        await UserRepository.update_user_language(
+        language_data = await UserCacheService.update_user_language(
+            cache_service=cache_service,
             session=session,
             user_id=callback_query.from_user.id,
             selected_language_code=selected_language_code
         )
-        logger.debug(f'Updated language for {user_id} to {selected_language_code}')
-        # Set a new language for the current user
-        i18n.ctx_locale.set(selected_language_code)  # noqa
+        updated_language_code = language_data.language_code
+        selected_language_name = LANGUAGES_DICT.get(updated_language_code)
+        logger.debug(f'Updated language for {user_id} to {selected_language_name}')
+
+        # Apply changes
+        i18n.ctx_locale.set(updated_language_code)  # noqa
         await callback_query.answer(
             text=_('🌐 Language updated to: {}').format(selected_language_name),
             show_alert=True
         )
         await send_main_menu(callback_query.message, session, image_manager)
+        logger.info(f'Interface refreshed for user {user_id} with new language: {selected_language_name}')
     except Exception as e:
-        logger.error(f'Language update failed for {user_id}: {e}', exc_info=True)
+        logger.error(f'Language update failed for user {user_id}: {e}', exc_info=True)
         raise
 
 

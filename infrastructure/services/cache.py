@@ -93,5 +93,5 @@ class CacheKeys:
     """Namespace for cache key patterns."""
 
     USER_DATA = 'user:{user_id}'
-    REFERRALS = 'refs:{user_id}'
+    LANGUAGE = 'lang:{user_id}'
     STATS = 'stats:{user_id}'
