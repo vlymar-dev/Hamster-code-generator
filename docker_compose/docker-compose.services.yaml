@@ -1,0 +1,57 @@
+services:
+  migrate:
+    image: ll/hamster_bot:${IMAGE_TAG}
+    container_name: hamster_migrate
+    env_file:
+      - ../.env
+    command: alembic upgrade head
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hamster_network
+
+  bot:
+    image: ll/hamster_bot:${IMAGE_TAG}
+    restart: unless-stopped
+    container_name: hamster_bot
+    env_file:
+      - ../.env
+    command: sh -c "pybabel compile -d bot/locales -D messages && exec python3 -m bot.bot"
+    volumes:
+      - locales_data:/app/bot/locales
+      - ../var/logs/bot:/app/var/logs/bot
+      - ../var/storage/uploads:/app/var/storage/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hamster_network
+
+  app:
+    image: ll/hamster_bot:${IMAGE_TAG}
+    restart: unless-stopped
+    container_name: hamster_app
+    env_file:
+      - ../.env
+    command: sh -c "exec python3 -m app.main"
+    volumes:
+      - locales_data:/app/bot/locales
+      - ../proxies.txt:/app/proxies.txt:ro
+      - ../var/logs/app:/app/var/logs/app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hamster_network
+
+volumes:
+  locales_data:

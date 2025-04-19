@@ -1,0 +1,32 @@
+services:
+  local_postgres:
+    image: postgres:17-alpine
+    restart: always
+    container_name: local_postgres
+    environment:
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_PORT: "${DB_PORT}"
+      POSTGRES_HOST: "${DB_HOST}"
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 1s
+      retries: 2
+
+  local_redis:
+    image: redis:7.4.2-alpine
+    restart: always
+    container_name: local_redis
+    env_file:
+      - ../.env
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 2

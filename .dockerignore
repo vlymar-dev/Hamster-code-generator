@@ -29,15 +29,16 @@ pip-wheel-metadata/
 .eggs/
 
 # Exclude Docker Compose files (if not needed inside the container)
-docker-compose.yml
-docker-compose.dev.yml
-docker-compose.prod.yml
+docker_compose/local.yaml
+docker_compose/docker-compose.services.yaml
+docker_compose/docker-compose.storages.yaml
+
 
 # Exclude various images and pictures if they are not required for assembly
-img/
-images_data/
-images/
+static/
+var/
 *.jpeg
+*.webp
 *.png
 
 # Exclude other files
@@ -47,4 +48,6 @@ images/
 .git
 proxies.txt
 docs/
+temp/
 pyproject.toml
+.github/
