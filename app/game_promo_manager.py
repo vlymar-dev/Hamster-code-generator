@@ -72,11 +72,11 @@ class GamePromo:
                 data = await response.json()
                 self.token = data['clientToken']
                 logger.info(
-                    f'`{response.status}` ✅ | Token for game: `{self.game['name']}` | Proxy: `{ip}:{port}` generated'
+                    f'`{response.status}` ✅ | Token for game: `{self.game["name"]}` | Proxy: `{ip}:{port}` generated'
                 )
         except Exception as error:
             logger.error(
-                f'`{response.status}` ⚠️ | Client login error `{self.game['name']}` | Proxy: `{ip}:{port}`| {error}'
+                f'`{response.status}` ⚠️ | Client login error `{self.game["name"]}` | Proxy: `{ip}:{port}`| {error}'
             )
             await asyncio.sleep(random.uniform(0.1, 3) + 6)
             await self.login_client()
@@ -107,7 +107,7 @@ class GamePromo:
                     if 'text/html' in response.headers.get('Content-Type', ''):
                         error_text = await response.text()
                         logger.error(
-                            f'`{response.status}` ⚠️ | Game: `{self.game['name']}` | Proxy: ({ip}:{port}) | '
+                            f'`{response.status}` ⚠️ | Game: `{self.game["name"]}` | Proxy: ({ip}:{port}) | '
                             f'HTML Response: {error_text[:500]}...'
                         )
                         continue
@@ -118,14 +118,14 @@ class GamePromo:
                             error_data = json.loads(error_text)
                             delay_time = self.game['base_delay'] + random.uniform(5, 15) + random.uniform(1, 3)
                             logger.warning(
-                                f'`{response.status}` ⚠️ | Game: `{self.game['name']}` | Proxy: `{ip}:{port})` | '
-                                f'Error: `{error_data['error_code']}` ⏱️ | New delay: `{delay_time:.2f}`s.'
+                                f'`{response.status}` ⚠️ | Game: `{self.game["name"]}` | Proxy: `{ip}:{port})` | '
+                                f'Error: `{error_data["error_code"]}` ⏱️ | New delay: `{delay_time:.2f}`s.'
                             )
                             await asyncio.sleep(delay_time)
                             continue
                         else:
                             logger.warning(
-                                f'`{response.status}` ⚠️ | Game: ({self.game['name']} | '
+                                f'`{response.status}` ⚠️ | Game: ({self.game["name"]} | '
                                 f'Proxy: {ip}:{port}): {error_text}'
                             )
 
@@ -136,7 +136,7 @@ class GamePromo:
                         data = await response.json()
                         if data.get('hasCode', False):
                             logger.info(
-                                f'`{response.status}` ✅ | Event: `{self.game['name']}` | '
+                                f'`{response.status}` ✅ | Event: `{self.game["name"]}` | '
                                 f'Proxy: `{ip}:{port}` successfully registered'
                             )
                             return True
@@ -146,9 +146,9 @@ class GamePromo:
                         continue
 
             except Exception as error:
-                logger.error(f' ⚠️ Error in event registration `{self.game['name']}` | Proxy: `{ip}:{port}`: {error}')
+                logger.error(f' ⚠️ Error in event registration `{self.game["name"]}` | Proxy: `{ip}:{port}`: {error}')
                 await asyncio.sleep(5)
-        logger.error(f' ❌ Failed to register an event for `{self.game['name']}` | Proxy: {ip}:{port}, restart!')
+        logger.error(f' ❌ Failed to register an event for `{self.game["name"]}` | Proxy: {ip}:{port}, restart!')
         return False
 
     async def create_code(self):
@@ -174,7 +174,7 @@ class GamePromo:
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
-                logger.error(f' ⚠️ Error creating code `{self.game['name']}` | Proxy: `{ip}:{port}` | `{error}`')
+                logger.error(f' ⚠️ Error creating code `{self.game["name"]}` | Proxy: `{ip}:{port}` | `{error}`')
                 await asyncio.sleep(random.uniform(1, 3.5))
         return response['promoCode']
 

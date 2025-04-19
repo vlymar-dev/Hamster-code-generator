@@ -71,7 +71,7 @@ async def change_language_handler(
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('Current language: <b>{}</b>\n\n' '🌐 Select a language from the available languages:').format(
+            text=_('Current language: <b>{}</b>\n\n🌐 Select a language from the available languages:').format(
                 current_language
             ),
             reply_markup=get_change_language_kb(language_data.language_code),

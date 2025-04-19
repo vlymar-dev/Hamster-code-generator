@@ -122,7 +122,7 @@ async def process_send_admin_reply(message: Message, bot: Bot, state: FSMContext
 
         image = image_manager.get_random_image('handlers')
         response_text = _(
-            '👋 The admin has responded to your feedback:\n\n' '{text}\n\n' 'Thanks again for reaching out to us! 💖'
+            '👋 The admin has responded to your feedback:\n\n{text}\n\nThanks again for reaching out to us! 💖'
         ).format(text=message.text)
         try:
             if image:
@@ -139,7 +139,7 @@ async def process_send_admin_reply(message: Message, bot: Bot, state: FSMContext
         except Exception as e:
             await message.answer(
                 _(
-                    '❌ Failed to send your message. ' 'The user may have blocked the bot or cannot be reached:\n\n{e}'
+                    '❌ Failed to send your message. The user may have blocked the bot or cannot be reached:\n\n{e}'
                 ).format(e=e)
             )
         finally:

@@ -46,9 +46,9 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
                 logger.debug(f'Sending referral notification to {referrer_id}')
                 await bot.send_message(
                     chat_id=referrer_id,
-                    text=_(
-                        '🎉 User {full_name} with ID <b>{user_id}</b> ' 'registered using your referral link!'
-                    ).format(full_name=message.from_user.full_name, user_id=message.from_user.id),
+                    text=_('🎉 User {full_name} with ID <b>{user_id}</b> registered using your referral link!').format(
+                        full_name=message.from_user.full_name, user_id=message.from_user.id
+                    ),
                 )
         image = image_manager.get_random_image('handlers')
         response_text = _(

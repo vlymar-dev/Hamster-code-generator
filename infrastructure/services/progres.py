@@ -83,4 +83,4 @@ class ProgressService:
 
         progress = min(int((current / total) * length), length)
         logger.debug(f'Progress: {progress}/{length} blocks')
-        return f"{'▰' * progress}{'▱' * (length - progress)} ({current}/{total}) {'✔️' if current >= total else '❌'}"
+        return f'{"▰" * progress}{"▱" * (length - progress)} ({current}/{total}) {"✔️" if current >= total else "❌"}'

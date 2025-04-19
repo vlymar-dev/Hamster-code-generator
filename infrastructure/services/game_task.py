@@ -19,7 +19,7 @@ class GameTaskService:
         tasks_per_page: int = 10,
     ):
         """Get paginated list of game tasks with metadata"""
-        logger.debug(f"Getting paginated tasks for game '{game_name}' - " f'Page: {page}, Per page: {tasks_per_page}')
+        logger.debug(f"Getting paginated tasks for game '{game_name}' - Page: {page}, Per page: {tasks_per_page}")
 
         if page < 1:
             logger.warning(f'Invalid page number ({page}), resetting to 1')

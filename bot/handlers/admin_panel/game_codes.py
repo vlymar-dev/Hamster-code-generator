@@ -67,7 +67,7 @@ async def add_game_code_handler(callback_query: CallbackQuery, state: FSMContext
             logger.warning(f'User {admin_id} tried to add code without selecting game')
             await callback_query.answer(text=_('⚠️ First, choose a game!'), show_alert=True)
             return
-        logger.info(f'User {admin_id} started adding code for {data['selected_game']}')
+        logger.info(f'User {admin_id} started adding code for {data["selected_game"]}')
         await state.set_state(GameCodeManagement.WaitingForTask)
         await callback_query.answer()
         await callback_query.message.delete()
@@ -152,7 +152,7 @@ async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext) 
         await callback_query.answer()
         await callback_query.message.delete()
         await callback_query.message.answer(
-            text=_('📲 You chose a game: <b>{game}</b>\n\n' '📋 <b>Enter the ID to be deleted:</b>').format(
+            text=_('📲 You chose a game: <b>{game}</b>\n\n📋 <b>Enter the ID to be deleted:</b>').format(
                 game=game_name
             ),
             reply_markup=get_cancel_game_code_action_kb(),

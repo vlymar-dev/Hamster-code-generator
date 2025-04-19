@@ -28,6 +28,6 @@ class ImageManagerMiddleware(BaseMiddleware):
             logger.debug(f'ImageManager processing completed for {event_type}')
             return result
         except Exception as e:
-            logger.error(f'ImageManager failure in {event_type}. ' f'Error: {str(e)}. ')
+            logger.error(f'ImageManager failure in {event_type}. Error: {str(e)}. ')
             logger.debug(f'Error details - Event data: {event.model_dump_json()}')
             raise

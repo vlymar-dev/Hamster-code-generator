@@ -280,4 +280,3 @@ msgid ""
 "👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive "
 "content. ✨"
 msgstr ""
-

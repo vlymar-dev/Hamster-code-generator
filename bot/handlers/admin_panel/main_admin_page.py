@@ -52,7 +52,7 @@ async def manage_keys_handler(callback_query: CallbackQuery, session: AsyncSessi
         db_keys_count = await PromoCodeRepository.get_code_counts_for_games(session, HAMSTER_GAMES_LIST)
         db_keys_count_formated = '\n'.join(f'{count}.....<b>{game}</b>' for game, count in db_keys_count.items())
         await callback_query.message.answer(
-            text=_('<b>Picked up the keys today:</b> {today_keys}\n\n' '🕹️ <i>All games:</i>\n' '{db_keys}').format(
+            text=_('<b>Picked up the keys today:</b> {today_keys}\n\n🕹️ <i>All games:</i>\n{db_keys}').format(
                 today_keys=today_keys, db_keys=db_keys_count_formated
             ),
             reply_markup=get_back_to_admin_panel_kb(),

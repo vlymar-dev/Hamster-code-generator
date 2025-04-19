@@ -71,7 +71,7 @@ async def process_announcement_title_handler(message: Message, state: FSMContext
         await state.update_data(title=message.html_text)
         await state.set_state(CreateAnnouncement.image)
         await message.answer(
-            text=_('📝 <b>Title:</b>\n{title}\n\n' 'Send an image or type <code>no_image</code> to skip.').format(
+            text=_('📝 <b>Title:</b>\n{title}\n\nSend an image or type <code>no_image</code> to skip.').format(
                 title=message.html_text
             ),
             reply_markup=get_cancel_announcement_action_kb(),
@@ -511,9 +511,9 @@ async def confirm_broadcast_handler(
             )
             logger.info(f'Broadcast stats: {stats}')
             await callback_query.message.answer(
-                text=_(
-                    '📤 Broadcast completed:\n\n' '✅ Delivered: <b>{success}</b>\n' '❌ Failed: <b>{failed}</b>'
-                ).format(success=stats['success'], failed=stats['failed']),
+                text=_('📤 Broadcast completed:\n\n✅ Delivered: <b>{success}</b>\n❌ Failed: <b>{failed}</b>').format(
+                    success=stats['success'], failed=stats['failed']
+                ),
                 reply_markup=get_back_to_announcement_details_kb(),
             )
         except ValueError as ve:
@@ -645,9 +645,9 @@ async def show_announcements_text(session: AsyncSession) -> str:
                 else _('No translations available')
             )
             posts.append(
-                _(
-                    '🔅 <b>ID:</b> <code>{id}</code>\n' '🔖 <b>Title:</b> {title}\n' '🌏 <b>Languages:</b> {languages}'
-                ).format(id=ann.id, title=ann.title, languages=lang_list)
+                _('🔅 <b>ID:</b> <code>{id}</code>\n🔖 <b>Title:</b> {title}\n🌏 <b>Languages:</b> {languages}').format(
+                    id=ann.id, title=ann.title, languages=lang_list
+                )
             )
 
         return _('📌 <b><i>All announcements:</i></b>\n\n') + '\n\n'.join(posts)
