@@ -13,5 +13,4 @@ COPY app app
 COPY bot bot
 COPY alembic alembic
 COPY alembic.ini alembic.ini
-COPY db db
-COPY config config
+COPY infrastructure infrastructure

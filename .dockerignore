@@ -47,5 +47,4 @@ images/
 .git
 proxies.txt
 docs/
-ruff.toml
-setup.cfg
+pyproject.toml
