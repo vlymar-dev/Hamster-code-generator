@@ -25,9 +25,7 @@ class CustomI18nMiddleware(I18nMiddleware):
     async def get_locale(self, event: TelegramObject, data: dict[str, Any]) -> str:
         """Determine user locale from cache/database or use default."""
         if not event.from_user:
-            logger.warning(
-                f'Localization failed - no user in event. Event type: {type(event).__name__}'
-            )
+            logger.warning(f'Localization failed - no user in event. Event type: {type(event).__name__}')
             return self.i18n.default_locale
 
         session: AsyncSession = data.get('session')
@@ -52,7 +50,5 @@ class CustomI18nMiddleware(I18nMiddleware):
                 logger.debug(f'Using default locale for user {user_id}')
                 return self.i18n.default_locale
         except Exception as e:
-            logger.error(
-                f'Locale detection failed for user {user_id}. Error: {str(e)}'
-            )
+            logger.error(f'Locale detection failed for user {user_id}. Error: {str(e)}')
             return self.i18n.default_locale

@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class ReferralsRepository:
-
     @staticmethod
     async def add_referral(session: AsyncSession, referrals_data: ReferralAddingSchema):
         try:
@@ -26,9 +25,7 @@ class ReferralsRepository:
     @staticmethod
     async def get_count_user_referrals_by_user_id(session: AsyncSession, user_id: int) -> int | None:
         try:
-            result = await session.execute(
-                select(func.count(Referral.id)).where(Referral.referrer_id == user_id)
-            )
+            result = await session.execute(select(func.count(Referral.id)).where(Referral.referrer_id == user_id))
             total_refs = result.scalar_one_or_none()
             return total_refs if total_refs else 0
         except SQLAlchemyError as e:

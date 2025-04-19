@@ -13,10 +13,10 @@ class DatabaseMiddleware(BaseMiddleware):
     """Provides database session management for request handlers."""
 
     async def __call__(
-            self,
-            handler: Callable[[Message | CallbackQuery, dict[str, Any]], Awaitable[Any]],
-            event: Message | CallbackQuery,
-            data: dict[str, Any]
+        self,
+        handler: Callable[[Message | CallbackQuery, dict[str, Any]], Awaitable[Any]],
+        event: Message | CallbackQuery,
+        data: dict[str, Any],
     ) -> Any:
         """Manages database session lifecycle for the request."""
         async with async_session_maker() as session:

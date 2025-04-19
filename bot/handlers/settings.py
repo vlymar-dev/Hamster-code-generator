@@ -32,25 +32,22 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
         await callback_query.answer()
 
         image = image_manager.get_random_image('handlers')
-        response_text = _('⚙️ <b>Settings</b>\n\n'
-                          '🎮 <i>Adjust the bot to fit your preferences! '
-                          'Choose an option below to customize your experience:</i>\n\n'
-                          '🌐 <b>Change Language</b> — Switch to your preferred language for a smoother experience.\n'
-                          '🔕 <b>Unsubscribe from Notifications</b> — '
-                          'Manage your subscriptions and stay in control of what you receive.\n\n'
-                          '🎨 Personalize to make your time here more enjoyable and tailored just for you!')
+        response_text = _(
+            '⚙️ <b>Settings</b>\n\n'
+            '🎮 <i>Adjust the bot to fit your preferences! '
+            'Choose an option below to customize your experience:</i>\n\n'
+            '🌐 <b>Change Language</b> — Switch to your preferred language for a smoother experience.\n'
+            '🔕 <b>Unsubscribe from Notifications</b> — '
+            'Manage your subscriptions and stay in control of what you receive.\n\n'
+            '🎨 Personalize to make your time here more enjoyable and tailored just for you!'
+        )
         if image:
             await callback_query.message.answer_photo(
-                photo=image,
-                caption=response_text,
-                reply_markup=get_settings_kb()
+                photo=image, caption=response_text, reply_markup=get_settings_kb()
             )
         else:
             logger.warning(f'No images available in settings for user {user_id}')
-            await callback_query.message.answer(
-                text=response_text,
-                reply_markup=get_settings_kb()
-            )
+            await callback_query.message.answer(text=response_text, reply_markup=get_settings_kb())
     except Exception as e:
         logger.error(f'Settings menu error for {user_id}: {e}', exc_info=True)
         raise
@@ -58,9 +55,7 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
 
 @settings_router.callback_query(F.data == 'change_language')
 async def change_language_handler(
-        callback_query: CallbackQuery,
-        session: AsyncSession,
-        cache_service: CacheService
+    callback_query: CallbackQuery, session: AsyncSession, cache_service: CacheService
 ) -> None:
     """Show language selection menu with current language."""
     user_id = callback_query.from_user.id
@@ -68,9 +63,7 @@ async def change_language_handler(
 
     try:
         language_data = await UserCacheService.get_user_language(
-            cache_service=cache_service,
-            session=session,
-            user_id=user_id
+            cache_service=cache_service, session=session, user_id=user_id
         )
         current_language = LANGUAGES_DICT.get(language_data.language_code)
         logger.debug(f'User {user_id} current language: {current_language}')
@@ -78,9 +71,10 @@ async def change_language_handler(
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('Current language: <b>{}</b>\n\n'
-                   '🌐 Select a language from the available languages:').format(current_language),
-            reply_markup=get_change_language_kb(language_data.language_code)
+            text=_('Current language: <b>{}</b>\n\n' '🌐 Select a language from the available languages:').format(
+                current_language
+            ),
+            reply_markup=get_change_language_kb(language_data.language_code),
         )
         logger.info(f'Language selection interface shown to user {user_id}')
     except Exception as e:
@@ -90,11 +84,11 @@ async def change_language_handler(
 
 @settings_router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
 async def update_language_handler(
-        callback_query: CallbackQuery,
-        session: AsyncSession,
-        i18n: CustomI18nMiddleware,
-        image_manager: ImageManager,
-        cache_service: CacheService
+    callback_query: CallbackQuery,
+    session: AsyncSession,
+    i18n: CustomI18nMiddleware,
+    image_manager: ImageManager,
+    cache_service: CacheService,
 ) -> None:
     """Process language update and refresh interface."""
     user_id = callback_query.from_user.id
@@ -106,7 +100,7 @@ async def update_language_handler(
             cache_service=cache_service,
             session=session,
             user_id=callback_query.from_user.id,
-            selected_language_code=selected_language_code
+            selected_language_code=selected_language_code,
         )
         updated_language_code = language_data.language_code
         selected_language_name = LANGUAGES_DICT.get(updated_language_code)
@@ -115,8 +109,7 @@ async def update_language_handler(
         # Apply changes
         i18n.ctx_locale.set(updated_language_code)  # noqa
         await callback_query.answer(
-            text=_('🌐 Language updated to: {}').format(selected_language_name),
-            show_alert=True
+            text=_('🌐 Language updated to: {}').format(selected_language_name), show_alert=True
         )
         await send_main_menu(callback_query.message, session, image_manager)
         logger.info(f'Interface refreshed for user {user_id} with new language: {selected_language_name}')
@@ -137,8 +130,7 @@ async def notifications_handler(callback_query: CallbackQuery, session: AsyncSes
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('Your subscription status: {}').format(status),
-            reply_markup=notifications_kb(is_subscribed)
+            text=_('Your subscription status: {}').format(status), reply_markup=notifications_kb(is_subscribed)
         )
     except Exception as e:
         logger.error(f'Notifications error for {user_id}: {e}', exc_info=True)
@@ -147,9 +139,7 @@ async def notifications_handler(callback_query: CallbackQuery, session: AsyncSes
 
 @settings_router.callback_query(F.data == 'subscribe_confirm')
 async def subscribe_confirm_handler(
-        callback_query: CallbackQuery,
-        session: AsyncSession,
-        image_manager: ImageManager
+    callback_query: CallbackQuery, session: AsyncSession, image_manager: ImageManager
 ) -> None:
     """Confirm and activate notification subscription."""
     user_id = callback_query.from_user.id
@@ -157,14 +147,9 @@ async def subscribe_confirm_handler(
 
     try:
         await UserRepository.update_subscription_status(
-            session=session,
-            user_id=callback_query.from_user.id,
-            is_subscribed=True
+            session=session, user_id=callback_query.from_user.id, is_subscribed=True
         )
-        await callback_query.answer(
-            text=_('You have successfully Subscribed for notifications.'),
-            show_alert=True
-        )
+        await callback_query.answer(text=_('You have successfully Subscribed for notifications.'), show_alert=True)
         await send_main_menu(callback_query, session, image_manager)
     except Exception as e:
         logger.error(f'Subscription error for {user_id}: {e}', exc_info=True)
@@ -173,9 +158,7 @@ async def subscribe_confirm_handler(
 
 @settings_router.callback_query(F.data == 'unsubscribe')
 async def unsubscribe_handler(
-        callback_query: CallbackQuery,
-        session: AsyncSession,
-        image_manager: ImageManager
+    callback_query: CallbackQuery, session: AsyncSession, image_manager: ImageManager
 ) -> None:
     """Handle unsubscribe request with referral requirement check."""
     user_id = callback_query.from_user.id
@@ -183,30 +166,24 @@ async def unsubscribe_handler(
 
     try:
         referrals_count = await ReferralsRepository.get_count_user_referrals_by_user_id(
-            session,
-            callback_query.from_user.id
+            session, callback_query.from_user.id
         )
         required_number_of_referrals = config.telegram.REFERRAL_THRESHOLD
         if referrals_count < required_number_of_referrals:
             logger.warning(f'Unsubscribe denied for {user_id} (referrals: {referrals_count})')
             await callback_query.answer(
-                text=_('You do not meet the requirements to unsubscribe from notifications. 🚫\n'
-                       'You must have at least {} referrals to unsubscribe from notifications 🫂').format(
-                    required_number_of_referrals
-                ),
-                show_alert=True
+                text=_(
+                    'You do not meet the requirements to unsubscribe from notifications. 🚫\n'
+                    'You must have at least {} referrals to unsubscribe from notifications 🫂'
+                ).format(required_number_of_referrals),
+                show_alert=True,
             )
             return await send_main_menu(callback_query, session, image_manager)
 
         await UserRepository.update_subscription_status(
-            session=session,
-            user_id=callback_query.from_user.id,
-            is_subscribed=False
+            session=session, user_id=callback_query.from_user.id, is_subscribed=False
         )
-        await callback_query.answer(
-            text=_('You have successfully unsubscribed from notifications.'),
-            show_alert=True
-        )
+        await callback_query.answer(text=_('You have successfully unsubscribed from notifications.'), show_alert=True)
         await send_main_menu(callback_query, session, image_manager)
     except Exception as e:
         logger.error(f'Unsubscribe error for {user_id}: {e}', exc_info=True)

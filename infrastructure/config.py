@@ -9,10 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class BotConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix='BOT_',
-        env_file=BASE_DIR / '.env',
-        env_file_encoding='utf-8',
-        extra='ignore')
+        env_prefix='BOT_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
+    )
 
     TOKEN: SecretStr
     ADMIN_ACCESS_IDs: list[int]
@@ -29,10 +27,8 @@ class BotConfig(BaseSettings):
 
 class WalletsConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix='WALLET_',
-        env_file=BASE_DIR / '.env',
-        env_file_encoding='utf-8',
-        extra='ignore')
+        env_prefix='WALLET_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
+    )
 
     TRC: str
     TON: str
@@ -40,10 +36,8 @@ class WalletsConfig(BaseSettings):
 
 class DatabaseConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix='DB_',
-        env_file=BASE_DIR / '.env',
-        env_file_encoding='utf-8',
-        extra='ignore')
+        env_prefix='DB_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
+    )
 
     NAME: str = Field(min_length=3)
     USER: str = Field(min_length=3)
@@ -61,10 +55,8 @@ class DatabaseConfig(BaseSettings):
 
 class RedisConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix='REDIS_',
-        env_file=BASE_DIR / '.env',
-        env_file_encoding='utf-8',
-        extra='ignore')
+        env_prefix='REDIS_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
+    )
 
     HOST: str = Field('redis')
     PORT: int = Field(6379, ge=1024, le=65535)
@@ -87,10 +79,7 @@ class RedisConfig(BaseSettings):
 
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=BASE_DIR / '.env',
-        env_file_encoding='utf-8',
-        extra='ignore')
+    model_config = SettingsConfigDict(env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore')
 
     PROD_MODE: bool = Field(default=True, validation_alias='PRODUCTION_MODE')
 

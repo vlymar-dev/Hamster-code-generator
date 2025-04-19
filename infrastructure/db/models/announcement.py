@@ -18,17 +18,13 @@ class Announcement(Base):
     )
     created_by: Mapped[int] = mapped_column(BigInteger, nullable=False)
     translations_text = relationship(
-        'AnnouncementTranslation',
-        back_populates='announcement',
-        cascade='all, delete-orphan'
+        'AnnouncementTranslation', back_populates='announcement', cascade='all, delete-orphan'
     )
 
 
 class AnnouncementTranslation(Base):
     __tablename__ = 'announcement_translations'
-    __table_args__ = (
-        UniqueConstraint('announcement_id', 'language_code', name='uc_announcement_language'),
-    )
+    __table_args__ = (UniqueConstraint('announcement_id', 'language_code', name='uc_announcement_language'),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     announcement_id: Mapped[int] = mapped_column(Integer, ForeignKey('announcements.id'), nullable=False)

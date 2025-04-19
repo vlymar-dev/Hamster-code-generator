@@ -3,22 +3,19 @@ LANGUAGES_DICT = {
     'ru': 'Русский',
 }
 
-ROLES_DICT = {
-    'user': 'User',
-    'admin': 'Admin'
-}
+ROLES_DICT = {'user': 'User', 'admin': 'Admin'}
 
 STATUS_LIMITS = {
     'free': {'daily_limit': 4, 'interval_minutes': 1},
     'friend': {'daily_limit': 20, 'interval_minutes': 1},
-    'premium': {'daily_limit': 200, 'interval_minutes': 0}
+    'premium': {'daily_limit': 200, 'interval_minutes': 0},
 }
 
 GAME_TASKS_DICT = {
     'cats': '🐈‍⬛ Cats Codes',
     'blum': '⚫️ BLUM Cinema',
     'tapswap': '🖐 TapSwap Cinema',
-    'hrum': '🥠 Hrum'
+    'hrum': '🥠 Hrum',
 }
 
 HAMSTER_GAMES_LIST = [
@@ -40,7 +37,7 @@ HAMSTER_GAMES_LIST = [
     'CountMasters',
     'InfectedFrontier',
     'AmongWater',
-    'FactoryWorld'
+    'FactoryWorld',
 ]
 
 SUPPORTED_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif', '.webp')

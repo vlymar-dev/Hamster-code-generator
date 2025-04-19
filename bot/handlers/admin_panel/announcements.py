@@ -35,10 +35,7 @@ async def manage_announcements_handler(callback_query: CallbackQuery, session: A
         text = await show_announcements_text(session)
         await callback_query.answer()
         await callback_query.message.delete()
-        await callback_query.message.answer(
-            text=text,
-            reply_markup=get_announcements_kb()
-        )
+        await callback_query.message.answer(text=text, reply_markup=get_announcements_kb())
         logger.info(f'Admin {admin_id} opened announcements list')
     except Exception as e:
         logger.error(f'Announcements error for admin {admin_id}: {e}', exc_info=True)
@@ -55,8 +52,7 @@ async def create_announcement_handler(callback_query: CallbackQuery, state: FSMC
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('📝 Enter the announcement title:'),
-            reply_markup=get_cancel_announcement_action_kb()
+            text=_('📝 Enter the announcement title:'), reply_markup=get_cancel_announcement_action_kb()
         )
         await state.set_state(CreateAnnouncement.title)
         logger.info(f'Admin {admin_id} entered announcement creation flow')
@@ -75,9 +71,10 @@ async def process_announcement_title_handler(message: Message, state: FSMContext
         await state.update_data(title=message.html_text)
         await state.set_state(CreateAnnouncement.image)
         await message.answer(
-            text=_('📝 <b>Title:</b>\n{title}\n\n'
-                   'Send an image or type <code>no_image</code> to skip.').format(title=message.html_text),
-            reply_markup=get_cancel_announcement_action_kb()
+            text=_('📝 <b>Title:</b>\n{title}\n\n' 'Send an image or type <code>no_image</code> to skip.').format(
+                title=message.html_text
+            ),
+            reply_markup=get_cancel_announcement_action_kb(),
         )
         logger.info(f'Admin {message.from_user.id} entered title: {message.text[:50]}...')
     except Exception as e:
@@ -87,10 +84,7 @@ async def process_announcement_title_handler(message: Message, state: FSMContext
 
 @announcements_router.message(CreateAnnouncement.image)
 async def process_announcement_image_handler(
-        message: Message,
-        state: FSMContext,
-        session: AsyncSession,
-        bot: Bot
+    message: Message, state: FSMContext, session: AsyncSession, bot: Bot
 ) -> None:
     """Process image input for announcement creation."""
     admin_id = message.from_user.id
@@ -104,45 +98,40 @@ async def process_announcement_image_handler(
                 logger.info(f'Admin {admin_id} sent photo for announcement')
                 image_url = await AdminPanelService.process_and_save_image(photo, bot)
                 data = AnnouncementCreateSchema(
-                        title=data['title'],
-                        created_by=message.from_user.id,
-                        image_url=image_url
-                    )
+                    title=data['title'], created_by=message.from_user.id, image_url=image_url
+                )
                 await AnnouncementRepository.add_announcement(session, data)
                 await message.answer(
                     text=_('✅ Announcement "{title}" with image created.').format(title=data.title),
-                    reply_markup=get_back_to_announcements_kb()
+                    reply_markup=get_back_to_announcements_kb(),
                 )
                 logger.info(f'Admin {admin_id} created announcement with image')
             except ValueError as ve:
                 logger.warning(f'Admin {admin_id} sent invalid image: {ve}')
                 await message.answer(
                     text=_('🚫 Unsupported image format. Please send a correct image.'),
-                    reply_markup=get_cancel_announcement_action_kb()
+                    reply_markup=get_cancel_announcement_action_kb(),
                 )
             except Exception as e:
                 logger.error(f'Image processing error: {e}', exc_info=True)
                 await message.answer(
                     text=_('⚠️ Error processing image. Please try again.'),
-                    reply_markup=get_cancel_announcement_action_kb()
+                    reply_markup=get_cancel_announcement_action_kb(),
                 )
 
         elif message.text.lower().strip() in ['no_image']:
-            data = AnnouncementCreateSchema(
-                title=data['title'],
-                created_by=message.from_user.id
-            )
+            data = AnnouncementCreateSchema(title=data['title'], created_by=message.from_user.id)
             await AnnouncementRepository.add_announcement(session, data)
 
             await message.answer(
                 text=_('✅ Announcement "{title}" without image created.').format(title=data.title),
-                reply_markup=get_back_to_announcements_kb()
+                reply_markup=get_back_to_announcements_kb(),
             )
             logger.info(f'Admin {admin_id} created announcement without image')
         else:
             await message.answer(
                 text=_('Please submit an image or enter <code>no_image</code> to skip.'),
-                reply_markup=get_cancel_announcement_action_kb()
+                reply_markup=get_cancel_announcement_action_kb(),
             )
         await state.clear()
     except Exception as e:
@@ -160,8 +149,7 @@ async def view_announcement_detail_handler(callback_query: CallbackQuery, state:
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('📝 Enter the announcement id:'),
-            reply_markup=get_cancel_announcement_action_kb()
+            text=_('📝 Enter the announcement id:'), reply_markup=get_cancel_announcement_action_kb()
         )
         await state.set_state(AnnouncementDetails.id)
         logger.info(f'Admin {admin_id} entering announcement ID input')
@@ -179,17 +167,11 @@ async def process_announcement_id_input(message: Message, state: FSMContext, ses
     try:
         announcement_id = int(message.text)
         logger.info(f'Admin {admin_id} requested details for announcement {announcement_id}')
-        await show_announcement_details(
-            target=message,
-            announcement_id=announcement_id,
-            session=session,
-            state=state
-        )
+        await show_announcement_details(target=message, announcement_id=announcement_id, session=session, state=state)
     except ValueError as ve:
         logger.warning(f'Invalid ID input from admin {admin_id}: {message.text}')
         await message.answer(
-            text=_('⚠️ {error}').format(error=str(ve)),
-            reply_markup=get_cancel_announcement_action_kb()
+            text=_('⚠️ {error}').format(error=str(ve)), reply_markup=get_cancel_announcement_action_kb()
         )
     except Exception as e:
         logger.error(f'Process announcement ID error for admin {admin_id}: {e}', exc_info=True)
@@ -216,13 +198,12 @@ async def create_translation_handler(callback_query: CallbackQuery, state: FSMCo
             logger.info(f'Admin {admin_id} selecting from {len(available_languages)} languages')
             await callback_query.message.answer(
                 text=_('🌏 Select a language from the available languages:'),
-                reply_markup=get_languages_kb(available_languages, 'add_translation_text_')
+                reply_markup=get_languages_kb(available_languages, 'add_translation_text_'),
             )
             return
         logger.debug(f'No available languages for admin {admin_id}')
         await callback_query.message.answer(
-            text=_('⚠️ No available languages.'),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=_('⚠️ No available languages.'), reply_markup=get_back_to_announcement_details_kb()
         )
     except Exception as e:
         logger.error(f'Create announcement translation error for admin {admin_id}: {e}', exc_info=True)
@@ -244,7 +225,7 @@ async def get_add_translation_text_handler(callback_query: CallbackQuery, state:
             text=_('📝 Enter the announcement text for "{language_code}":').format(
                 language_code=LANGUAGES_DICT.get(language_code)
             ),
-            reply_markup=get_back_to_announcement_details_kb()
+            reply_markup=get_back_to_announcement_details_kb(),
         )
         await state.set_state(AnnouncementDetails.translation_text)
     except Exception as e:
@@ -264,24 +245,19 @@ async def process_translation_text_input(message: Message, state: FSMContext, se
         await AnnouncementRepository.add_translation_by_announcement_id(
             session=session,
             translation=AnnouncementTranslationCreateSchema(
-                announcement_id=int(data['id']),
-                text=message.html_text,
-                language_code=language_code
-            )
+                announcement_id=int(data['id']), text=message.html_text, language_code=language_code
+            ),
         )
         logger.info(f'Admin {admin_id} added {language_code} translation')
         await message.answer(
-            text=_('✅ Translation for: \'{language}\' created').format(
-                language=LANGUAGES_DICT.get(language_code)
-            ),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=_("✅ Translation for: '{language}' created").format(language=LANGUAGES_DICT.get(language_code)),
+            reply_markup=get_back_to_announcement_details_kb(),
         )
         data.pop('language_code', None)
         await state.update_data(**data)
     except ValueError as ve:
         await message.answer(
-            text=_('❌ {error}').format(error=str(ve)),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=_('❌ {error}').format(error=str(ve)), reply_markup=get_back_to_announcement_details_kb()
         )
     except Exception as e:
         logger.error(f'Translation text input error for admin {admin_id}: {e}', exc_info=True)
@@ -303,13 +279,12 @@ async def edit_announcement_translation_handler(callback_query: CallbackQuery, s
         if available_languages:
             await callback_query.message.answer(
                 text=_('🌏 Select the language available for editing:'),
-                reply_markup=get_languages_kb(available_languages, 'edit_translation_text_')
+                reply_markup=get_languages_kb(available_languages, 'edit_translation_text_'),
             )
             return
         logger.info(f'No editable translations for admin {admin_id}')
         await callback_query.message.answer(
-            text=_('⚠️ No available translations for editing.'),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=_('⚠️ No available translations for editing.'), reply_markup=get_back_to_announcement_details_kb()
         )
     except Exception as e:
         logger.error(f'Translation edit error for admin {admin_id}: {e}', exc_info=True)
@@ -318,9 +293,7 @@ async def edit_announcement_translation_handler(callback_query: CallbackQuery, s
 
 @announcements_router.callback_query(F.data.startswith('edit_translation_text_'))
 async def get_edit_translation_text_handler(
-        callback_query: CallbackQuery,
-        state: FSMContext,
-        session: AsyncSession
+    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession
 ) -> None:
     """Handle language selection for translation editing."""
     admin_id = callback_query.from_user.id
@@ -335,19 +308,20 @@ async def get_edit_translation_text_handler(
             return
 
         text = await AnnouncementRepository.get_translation_by_language_code(
-            session=session,
-            announcement_id=int(data['id']),
-            language_code=language_code
+            session=session, announcement_id=int(data['id']), language_code=language_code
         )
         await state.update_data(language_code=language_code)
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=(_('📙 <b>Text: </b>\n')
-                  + f'{text.text}\n\n'
-                  + _('📝 Enter new announcement text for "{language_code}":').format(
-                        language_code=LANGUAGES_DICT.get(language_code))),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=(
+                _('📙 <b>Text: </b>\n')
+                + f'{text.text}\n\n'
+                + _('📝 Enter new announcement text for "{language_code}":').format(
+                    language_code=LANGUAGES_DICT.get(language_code)
+                )
+            ),
+            reply_markup=get_back_to_announcement_details_kb(),
         )
         await state.set_state(AnnouncementDetails.edit_translation_text)
     except Exception as e:
@@ -367,17 +341,15 @@ async def process_edit_translation_text_input(message: Message, state: FSMContex
         await AnnouncementRepository.update_translation(
             session=session,
             translation=AnnouncementTranslationCreateSchema(
-                announcement_id=int(data['id']),
-                text=message.html_text,
-                language_code=language_code
-            )
+                announcement_id=int(data['id']), text=message.html_text, language_code=language_code
+            ),
         )
 
         await message.answer(
-            text=_('✅ Translation updated <b>successfully</b> for: \'{language}\'.').format(
+            text=_("✅ Translation updated <b>successfully</b> for: '{language}'.").format(
                 language=LANGUAGES_DICT.get(language_code)
             ),
-            reply_markup=get_back_to_announcement_details_kb()
+            reply_markup=get_back_to_announcement_details_kb(),
         )
         logger.info(f'Translation {language_code} updated successfully')
         data.pop('language_code', None)
@@ -385,8 +357,7 @@ async def process_edit_translation_text_input(message: Message, state: FSMContex
     except ValueError as ve:
         logger.warning(f'Validation error updating translation: {ve}')
         await message.answer(
-            text=_('❌ {error}').format(error=str(ve)),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=_('❌ {error}').format(error=str(ve)), reply_markup=get_back_to_announcement_details_kb()
         )
     except Exception as e:
         logger.error(f'Update translation error for admin {admin_id}: {e}', exc_info=True)
@@ -404,8 +375,7 @@ async def delete_announcement_handler(callback_query: CallbackQuery, state: FSMC
         await callback_query.message.delete()
         await callback_query.answer()
         await callback_query.message.answer(
-            text=_('📝 Enter the announcement id to delete:'),
-            reply_markup=get_cancel_announcement_action_kb()
+            text=_('📝 Enter the announcement id to delete:'), reply_markup=get_cancel_announcement_action_kb()
         )
         await state.set_state(DeleteAnnouncement.id)
         logger.debug('Deletion state initialized')
@@ -426,19 +396,16 @@ async def process_delete_announcement_handler(message: Message, session: AsyncSe
         await state.clear()
         await message.answer(
             text=_('✅ Announcement with ID: <b>{id}</b> has been deleted.').format(id=announcement_id),
-            reply_markup=get_back_to_announcements_kb()
+            reply_markup=get_back_to_announcements_kb(),
         )
         logger.info(f'Announcement {announcement_id} deleted successfully')
     except ValueError as e:
-        await message.answer(
-            text=_('❌ {error}').format(error=str(e)),
-            reply_markup=get_back_to_announcements_kb()
-        )
+        await message.answer(text=_('❌ {error}').format(error=str(e)), reply_markup=get_back_to_announcements_kb())
     except Exception as e:
         await state.clear()
         await message.answer(
             text=_('⚠️ An unexpected error occurred. Please try again later.'),
-            reply_markup=get_back_to_announcements_kb()
+            reply_markup=get_back_to_announcements_kb(),
         )
         logger.error(f'Deletion announcement error for admin {admin_id}: {e}', exc_info=True)
 
@@ -464,12 +431,11 @@ async def view_announcement_translation_handler(callback_query: CallbackQuery, s
             logger.info(f'Showing {len(languages_dict)} translations')
             await callback_query.message.answer(
                 text=_('🌏 Select a language from the list of available languages:'),
-                reply_markup=get_languages_kb(languages_dict, 'view_translation_text_')
+                reply_markup=get_languages_kb(languages_dict, 'view_translation_text_'),
             )
             return
         await callback_query.message.answer(
-            text=_('⚠️ No available translations to view.'),
-            reply_markup=get_back_to_announcement_details_kb()
+            text=_('⚠️ No available translations to view.'), reply_markup=get_back_to_announcement_details_kb()
         )
     except Exception as e:
         logger.error(f'View announcements error for admin {admin_id}: {e}', exc_info=True)
@@ -477,9 +443,7 @@ async def view_announcement_translation_handler(callback_query: CallbackQuery, s
 
 @announcements_router.callback_query(F.data.startswith('view_translation_text_'))
 async def get_view_translation_text_handler(
-        callback_query: CallbackQuery,
-        session: AsyncSession,
-        state: FSMContext
+    callback_query: CallbackQuery, session: AsyncSession, state: FSMContext
 ) -> None:
     """Display selected translation text."""
     admin_id = callback_query.from_user.id
@@ -495,16 +459,11 @@ async def get_view_translation_text_handler(
             return
 
         text = await AnnouncementRepository.get_translation_by_language_code(
-            session=session,
-            announcement_id=int(data['id']),
-            language_code=language_code
+            session=session, announcement_id=int(data['id']), language_code=language_code
         )
         await callback_query.message.delete()
         await callback_query.answer()
-        await callback_query.message.answer(
-            text=text.text,
-            reply_markup=get_back_to_announcement_details_kb()
-        )
+        await callback_query.message.answer(text=text.text, reply_markup=get_back_to_announcement_details_kb())
     except Exception as e:
         logger.error(f'Display translation error for admin {admin_id}: {e}', exc_info=True)
 
@@ -520,7 +479,7 @@ async def broadcast_announcement_request_handler(callback_query: CallbackQuery) 
         await callback_query.answer()
         await callback_query.message.answer(
             text=_('🫔 Are you sure you want to broadcast this announcement?'),
-            reply_markup=get_confirmation_broadcast_kb()
+            reply_markup=get_confirmation_broadcast_kb(),
         )
     except Exception as e:
         logger.error(f'Broadcast confirmation error for admin {admin_id}: {e}', exc_info=True)
@@ -528,10 +487,7 @@ async def broadcast_announcement_request_handler(callback_query: CallbackQuery) 
 
 @announcements_router.callback_query(F.data == 'confirm_broadcast')
 async def confirm_broadcast_handler(
-        callback_query: CallbackQuery,
-        state: FSMContext,
-        session: AsyncSession,
-        bot: Bot
+    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession, bot: Bot
 ) -> None:
     """Handle final confirmation of announcement broadcast."""
     admin_id = callback_query.from_user.id
@@ -551,18 +507,14 @@ async def confirm_broadcast_handler(
         try:
             logger.info(f'Starting broadcast for announcement {announcement_id}')
             stats = await AdminPanelService.broadcast_announcement(
-                session=session,
-                bot=bot,
-                announcement_id=announcement_id
+                session=session, bot=bot, announcement_id=announcement_id
             )
             logger.info(f'Broadcast stats: {stats}')
             await callback_query.message.answer(
                 text=_(
-                    '📤 Broadcast completed:\n\n'
-                    '✅ Delivered: <b>{success}</b>\n'
-                    '❌ Failed: <b>{failed}</b>'
+                    '📤 Broadcast completed:\n\n' '✅ Delivered: <b>{success}</b>\n' '❌ Failed: <b>{failed}</b>'
                 ).format(success=stats['success'], failed=stats['failed']),
-                reply_markup=get_back_to_announcement_details_kb()
+                reply_markup=get_back_to_announcement_details_kb(),
             )
         except ValueError as ve:
             logger.error(f'Broadcast validation error: {ve}')
@@ -577,9 +529,7 @@ async def confirm_broadcast_handler(
 
 @announcements_router.callback_query(F.data == 'back_to_announcements')
 async def back_to_announcements_handler(
-        callback_query: CallbackQuery,
-        state: FSMContext,
-        session: AsyncSession
+    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession
 ) -> None:
     """Handle navigation back to announcements list."""
     admin_id = callback_query.from_user.id
@@ -590,10 +540,7 @@ async def back_to_announcements_handler(
         await state.clear()
         await callback_query.message.delete()
         await callback_query.answer()
-        await callback_query.message.answer(
-            text=text,
-            reply_markup=get_announcements_kb()
-        )
+        await callback_query.message.answer(text=text, reply_markup=get_announcements_kb())
         logger.debug('Announcements list displayed')
     except Exception as e:
         logger.error(f'Back to announcements error for admin {admin_id}: {e}', exc_info=True)
@@ -601,9 +548,7 @@ async def back_to_announcements_handler(
 
 @announcements_router.callback_query(F.data == 'back_to_announcement_details')
 async def back_to_announcement_details_handler(
-        callback_query: CallbackQuery,
-        state: FSMContext,
-        session: AsyncSession
+    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession
 ) -> None:
     """Handle navigation back to announcement details."""
     admin_id = callback_query.from_user.id
@@ -617,15 +562,12 @@ async def back_to_announcement_details_handler(
             logger.warning('Missing announcement ID in state')
             await callback_query.message.answer(
                 text=_('⚠️ Announcement ID not found. Please select it again.'),
-                reply_markup=get_back_to_announcements_kb()
+                reply_markup=get_back_to_announcements_kb(),
             )
             return
         await callback_query.message.delete()
         await show_announcement_details(
-            target=callback_query.message,
-            announcement_id=announcement_id,
-            session=session,
-            state=state
+            target=callback_query.message, announcement_id=announcement_id, session=session, state=state
         )
         await callback_query.answer()
         logger.debug(f'Re-displayed details for announcement {announcement_id}')
@@ -633,16 +575,12 @@ async def back_to_announcement_details_handler(
         logger.error(f'Error in back_to_announcement_details_handler: {e}')
         await callback_query.message.answer(
             text=_('⚠️ An unexpected error occurred. Please try again later.'),
-            reply_markup=get_back_to_announcements_kb()
+            reply_markup=get_back_to_announcements_kb(),
         )
 
 
 async def show_announcement_details(
-        target,
-        announcement_id: int,
-        session: AsyncSession,
-        state: FSMContext = None,
-        reply_markup=None
+    target, announcement_id: int, session: AsyncSession, state: FSMContext = None, reply_markup=None
 ) -> None:
     """Display announcement details with translations."""
     logger.debug(f'Showing details for announcement {announcement_id}')
@@ -650,16 +588,12 @@ async def show_announcement_details(
     try:
         announcement = await AnnouncementRepository.get_announcement_by_id(session, announcement_id)
         english_text = next(
-            (translation.text for translation in announcement.languages if translation.language_code == 'en'),
-            None
+            (translation.text for translation in announcement.languages if translation.language_code == 'en'), None
         )
         language_codes = [translation.language_code for translation in announcement.languages]
 
         if state:
-            await state.update_data(
-                id=announcement_id,
-                languages=language_codes
-            )
+            await state.update_data(id=announcement_id, languages=language_codes)
 
         text = _(
             '🔅 <b>ID: {announcement_id}</b>\n'
@@ -670,34 +604,28 @@ async def show_announcement_details(
             announcement_id=announcement.id,
             title=announcement.title,
             languages=', '.join(language_codes),
-            text=english_text or _('No text available.')
+            text=english_text or _('No text available.'),
         )
 
         if not announcement.image_url:
-            await target.answer(
-                text=text,
-                reply_markup=reply_markup or get_announcement_menu_kb()
-            )
+            await target.answer(text=text, reply_markup=reply_markup or get_announcement_menu_kb())
             return
 
         await target.answer_photo(
             photo=FSInputFile(announcement.image_url),
             caption=text,
-            reply_markup=reply_markup or get_announcement_menu_kb()
+            reply_markup=reply_markup or get_announcement_menu_kb(),
         )
         logger.info(f'Displayed details for announcement {announcement_id}')
 
     except ValueError as ve:
         logger.warning(f'Error showing announcement details: {ve}')
-        await target.answer(
-            text=_('⚠️ {error}').format(error=str(ve)),
-            reply_markup=get_cancel_announcement_action_kb()
-        )
+        await target.answer(text=_('⚠️ {error}').format(error=str(ve)), reply_markup=get_cancel_announcement_action_kb())
     except Exception as e:
         logger.error(f'Error in show_announcement_details: {e}', exc_info=True)
         await target.answer(
             text=_('⚠️ An unexpected error occurred. Please try again later.'),
-            reply_markup=get_cancel_announcement_action_kb()
+            reply_markup=get_cancel_announcement_action_kb(),
         )
 
 
@@ -713,13 +641,14 @@ async def show_announcements_text(session: AsyncSession) -> str:
         for ann in announcements:
             lang_list = (
                 ', '.join(lang.language_code for lang in ann.languages)
-                if ann.languages else _('No translations available')
+                if ann.languages
+                else _('No translations available')
             )
-            posts.append(_(
-                '🔅 <b>ID:</b> <code>{id}</code>\n'
-                '🔖 <b>Title:</b> {title}\n'
-                '🌏 <b>Languages:</b> {languages}'
-            ).format(id=ann.id, title=ann.title, languages=lang_list))
+            posts.append(
+                _(
+                    '🔅 <b>ID:</b> <code>{id}</code>\n' '🔖 <b>Title:</b> {title}\n' '🌏 <b>Languages:</b> {languages}'
+                ).format(id=ann.id, title=ann.title, languages=lang_list)
+            )
 
         return _('📌 <b><i>All announcements:</i></b>\n\n') + '\n\n'.join(posts)
     except Exception as e:

@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class GameTaskRepository:
-
     @staticmethod
     async def add_task(session: AsyncSession, game_task: GameTaskSchema) -> None:
         try:

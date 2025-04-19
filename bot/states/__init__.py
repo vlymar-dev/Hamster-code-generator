@@ -10,5 +10,5 @@ __all__ = [
     'DeleteAnnouncement',
     'AdminReplyToFeedback',
     'UserLeaveFeedback',
-    'GameCodeManagement'
+    'GameCodeManagement',
 ]

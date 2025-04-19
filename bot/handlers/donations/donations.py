@@ -24,10 +24,7 @@ async def custom_donate_handler(callback_query: CallbackQuery, state: FSMContext
     try:
         await callback_query.message.delete()
         await callback_query.answer()
-        await callback_query.message.answer(
-            text=_('💫 Enter Your Amount'),
-            reply_markup=get_cancel_donation_kb()
-        )
+        await callback_query.message.answer(text=_('💫 Enter Your Amount'), reply_markup=get_cancel_donation_kb())
         await state.set_state(PaymentState.amount_entry)
     except Exception as e:
         logger.error(f'Custom donate undefined error for user {user_id}: {e}', exc_info=True)
@@ -64,9 +61,7 @@ async def process_custom_donate(message: Message, state: FSMContext) -> None:
             await send_invoice_message(message, amount)
         except TelegramBadRequest as error:
             logger.warning(f'Non-numeric input from user {user_id}')
-            await message.answer(
-                _('❗️ <b>Error:</b> {error}').format(error=error.message)
-            )
+            await message.answer(_('❗️ <b>Error:</b> {error}').format(error=error.message))
     except Exception as e:
         logger.error(f' Process donate undefined error for user {user_id}: {e}', exc_info=True)
 
@@ -104,7 +99,7 @@ async def success_payment_handler(message: Message) -> None:
     try:
         await message.answer(
             text=_('🥳 <b>Thank you! Your support helps us improve!</b> 🤗'),
-            reply_markup=get_back_to_main_menu_keyboard()
+            reply_markup=get_back_to_main_menu_keyboard(),
         )
     except Exception as e:
         logger.error(f'Success payment undefined error for user {user_id}: {e}', exc_info=True)
@@ -116,7 +111,7 @@ async def send_invoice_message(message: Message, amount: int) -> None:
     logger.debug(f'Sending invoice for {amount} to user {user_id}')
 
     try:
-        prices = [LabeledPrice(label="XTR", amount=amount)]
+        prices = [LabeledPrice(label='XTR', amount=amount)]
         await message.answer_invoice(
             title=_('Support Our Community 🚀'),
             description=_('Your contribution of {amount} 🌟 helps us').format(amount=amount),

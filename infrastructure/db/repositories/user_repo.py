@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class UserRepository:
-
     @staticmethod
     async def add_user(session: AsyncSession, user_data: UserCreateSchema) -> None:
         try:
@@ -90,9 +89,7 @@ class UserRepository:
 
     @staticmethod
     async def update_user_language(
-            session: AsyncSession,
-            user_id: int,
-            selected_language_code: str
+        session: AsyncSession, user_id: int, selected_language_code: str
     ) -> UserLanguageCacheSchema:
         try:
             result = await session.execute(
@@ -110,11 +107,7 @@ class UserRepository:
     @staticmethod
     async def update_subscription_status(session: AsyncSession, user_id: int, is_subscribed: bool) -> None:
         try:
-            result = await session.execute(
-                update(User)
-                .where(User.id == user_id)
-                .values(is_subscribed=is_subscribed)
-            )
+            result = await session.execute(update(User).where(User.id == user_id).values(is_subscribed=is_subscribed))
             if result.rowcount:
                 await session.commit()
         except SQLAlchemyError as e:
@@ -124,11 +117,7 @@ class UserRepository:
     async def get_user_progress(session: AsyncSession, user_id: int) -> UserProgressSchema | None:
         try:
             result = await session.execute(
-                select(
-                    User.registration_date,
-                    User.user_status,
-                    User.total_keys_generated
-                ).where(User.id == user_id)
+                select(User.registration_date, User.user_status, User.total_keys_generated).where(User.id == user_id)
             )
             row = result.one_or_none()
             if not row:
@@ -137,7 +126,7 @@ class UserRepository:
             return UserProgressSchema(
                 registration_date=row.registration_date,
                 user_status=row.user_status,
-                total_keys_generated=row.total_keys_generated
+                total_keys_generated=row.total_keys_generated,
             )
         except SQLAlchemyError as e:
             logger.error(f'Database error occurred while retrieving progress for user_id={user_id}: {e}')
@@ -148,11 +137,9 @@ class UserRepository:
         """Gets daily requests, time of last request, and user status per request."""
         try:
             result = await session.execute(
-                select(
-                    User.daily_requests_count,
-                    User.last_request_datetime,
-                    User.user_status
-                ).where(User.id == user_id)
+                select(User.daily_requests_count, User.last_request_datetime, User.user_status).where(
+                    User.id == user_id
+                )
             )
             row = result.one_or_none()
             if not row:
@@ -161,7 +148,7 @@ class UserRepository:
             return UserActivitySchema(
                 daily_requests_count=row.daily_requests_count,
                 last_request_datetime=row.last_request_datetime,
-                user_status=row.user_status
+                user_status=row.user_status,
             )
         except SQLAlchemyError as e:
             logger.error(f'Database error when retrieving user activity data for user_id={user_id}: {e}')
@@ -169,10 +156,7 @@ class UserRepository:
 
     @staticmethod
     async def update_user_activity(
-            session: AsyncSession,
-            user_id: int,
-            increment_keys: int = 1,
-            increment_requests: int = 1
+        session: AsyncSession, user_id: int, increment_keys: int = 1, increment_requests: int = 1
     ) -> None:
         """Updates the number of keys, queries, and the time of the last query."""
         try:
@@ -194,9 +178,7 @@ class UserRepository:
     async def reset_daily_request(session: AsyncSession, user_id: int) -> None:
         """Reset the count of daily requests to zero."""
         try:
-            await session.execute(
-                update(User).where(User.id == user_id).values(daily_requests_count=0)
-            )
+            await session.execute(update(User).where(User.id == user_id).values(daily_requests_count=0))
             await session.commit()
         except SQLAlchemyError as e:
             await session.rollback()
@@ -207,8 +189,7 @@ class UserRepository:
         try:
             today = date.today()
             result = await session.execute(
-                select(func.sum(User.daily_requests_count))
-                .where(cast(User.last_request_datetime, Date) == today)
+                select(func.sum(User.daily_requests_count)).where(cast(User.last_request_datetime, Date) == today)
             )
             today_keys = result.scalar_one_or_none()
             return today_keys if today_keys else 0
@@ -228,10 +209,7 @@ class UserRepository:
     @staticmethod
     async def get_subscribed_users(session: AsyncSession) -> list[SubscribedUsersSchema]:
         try:
-            result = await session.execute(
-                select(User)
-                .where(User.is_subscribed)
-            )
+            result = await session.execute(select(User).where(User.is_subscribed))
             users = result.scalars().all()
             return [SubscribedUsersSchema.model_validate(user) for user in users]
         except SQLAlchemyError as e:

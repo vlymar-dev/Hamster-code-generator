@@ -33,16 +33,11 @@ async def get_games_handler(callback_query: CallbackQuery, image_manager: ImageM
         response_text = _('📱 Select the game for which you want to get codes:')
         if image:
             await callback_query.message.answer_photo(
-                photo=image,
-                caption=response_text,
-                reply_markup=get_games_codes_and_keys_kb()
+                photo=image, caption=response_text, reply_markup=get_games_codes_and_keys_kb()
             )
         else:
             logger.warning(f'No images available in game keys for user {user_id}')
-            await callback_query.message.answer(
-                text=response_text,
-                reply_markup=get_games_codes_and_keys_kb()
-            )
+            await callback_query.message.answer(text=response_text, reply_markup=get_games_codes_and_keys_kb())
     except Exception as e:
         logger.error(f'Games list error for {user_id}: {e}', exc_info=True)
         raise
@@ -54,19 +49,12 @@ async def get_tasks_handler(callback_query: CallbackQuery, session: AsyncSession
     game_name = callback_query.data.split('_')[-1]
     logger.debug(f'User {callback_query.from_user.id} requested tasks for {game_name}')
 
-    await process_tasks_page(
-        callback_query=callback_query,
-        session=session,
-        game_name=game_name,
-        current_page=1
-    )
+    await process_tasks_page(callback_query=callback_query, session=session, game_name=game_name, current_page=1)
 
 
 @games_keys_router.callback_query(PaginationCallbackData.filter())
 async def handle_pagination(
-    callback_query: CallbackQuery,
-    callback_data: PaginationCallbackData,
-    session: AsyncSession
+    callback_query: CallbackQuery, callback_data: PaginationCallbackData, session: AsyncSession
 ):
     """Handle pagination navigation for tasks list."""
     game_name = callback_data.game_name
@@ -81,43 +69,31 @@ async def handle_pagination(
     )
 
 
-async def process_tasks_page(
-    callback_query: CallbackQuery,
-    session: AsyncSession,
-    game_name: str,
-    current_page: int
-):
+async def process_tasks_page(callback_query: CallbackQuery, session: AsyncSession, game_name: str, current_page: int):
     """Process and display paginated tasks for a game."""
     user_id = callback_query.from_user.id
 
     try:
-        response = await GameTaskService.get_paginated_response(
-            session=session,
-            game_name=game_name,
-            page=current_page
-        )
+        response = await GameTaskService.get_paginated_response(session=session, game_name=game_name, page=current_page)
 
         if not response.tasks:
             logger.warning(f'No tasks found for {game_name}, page {current_page}')
-            await callback_query.answer(
-                text=_('No tasks/keys/codes available for this game.'),
-                show_alert=True
-            )
+            await callback_query.answer(text=_('No tasks/keys/codes available for this game.'), show_alert=True)
             return
 
-        task_text = '\n'.join(['<b>{task}</b> - <code>{answer}</code>'.format(
-            task=task.task.strip(),
-            answer=task.answer.strip()) for task in response.tasks]
+        task_text = '\n'.join(
+            [
+                '<b>{task}</b> - <code>{answer}</code>'.format(task=task.task.strip(), answer=task.answer.strip())
+                for task in response.tasks
+            ]
         )
 
         logger.debug(f'Displaying {len(response.tasks)} tasks for {game_name} to {user_id}')
         await callback_query.message.edit_text(
             text=task_text + _('\n\n🔖 (<i>click to copy</i>)'),
             reply_markup=get_pagination_kb(
-                current_page=response.page,
-                total_pages=response.total_pages,
-                game_name=game_name
-            )
+                current_page=response.page, total_pages=response.total_pages, game_name=game_name
+            ),
         )
     except Exception as e:
         logger.error(f'Tasks processing error for {user_id}: {e}', exc_info=True)
@@ -149,10 +125,12 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
                 logger.info(f'Cooldown active for user {user_id}')
                 minutes = validation_result.remaining_time.minutes
                 seconds = validation_result.remaining_time.seconds
-                time_text = _('⏱️ Wait for {minutes} min {seconds} sec before getting the next key.').format(
-                    minutes=minutes, seconds=seconds
-                    ) if minutes else _('⏱️ Wait for {seconds} sec before getting the next key.').format(
-                    seconds=seconds
+                time_text = (
+                    _('⏱️ Wait for {minutes} min {seconds} sec before getting the next key.').format(
+                        minutes=minutes, seconds=seconds
+                    )
+                    if minutes
+                    else _('⏱️ Wait for {seconds} sec before getting the next key.').format(seconds=seconds)
                 )
                 await callback_query.answer(time_text, show_alert=True)
                 return
@@ -164,8 +142,7 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
         except Exception as e:
             logger.error(f'Promo code error for {user_id}: {e}', exc_info=True)
             await callback_query.answer(
-                text=_('An error occurred while retrieving promo codes. Please try again later.'),
-                show_alert=True
+                text=_('An error occurred while retrieving promo codes. Please try again later.'), show_alert=True
             )
             return
         text = []
@@ -188,7 +165,7 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
         await callback_query.message.delete()
         await callback_query.message.answer(
             text=_('{text}\n\n🔖 (click to copy)').format(text=formatted_text),
-            reply_markup=get_back_to_main_menu_keyboard()
+            reply_markup=get_back_to_main_menu_keyboard(),
         )
         logger.debug(f'Successfully sent codes to user {user_id}')
     except Exception as e:

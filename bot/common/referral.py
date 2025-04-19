@@ -10,7 +10,7 @@ REFERRAL_LINKS = {
     '🖲️ CEX.IO Power Tap': 'https://t.me/cexio_tap_bot?startapp=1716399236183636',
     '🪙 Blum': 'https://t.me/blum/app?startapp=ref_8U6nYohQav',
     '🐸 Frog Trader': 'https://t.me/xkucoinbot/kucoinminiapp?startapp'
-                     '=cm91dGU9JTJGdGFwLWdhbWUlM0ZpbnZpdGVyVXNlcklkJTNENDUyNzkyNTg2JTI2cmNvZGUlM0Q=',
+    '=cm91dGU9JTJGdGFwLWdhbWUlM0ZpbnZpdGVyVXNlcklkJTNENDUyNzkyNTg2JTI2cmNvZGUlM0Q=',
     'Binance 🔶': 'https://www.binance.com/activity/referral-entry/CPA?ref=CPA_009SJLVSMT',
     'Bybit ⚫️': 'https://www.bybit.com/invite?ref=ZYJQX3B',
 }

@@ -26,9 +26,7 @@ class UserCacheService:
 
     @staticmethod
     async def get_user_language(
-            cache_service: CacheService,
-            session: AsyncSession,
-            user_id: int
+        cache_service: CacheService, session: AsyncSession, user_id: int
     ) -> UserLanguageCacheSchema:
         """Get user language from cache or database."""
         logger.debug(f'Getting language for user {user_id}')
@@ -37,15 +35,12 @@ class UserCacheService:
             model=UserLanguageCacheSchema,
             fetch_func=UserRepository.get_user_language,
             session=session,
-            user_id=user_id
+            user_id=user_id,
         )
 
     @staticmethod
     async def update_user_language(
-            cache_service: CacheService,
-            session: AsyncSession,
-            user_id: int,
-            selected_language_code: str
+        cache_service: CacheService, session: AsyncSession, user_id: int, selected_language_code: str
     ) -> UserLanguageCacheSchema:
         """Update user language in both cache and database."""
         logger.debug(f'Updating language for user {user_id} to {selected_language_code}')
@@ -54,30 +49,23 @@ class UserCacheService:
             fetch_func=UserRepository.update_user_language,
             session=session,
             user_id=user_id,
-            selected_language_code=selected_language_code
+            selected_language_code=selected_language_code,
         )
 
     @staticmethod
-    async def get_user_auth_data(
-            cache_service: CacheService,
-            session: AsyncSession,
-            user_id: int
-    ):
+    async def get_user_auth_data(cache_service: CacheService, session: AsyncSession, user_id: int):
         """Get cached auth data (roles, permissions)."""
         return await cache_service.get_or_set(
             key=CacheKeys.USER_DATA.format(user_id=user_id),
             model=UserAuthCache,
             fetch_func=UserRepository.get_user_auth,
             session=session,
-            user_id=user_id
+            user_id=user_id,
         )
 
     @staticmethod
     async def update_user_auth_data(
-            cache_service: CacheService,
-            session: AsyncSession,
-            user_id: int,
-            new_user_role: str
+        cache_service: CacheService, session: AsyncSession, user_id: int, new_user_role: str
     ):
         """Update user auth data in cache and DB."""
         return await cache_service.refresh(
@@ -85,7 +73,7 @@ class UserCacheService:
             fetch_func=UserRepository.update_user_role,
             session=session,
             user_id=user_id,
-            new_user_role=new_user_role
+            new_user_role=new_user_role,
         )
 
 
@@ -138,9 +126,7 @@ class UserService:
 
         try:
             await UserService._reset_daily_request_if_needed(
-                session=session,
-                user_id=user_id,
-                last_request_datetime=user_activity.last_request_datetime
+                session=session, user_id=user_id, last_request_datetime=user_activity.last_request_datetime
             )
             return UserService._check_user_daily_limits(user_activity)
         except Exception as e:
@@ -166,7 +152,7 @@ class UserService:
     @staticmethod
     def _check_user_daily_limits(user_activity: UserActivitySchema) -> UserKeyGenerationSchema:
         """Check user's daily limits and cooldowns"""
-        logger.debug(f"Checking limits for {user_activity.user_id}")
+        logger.debug(f'Checking limits for {user_activity.user_id}')
 
         try:
             daily_limit = STATUS_LIMITS[user_activity.user_status]['daily_limit']
@@ -182,10 +168,10 @@ class UserService:
             if elapsed_seconds < interval_seconds:
                 remaining_time = RemainingTimeSchema(
                     minutes=int((interval_seconds - elapsed_seconds) // 60),
-                    seconds=int((interval_seconds - elapsed_seconds) % 60)
+                    seconds=int((interval_seconds - elapsed_seconds) % 60),
                 )
                 return UserKeyGenerationSchema(remaining_time=remaining_time)
-            logger.debug("User passed all checks")
+            logger.debug('User passed all checks')
             return UserKeyGenerationSchema(can_generate=True)
         except Exception as e:
             logger.error(f'Error checking users daily limits: {e}', exc_info=True)

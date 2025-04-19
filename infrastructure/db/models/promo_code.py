@@ -11,6 +11,4 @@ class PromoCode(Base):
     game_name: Mapped[str] = mapped_column(String(50), nullable=False)
     promo_code: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
 
-    __table_args__ = (
-        Index('ix_game_name_id', 'game_name', 'id'),
-    )
+    __table_args__ = (Index('ix_game_name_id', 'game_name', 'id'),)

@@ -12,10 +12,7 @@ def get_change_language_kb(current_language_code: str) -> InlineKeyboardMarkup:
         if lang_code == current_language_code:
             continue
 
-        builder.button(
-            text=language_name,
-            callback_data=f'set_lang:{lang_code}'
-        )
+        builder.button(text=language_name, callback_data=f'set_lang:{lang_code}')
     builder.adjust(2)
     builder.row(back_to_main_menu_button())
     return builder.as_markup()

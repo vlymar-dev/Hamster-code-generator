@@ -22,17 +22,17 @@ def get_admin_panel_codes_kb() -> InlineKeyboardMarkup:
 def get_game_codes_actions_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=_('➕ Add Code'), callback_data='add_code'),
-                InlineKeyboardButton(text=_('❌ Delete Code'), callback_data='delete_code'))
+    builder.row(
+        InlineKeyboardButton(text=_('➕ Add Code'), callback_data='add_code'),
+        InlineKeyboardButton(text=_('❌ Delete Code'), callback_data='delete_code'),
+    )
     builder.row(back_to_admin_panel_button())
     return builder.as_markup()
 
 
 def get_cancel_game_code_action_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text=_('🔙 Cancel'), callback_data='back_to_admin_game_menu')]
-        ]
+        inline_keyboard=[[InlineKeyboardButton(text=_('🔙 Cancel'), callback_data='back_to_admin_game_menu')]]
     )
 
 

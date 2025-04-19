@@ -14,5 +14,5 @@ __all__ = [
     'progres_service',
     'PromoCodeService',
     'UserCacheService',
-    'UserService'
+    'UserService',
 ]

@@ -36,5 +36,5 @@ __all__ = [
     'UserKeyGenerationSchema',
     'UserProgressSchema',
     'UserLanguageCacheSchema',
-    'UserProgressDataSchema'
+    'UserProgressDataSchema',
 ]

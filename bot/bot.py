@@ -34,13 +34,10 @@ async def main():
         logger.info('✅ Redis connection established')
 
         bot = Bot(
-            token=config.telegram.TOKEN.get_secret_value(),
-            default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+            token=config.telegram.TOKEN.get_secret_value(), default=DefaultBotProperties(parse_mode=ParseMode.HTML)
         )
         storage = RedisStorage(
-            redis=redis_client,
-            state_ttl=config.redis.FSM_TTL or 3600,
-            data_ttl=config.redis.DATA_TTL or 7200
+            redis=redis_client, state_ttl=config.redis.FSM_TTL or 3600, data_ttl=config.redis.DATA_TTL or 7200
         )
         logger.debug(f'Using storage: {type(storage).__name__}')
         dp = Dispatcher(storage=storage)
@@ -49,15 +46,12 @@ async def main():
         image_manager = ImageManager(BASE_DIR)
         logger.debug(f'Initializing ImageManager with base directory: {BASE_DIR}')
         image_manager.load_category('handlers', 'handlers_images')
-        logger.info('Loaded {} images for category \'handlers\''.format(
-            len(image_manager.categories.get('handlers', []))
-        ))
+        logger.info(
+            "Loaded {} images for category 'handlers'".format(len(image_manager.categories.get('handlers', [])))
+        )
 
         # CacheService initialization
-        cache_service = CacheService(
-            redis=redis_client,
-            default_ttl=config.redis.TTL
-        )
+        cache_service = CacheService(redis=redis_client, default_ttl=config.redis.TTL)
 
         # Middleware setup
         logger.debug('Setting up middlewares...')
@@ -92,6 +86,7 @@ async def main():
         if bot:
             await bot.session.close()
         await bot.session.close()
+
 
 if __name__ == '__main__':
     asyncio.run(main())

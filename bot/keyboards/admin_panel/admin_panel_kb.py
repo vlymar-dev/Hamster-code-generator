@@ -9,9 +9,11 @@ from bot.keyboards.main_menu_kb import back_to_main_menu_button
 def admin_panel_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=_('🔑 Keys'), callback_data='manage_keys'),
-                InlineKeyboardButton(text=_('🕹️ Codes'), callback_data='manage_codes'),
-                InlineKeyboardButton(text=_('🧑‍💻 Users'), callback_data='manage_users'))
+    builder.row(
+        InlineKeyboardButton(text=_('🔑 Keys'), callback_data='manage_keys'),
+        InlineKeyboardButton(text=_('🕹️ Codes'), callback_data='manage_codes'),
+        InlineKeyboardButton(text=_('🧑‍💻 Users'), callback_data='manage_users'),
+    )
     builder.row(InlineKeyboardButton(text=_('📣 Announcements'), callback_data='manage_announcements'))
     builder.row(back_to_main_menu_button())
     return builder.as_markup()
@@ -32,10 +34,7 @@ def admin_panel_user_role_kb(current_user_role: str) -> InlineKeyboardMarkup:
         if role == current_user_role:
             continue
 
-        builder.button(
-            text=title,
-            callback_data=f'change_role_to_{role}'
-        )
+        builder.button(text=title, callback_data=f'change_role_to_{role}')
 
     builder.adjust(2)
     builder.row(back_to_admin_panel_button())

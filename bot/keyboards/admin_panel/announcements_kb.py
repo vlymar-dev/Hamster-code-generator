@@ -18,8 +18,10 @@ def get_announcements_kb() -> InlineKeyboardMarkup:
 def get_announcement_menu_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(InlineKeyboardButton(text=_('🥏 Create Translation'), callback_data='create_announcement_translation'),
-                InlineKeyboardButton(text=_('🔍 View Translation'), callback_data='view_announcement_translation'))
+    builder.row(
+        InlineKeyboardButton(text=_('🥏 Create Translation'), callback_data='create_announcement_translation'),
+        InlineKeyboardButton(text=_('🔍 View Translation'), callback_data='view_announcement_translation'),
+    )
     builder.row(InlineKeyboardButton(text=_('✏️ Edit'), callback_data='edit_announcement_translation'))
     builder.row(InlineKeyboardButton(text=_('📤 Broadcast Announcement'), callback_data='broadcast_announcement'))
 
@@ -31,10 +33,7 @@ def get_languages_kb(languages_dict: dict, callback_prefix: str) -> InlineKeyboa
     builder = InlineKeyboardBuilder()
 
     for lang_code, language_name in languages_dict.items():
-        builder.button(
-            text=language_name,
-            callback_data=f'{callback_prefix}_{lang_code}'
-        )
+        builder.button(text=language_name, callback_data=f'{callback_prefix}_{lang_code}')
     builder.adjust(2)
     builder.row(cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details'))
     return builder.as_markup()
@@ -42,23 +41,20 @@ def get_languages_kb(languages_dict: dict, callback_prefix: str) -> InlineKeyboa
 
 def get_cancel_announcement_action_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [cancel_announcement_action_button(_('🔙 Cancel'), 'back_to_announcements')]
-        ])
+        inline_keyboard=[[cancel_announcement_action_button(_('🔙 Cancel'), 'back_to_announcements')]]
+    )
 
 
 def get_back_to_announcement_details_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details')]
-        ])
+        inline_keyboard=[[cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details')]]
+    )
 
 
 def get_back_to_announcements_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [cancel_announcement_action_button(_('🔙 Back to announcements'), 'back_to_announcements')]
-        ])
+        inline_keyboard=[[cancel_announcement_action_button(_('🔙 Back to announcements'), 'back_to_announcements')]]
+    )
 
 
 def get_confirmation_broadcast_kb() -> InlineKeyboardMarkup:

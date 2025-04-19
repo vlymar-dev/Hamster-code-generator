@@ -68,10 +68,7 @@ class AdminPanelService:
         logger.debug(f'Loaded {len(users)} subscribed users')
 
         # Create translation map
-        translations_map = {
-            tr.language_code: tr.text
-            for tr in announcement.languages
-        }
+        translations_map = {tr.language_code: tr.text for tr in announcement.languages}
         success_count = 0
         failed_count = 0
 
@@ -91,10 +88,7 @@ class AdminPanelService:
 
                 # Attempt message delivery
                 delivery_status = await AdminPanelService.send_message_to_user(
-                    bot=bot,
-                    user_id=user.id,
-                    message=user_message,
-                    image_url=announcement.image_url
+                    bot=bot, user_id=user.id, message=user_message, image_url=announcement.image_url
                 )
                 if delivery_status:
                     success_count += 1
@@ -116,11 +110,7 @@ class AdminPanelService:
             if image_url and Path(image_url).exists():
                 logger.debug(f'Attaching image: {image_url}')
                 image = FSInputFile(image_url)
-                await bot.send_photo(
-                    chat_id=user_id,
-                    photo=image,
-                    caption=message
-                )
+                await bot.send_photo(chat_id=user_id, photo=image, caption=message)
             else:
                 await bot.send_message(chat_id=user_id, text=message)
             return True

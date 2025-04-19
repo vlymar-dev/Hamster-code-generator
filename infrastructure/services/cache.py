@@ -44,11 +44,7 @@ class CacheService:
         """Cache data with automatic JSON serialization."""
         actual_ttl = ttl or self.default_ttl
         logger.debug(f'SET cache: {key} (ttl={actual_ttl}s)')
-        await self.redis.setex(
-            key,
-            actual_ttl,
-            value.model_dump_json()
-        )
+        await self.redis.setex(key, actual_ttl, value.model_dump_json())
 
     async def delete(self, *keys: str):
         """Purge cache entries."""
@@ -56,13 +52,13 @@ class CacheService:
         await self.redis.delete(*keys)
 
     async def get_or_set(
-            self,
-            key: str,
-            model: type[T],
-            fetch_func: Callable[..., Coroutine[Any, Any, T]],
-            *args,
-            ttl: int = None,
-            **kwargs
+        self,
+        key: str,
+        model: type[T],
+        fetch_func: Callable[..., Coroutine[Any, Any, T]],
+        *args,
+        ttl: int = None,
+        **kwargs,
     ) -> T:
         """Smart cache access with fallback to fresh data."""
         if cached := await self.get(key, model):
@@ -74,12 +70,7 @@ class CacheService:
         return fresh_data
 
     async def refresh(
-            self,
-            key: str,
-            fetch_func: Callable[..., Coroutine[Any, Any, T]],
-            *args,
-            ttl: int | None = None,
-            **kwargs
+        self, key: str, fetch_func: Callable[..., Coroutine[Any, Any, T]], *args, ttl: int | None = None, **kwargs
     ) -> T:
         """Force cache update with fresh data."""
         logger.info(f'FORCE REFRESH: {key}')

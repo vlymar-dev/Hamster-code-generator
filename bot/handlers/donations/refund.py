@@ -24,9 +24,7 @@ async def refund_stars_command_handler(message: Message, session: AsyncSession, 
     transaction_id: str = message.text.split(' ')[1] if len(message.text.split()) > 1 else None
     if not transaction_id:
         logger.warning(f'Missing transaction ID from user {user_id}')
-        await message.answer(
-            _('To refund ⭐️ use the command <code><b>/refund_stars <i>transaction_id</i></b></code>')
-        )
+        await message.answer(_('To refund ⭐️ use the command <code><b>/refund_stars <i>transaction_id</i></b></code>'))
         return
     try:
         logger.info(f'Processing refund for transaction {transaction_id}')
@@ -42,19 +40,13 @@ async def refund_stars_command_handler(message: Message, session: AsyncSession, 
     except TelegramBadRequest as error:
         logger.error(f'Refund error for user {user_id}: {error.message}')
         if 'CHARGE_NOT_FOUND' in error.message:
-            await message.answer(
-                _('❌ <b>Transaction with this number not found. Please check your input!</b>')
-            )
+            await message.answer(_('❌ <b>Transaction with this number not found. Please check your input!</b>'))
         elif 'CHARGE_ALREADY_REFUNDED' in error.message:
-            await message.answer(
-                _('⚠️ <b>This transaction has already been refunded!!</b>')
-            )
+            await message.answer(_('⚠️ <b>This transaction has already been refunded!!</b>'))
             await asyncio.sleep(2)
             await send_main_menu(message, session, image_manager)
         else:
-            await message.answer(
-                _('❗️ <b>Error:</b> {error}').format(error=error.message)
-            )
+            await message.answer(_('❗️ <b>Error:</b> {error}').format(error=error.message))
     except Exception as e:
         logger.error(f'Refund undefined error for user {user_id}: {e}', exc_info=True)
         raise

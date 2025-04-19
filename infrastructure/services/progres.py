@@ -31,9 +31,7 @@ class ProgressService:
             days_in_bot = (datetime.now().date() - user_data.registration_date.date()).days
 
             current_level, next_level = self.calculate_achievement(
-                user_data.total_keys_generated,
-                referrals_count,
-                days_in_bot
+                user_data.total_keys_generated, referrals_count, days_in_bot
             )
             logger.debug(f'Calculated levels: {current_level} -> {next_level}')
 
@@ -65,8 +63,11 @@ class ProgressService:
 
         for i, level in enumerate(levels):
             thresholds = ACHIEVEMENTS[level]
-            if (total_keys < thresholds['keys'] or referrals < thresholds['referrals']
-                    or days_in_bot < thresholds['days']):
+            if (
+                total_keys < thresholds['keys']
+                or referrals < thresholds['referrals']
+                or days_in_bot < thresholds['days']
+            ):
                 return levels[max(i - 1, 0)], level
 
         logger.debug('Maximum achievement level reached')

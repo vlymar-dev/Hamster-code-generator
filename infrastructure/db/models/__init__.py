@@ -5,12 +5,4 @@ from infrastructure.db.models.promo_code import PromoCode
 from infrastructure.db.models.referral import Referral
 from infrastructure.db.models.user import User
 
-__all__ = [
-    'Announcement',
-    'AnnouncementTranslation',
-    'Base',
-    'GameTask',
-    'PromoCode',
-    'Referral',
-    'User'
-]
+__all__ = ['Announcement', 'AnnouncementTranslation', 'Base', 'GameTask', 'PromoCode', 'Referral', 'User']

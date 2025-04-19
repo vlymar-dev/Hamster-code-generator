@@ -13,17 +13,14 @@ def get_pagination_kb(current_page: int, total_pages: int, game_name: str) -> In
         builder.add(
             InlineKeyboardButton(
                 text=_('⬅️ Back'),
-                callback_data=PaginationCallbackData(game_name=game_name, current_page=current_page - 1).pack()
+                callback_data=PaginationCallbackData(game_name=game_name, current_page=current_page - 1).pack(),
             )
         )
 
     builder.add(
         InlineKeyboardButton(
-            text=_('Page {current_page} of {total_pages}').format(
-                current_page=current_page,
-                total_pages=total_pages
-            ),
-            callback_data='noop'
+            text=_('Page {current_page} of {total_pages}').format(current_page=current_page, total_pages=total_pages),
+            callback_data='noop',
         )
     )
 
@@ -31,7 +28,7 @@ def get_pagination_kb(current_page: int, total_pages: int, game_name: str) -> In
         builder.add(
             InlineKeyboardButton(
                 text=_('➡️ Forward'),
-                callback_data=PaginationCallbackData(game_name=game_name, current_page=current_page + 1).pack()
+                callback_data=PaginationCallbackData(game_name=game_name, current_page=current_page + 1).pack(),
             )
         )
 

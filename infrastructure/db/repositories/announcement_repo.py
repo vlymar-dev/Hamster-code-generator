@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class AnnouncementRepository:
-
     @staticmethod
     async def add_announcement(session: AsyncSession, data: AnnouncementCreateSchema) -> None:
         try:
@@ -30,8 +29,7 @@ class AnnouncementRepository:
 
     @staticmethod
     async def add_translation_by_announcement_id(
-            session: AsyncSession,
-            translation: AnnouncementTranslationCreateSchema
+        session: AsyncSession, translation: AnnouncementTranslationCreateSchema
     ) -> None:
         try:
             session.add(AnnouncementTranslation(**translation.model_dump()))
@@ -42,29 +40,24 @@ class AnnouncementRepository:
 
     @staticmethod
     async def get_announcement_by_id(
-            session: AsyncSession,
-            announcement_id: int
+        session: AsyncSession, announcement_id: int
     ) -> AnnouncementWithLanguagesSchema | None:
         try:
             result = await session.execute(
-                (select(Announcement)
-                 .options(joinedload(Announcement.translations_text))
-                 .where(Announcement.id == announcement_id))
+                (
+                    select(Announcement)
+                    .options(joinedload(Announcement.translations_text))
+                    .where(Announcement.id == announcement_id)
+                )
             )
             announcement = result.unique().scalar_one_or_none()
             if announcement:
                 languages = [
-                    AnnouncementTranslationSchema(
-                        language_code=translation.language_code,
-                        text=translation.text
-                    )
+                    AnnouncementTranslationSchema(language_code=translation.language_code, text=translation.text)
                     for translation in announcement.translations_text
                 ]
                 return AnnouncementWithLanguagesSchema(
-                    id=announcement.id,
-                    title=announcement.title,
-                    image_url=announcement.image_url,
-                    languages=languages
+                    id=announcement.id, title=announcement.title, image_url=announcement.image_url, languages=languages
                 )
             return None
         except SQLAlchemyError as e:
@@ -73,8 +66,7 @@ class AnnouncementRepository:
 
     @staticmethod
     async def get_all_announcements_with_languages(
-            session: AsyncSession,
-            limit: int = 20
+        session: AsyncSession, limit: int = 20
     ) -> list[AnnouncementWithLanguagesSchema]:
         try:
             query = (
@@ -96,10 +88,7 @@ class AnnouncementRepository:
                 AnnouncementWithLanguagesSchema(
                     id=announcement_id,
                     title=data['title'],
-                    languages=[
-                        AnnouncementTranslationSchema(language_code=lang)
-                        for lang in sorted(data['languages'])
-                    ]
+                    languages=[AnnouncementTranslationSchema(language_code=lang) for lang in sorted(data['languages'])],
                 )
                 for announcement_id, data in grouped.items()
             ]
@@ -109,40 +98,41 @@ class AnnouncementRepository:
 
     @staticmethod
     async def get_translation_by_language_code(
-            session: AsyncSession,
-            announcement_id: int,
-            language_code: str
+        session: AsyncSession, announcement_id: int, language_code: str
     ) -> AnnouncementTranslationSchema:
         try:
             result = await session.execute(
-                select(AnnouncementTranslation)
-                .where(
+                select(AnnouncementTranslation).where(
                     AnnouncementTranslation.announcement_id == announcement_id,
-                    AnnouncementTranslation.language_code == language_code
+                    AnnouncementTranslation.language_code == language_code,
                 )
             )
             announcement_translation = result.scalar_one_or_none()
-            return AnnouncementTranslationSchema(
-                text=announcement_translation.text
-            )
+            return AnnouncementTranslationSchema(text=announcement_translation.text)
         except SQLAlchemyError as e:
-            logger.error(f'Database error occurred while fetching translation for announcement ID={announcement_id}, '
-                         f'language={language_code}: {e}')
+            logger.error(
+                f'Database error occurred while fetching translation for announcement ID={announcement_id}, '
+                f'language={language_code}: {e}'
+            )
 
     @staticmethod
     async def update_translation(session: AsyncSession, translation: AnnouncementTranslationCreateSchema) -> None:
         try:
             await session.execute(
                 update(AnnouncementTranslation)
-                .where(AnnouncementTranslation.announcement_id == translation.announcement_id,
-                       AnnouncementTranslation.language_code == translation.language_code)
+                .where(
+                    AnnouncementTranslation.announcement_id == translation.announcement_id,
+                    AnnouncementTranslation.language_code == translation.language_code,
+                )
                 .values(text=translation.text)
             )
             await session.commit()
         except SQLAlchemyError as e:
             await session.rollback()
-            logger.error(f'Database error occurred while updating translation for announcement '
-                         f'ID={translation.announcement_id}, language={translation.language_code}: {e}')
+            logger.error(
+                f'Database error occurred while updating translation for announcement '
+                f'ID={translation.announcement_id}, language={translation.language_code}: {e}'
+            )
 
     @staticmethod
     async def delete_announcement_by_id(session: AsyncSession, announcement_id: int) -> None:

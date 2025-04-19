@@ -61,17 +61,13 @@ class GamePromo:
         try:
             auth = aiohttp.BasicAuth(username, password) if username and password else None
             async with self.session.post(
-                    'https://api.gamepromo.io/promo/login-client',
-                    json={
-                        'appToken': self.game['app_token'],
-                        'clientId': client_id,
-                        'clientOrigin': 'deviceid'
-                    },
-                    proxy=f'http://{proxy}',
-                    proxy_auth=auth,
-                    headers={
-                        'Content-Type': 'application/json; charset=utf-8',
-                    }
+                'https://api.gamepromo.io/promo/login-client',
+                json={'appToken': self.game['app_token'], 'clientId': client_id, 'clientOrigin': 'deviceid'},
+                proxy=f'http://{proxy}',
+                proxy_auth=auth,
+                headers={
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
             ) as response:
                 data = await response.json()
                 self.token = data['clientToken']
@@ -99,24 +95,21 @@ class GamePromo:
 
                 auth = aiohttp.BasicAuth(username, password) if username and password else None
                 async with self.session.post(
-                        'https://api.gamepromo.io/promo/register-event',
-                        json={
-                            'promoId': self.game['promo_id'],
-                            'eventId': event_id,
-                            'eventOrigin': 'undefined'
-                        },
-                        proxy=f'http://{proxy}',
-                        proxy_auth=auth,
-                        headers={
-                            'Authorization': f'Bearer {self.token}',
-                            'Content-Type': 'application/json; charset=utf-8',
-                        }
+                    'https://api.gamepromo.io/promo/register-event',
+                    json={'promoId': self.game['promo_id'], 'eventId': event_id, 'eventOrigin': 'undefined'},
+                    proxy=f'http://{proxy}',
+                    proxy_auth=auth,
+                    headers={
+                        'Authorization': f'Bearer {self.token}',
+                        'Content-Type': 'application/json; charset=utf-8',
+                    },
                 ) as response:
                     if 'text/html' in response.headers.get('Content-Type', ''):
                         error_text = await response.text()
                         logger.error(
                             f'`{response.status}` ⚠️ | Game: `{self.game['name']}` | Proxy: ({ip}:{port}) | '
-                            f'HTML Response: {error_text[:500]}...')
+                            f'HTML Response: {error_text[:500]}...'
+                        )
                         continue
 
                     if response.status != 200:
@@ -131,8 +124,10 @@ class GamePromo:
                             await asyncio.sleep(delay_time)
                             continue
                         else:
-                            logger.warning(f'`{response.status}` ⚠️ | Game: ({self.game['name']} | '
-                                           f'Proxy: {ip}:{port}): {error_text}')
+                            logger.warning(
+                                f'`{response.status}` ⚠️ | Game: ({self.game['name']} | '
+                                f'Proxy: {ip}:{port}): {error_text}'
+                            )
 
                         await asyncio.sleep(random.uniform(3, 6))
                         continue
@@ -142,7 +137,8 @@ class GamePromo:
                         if data.get('hasCode', False):
                             logger.info(
                                 f'`{response.status}` ✅ | Event: `{self.game['name']}` | '
-                                f'Proxy: `{ip}:{port}` successfully registered')
+                                f'Proxy: `{ip}:{port}` successfully registered'
+                            )
                             return True
                     else:
                         logger.warning(f'Unexpected response from the server: {await response.text()}')
@@ -150,8 +146,7 @@ class GamePromo:
                         continue
 
             except Exception as error:
-                logger.error(
-                    f' ⚠️ Error in event registration `{self.game['name']}` | Proxy: `{ip}:{port}`: {error}')
+                logger.error(f' ⚠️ Error in event registration `{self.game['name']}` | Proxy: `{ip}:{port}`: {error}')
                 await asyncio.sleep(5)
         logger.error(f' ❌ Failed to register an event for `{self.game['name']}` | Proxy: {ip}:{port}, restart!')
         return False
@@ -168,14 +163,14 @@ class GamePromo:
         while not response or not response.get('promoCode'):
             try:
                 async with self.session.post(
-                        'https://api.gamepromo.io/promo/create-code',
-                        json={'promoId': self.game['promo_id']},
-                        proxy=f'http://{proxy}',
-                        proxy_auth=auth,
-                        headers={
-                            'Authorization': f'Bearer {self.token}',
-                            'Content-Type': 'application/json; charset=utf-8',
-                        }
+                    'https://api.gamepromo.io/promo/create-code',
+                    json={'promoId': self.game['promo_id']},
+                    proxy=f'http://{proxy}',
+                    proxy_auth=auth,
+                    headers={
+                        'Authorization': f'Bearer {self.token}',
+                        'Content-Type': 'application/json; charset=utf-8',
+                    },
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
@@ -188,9 +183,9 @@ class GamePromo:
         try:
             formatted_game_name = game_name.replace(' ', '')
             async with async_session_maker() as session:
-                await PromoCodeRepository.add_promo_code(session, PromoCodeCreateSchema(
-                    game_name=formatted_game_name,
-                    promo_code=promo_code))
+                await PromoCodeRepository.add_promo_code(
+                    session, PromoCodeCreateSchema(game_name=formatted_game_name, promo_code=promo_code)
+                )
                 logger.info(f'🔑 `KEY` | `{promo_code[:12]}` | Saved in `promo_code` for game `{formatted_game_name}`')
         except Exception as e:
             logger.error(f'❌ Failed to save promo code `{promo_code[:12]}` for game `{game_name}`: {e}')

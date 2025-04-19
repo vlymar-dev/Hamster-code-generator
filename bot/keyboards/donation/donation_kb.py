@@ -22,7 +22,7 @@ async def get_confirm_donation_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(InlineKeyboardButton(text=_('Give money'), pay=True))
-    builder.row(InlineKeyboardButton(text=_('No it\'s scam'), callback_data='cancel_payment'))
+    builder.row(InlineKeyboardButton(text=_("No it's scam"), callback_data='cancel_payment'))
     return builder.as_markup()
 
 

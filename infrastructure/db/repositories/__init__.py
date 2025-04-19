@@ -9,5 +9,5 @@ __all__ = [
     'GameTaskRepository',
     'PromoCodeRepository',
     'ReferralsRepository',
-    'UserRepository'
+    'UserRepository',
 ]

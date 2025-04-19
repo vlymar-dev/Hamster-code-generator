@@ -26,7 +26,7 @@ ROUTERS = [
     main_menu_router,
     progress_router,
     referral_links_router,
-    settings_router
+    settings_router,
 ]
 
 __all__ = ['ROUTERS', 'PaginationCallbackData']

@@ -14,7 +14,6 @@ def get_random_referral_buttons() -> list[InlineKeyboardButton]:
 
 
 def get_main_menu_kb() -> InlineKeyboardMarkup:
-
     builder = InlineKeyboardBuilder()
     # NOTE:
     # This is used to display a random referral link for the "Game of the Day".
@@ -25,9 +24,11 @@ def get_main_menu_kb() -> InlineKeyboardMarkup:
     builder.row(InlineKeyboardButton(text=_('── 🎮 GAMES CATALOG ──'), callback_data='referral_links'))
     builder.row(InlineKeyboardButton(text=_('🔑 Keys & Video Codes 🕹️'), callback_data='get_games'))
     builder.row(InlineKeyboardButton(text=_('─── 👤 PROFILE ───'), callback_data='user_progress'))
-    builder.row(InlineKeyboardButton(text=_('⚙️ Settings'), callback_data='settings_menu'),
-                InlineKeyboardButton(text=_('💬 Feedback'), callback_data='feedback'),
-                InlineKeyboardButton(text=_('ℹ Info'), callback_data='user_info'))
+    builder.row(
+        InlineKeyboardButton(text=_('⚙️ Settings'), callback_data='settings_menu'),
+        InlineKeyboardButton(text=_('💬 Feedback'), callback_data='feedback'),
+        InlineKeyboardButton(text=_('ℹ Info'), callback_data='user_info'),
+    )
     return builder.as_markup()
 
 

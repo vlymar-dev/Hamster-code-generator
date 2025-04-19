@@ -29,10 +29,7 @@ async def manage_codes_handler(callback_query: CallbackQuery) -> None:
     try:
         await callback_query.answer()
         await callback_query.message.delete()
-        await callback_query.message.answer(
-            text=_('<b>Choose a game:</b>'),
-            reply_markup=get_admin_panel_codes_kb()
-        )
+        await callback_query.message.answer(text=_('<b>Choose a game:</b>'), reply_markup=get_admin_panel_codes_kb())
     except Exception as e:
         logger.error(f'Manage codes error for {admin_id}: {str(e)}')
         raise
@@ -52,7 +49,7 @@ async def actions_with_game_codes_handler(callback_query: CallbackQuery, state: 
         await callback_query.message.delete()
         await callback_query.message.answer(
             text=_('You have selected a game: <b>{game_name}</b>\n\nSelect an action:').format(game_name=game_name),
-            reply_markup=get_game_codes_actions_kb()
+            reply_markup=get_game_codes_actions_kb(),
         )
     except Exception as e:
         logger.error(f'Game selection undefined error for admin {admin_id}: {e}', exc_info=True)
@@ -68,17 +65,14 @@ async def add_game_code_handler(callback_query: CallbackQuery, state: FSMContext
         data = await state.get_data()
         if 'selected_game' not in data:
             logger.warning(f'User {admin_id} tried to add code without selecting game')
-            await callback_query.answer(
-                text=_('⚠️ First, choose a game!'),
-                show_alert=True)
+            await callback_query.answer(text=_('⚠️ First, choose a game!'), show_alert=True)
             return
         logger.info(f'User {admin_id} started adding code for {data['selected_game']}')
         await state.set_state(GameCodeManagement.WaitingForTask)
         await callback_query.answer()
         await callback_query.message.delete()
         await callback_query.message.answer(
-            text=_('🐥 Enter the task for the selected game:'),
-            reply_markup=get_cancel_game_code_action_kb()
+            text=_('🐥 Enter the task for the selected game:'), reply_markup=get_cancel_game_code_action_kb()
         )
     except Exception as e:
         logger.error(f'Adding code undefined error for admin {admin_id}: {e}', exc_info=True)
@@ -96,15 +90,12 @@ async def process_task_input_handler(message: Message, state: FSMContext) -> Non
             logger.warning(f'User {admin_id} entered empty task')
             await message.answer(
                 text=_('⚠️ The length of a task must be longer than one character!'),
-                reply_markup=get_cancel_game_code_action_kb()
+                reply_markup=get_cancel_game_code_action_kb(),
             )
             return
         await state.update_data(task=task)
         await state.set_state(GameCodeManagement.WaitingForAnswer)
-        await message.answer(
-            text=_('⛱️ Enter an answer for the game:'),
-            reply_markup=get_cancel_game_code_action_kb()
-        )
+        await message.answer(text=_('⛱️ Enter an answer for the game:'), reply_markup=get_cancel_game_code_action_kb())
     except Exception as e:
         logger.error(f'Task input undefined error for admin {admin_id}: {e}', exc_info=True)
 
@@ -121,29 +112,23 @@ async def process_answer_input_handler(message: Message, state: FSMContext, sess
             logger.warning(f'User {admin_id} entered short answer')
             await message.answer(
                 text=_('⚠️ The length of a answer must be longer than one character!'),
-                reply_markup=get_cancel_game_code_action_kb()
+                reply_markup=get_cancel_game_code_action_kb(),
             )
             return
 
         data = await state.get_data()
-        game_task = GameTaskSchema(
-                game_name=data['selected_game'],
-                task=data['task'],
-                answer=answer
-            )
+        game_task = GameTaskSchema(game_name=data['selected_game'], task=data['task'], answer=answer)
         await GameTaskRepository.add_task(session, game_task)
 
         await state.clear()
         await message.answer(
-            text=_('✅ <i>Code for the game <b>{game}</b> successfully added!</i>\n\n'
-                   '🐥 <i>Task: <b>{task}</b></i>\n'
-                   '⛱️ <i>Answer: <b>{answer}</b></i>\n\n'
-                   'Select a game to add a new code or go back to the main menu:').format(
-                game=game_task.game_name,
-                task=game_task.task,
-                answer=game_task.answer
-            ),
-            reply_markup=get_admin_panel_codes_kb()
+            text=_(
+                '✅ <i>Code for the game <b>{game}</b> successfully added!</i>\n\n'
+                '🐥 <i>Task: <b>{task}</b></i>\n'
+                '⛱️ <i>Answer: <b>{answer}</b></i>\n\n'
+                'Select a game to add a new code or go back to the main menu:'
+            ).format(game=game_task.game_name, task=game_task.task, answer=game_task.answer),
+            reply_markup=get_admin_panel_codes_kb(),
         )
     except Exception as e:
         logger.error(f'Answer input undefined error for admin {admin_id}: {e}', exc_info=True)
@@ -160,19 +145,17 @@ async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext) 
         if 'selected_game' not in data:
             logger.debug(f'Admin {admin_id} triggered delete_code_handler')
 
-            await callback_query.answer(
-                text=_('⚠️ First, choose a game!'),
-                show_alert=True
-            )
+            await callback_query.answer(text=_('⚠️ First, choose a game!'), show_alert=True)
             return
         game_name = data['selected_game']
         await state.set_state(GameCodeManagement.WaitingForIDToDelete)
         await callback_query.answer()
         await callback_query.message.delete()
         await callback_query.message.answer(
-            text=_('📲 You chose a game: <b>{game}</b>\n\n'
-                   '📋 <b>Enter the ID to be deleted:</b>').format(game=game_name),
-            reply_markup=get_cancel_game_code_action_kb()
+            text=_('📲 You chose a game: <b>{game}</b>\n\n' '📋 <b>Enter the ID to be deleted:</b>').format(
+                game=game_name
+            ),
+            reply_markup=get_cancel_game_code_action_kb(),
         )
         logger.info(f'Admin {admin_id} started deletion process for {game_name}')
     except Exception as e:
@@ -192,7 +175,7 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
             logger.warning(f'Admin {admin_id} entered invalid ID: {message.text}')
             await message.answer(
                 text=_('⚠️ Invalid <b>ID</b> format. Please enter a valid number!'),
-                reply_markup=get_cancel_game_code_action_kb()
+                reply_markup=get_cancel_game_code_action_kb(),
             )
             return
         await state.update_data(task_id=task_id)
@@ -201,19 +184,17 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
             logger.warning(f'Admin {admin_id} tried to delete non-existing task ID: {task_id}')
             await message.answer(
                 text=_('⚠️ Task with ID <b>{task_id}</b> not found.\n\nRepeat input:').format(task_id=task_id),
-                reply_markup=get_cancel_game_code_action_kb()
+                reply_markup=get_cancel_game_code_action_kb(),
             )
             return
         await message.answer(
-            text=_('⚠️ <b>Confirm the deletion of the task:</b>\n\n'
-                   '📋 <b>ID:</b> {id}\n'
-                   '<b>Task:</b> {task}\n'
-                   '<b>Answer:</b> {answer}').format(
-                id=task_id,
-                task=task.task,
-                answer=task.answer
-            ),
-            reply_markup=get_confirm_deletion_task_kb()
+            text=_(
+                '⚠️ <b>Confirm the deletion of the task:</b>\n\n'
+                '📋 <b>ID:</b> {id}\n'
+                '<b>Task:</b> {task}\n'
+                '<b>Answer:</b> {answer}'
+            ).format(id=task_id, task=task.task, answer=task.answer),
+            reply_markup=get_confirm_deletion_task_kb(),
         )
         logger.info(f'Admin {admin_id} requested deletion confirmation for task ID: {task_id}')
     except Exception as e:
@@ -222,9 +203,7 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
 
 @game_codes_router.callback_query(F.data == 'confirm_deletion')
 async def confirmation_deletion_handler(
-        callback_query: CallbackQuery,
-        state: FSMContext,
-        session: AsyncSession
+    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession
 ) -> None:
     """Handle final confirmation of task deletion."""
     admin_id = callback_query.from_user.id
@@ -243,13 +222,13 @@ async def confirmation_deletion_handler(
             await GameTaskRepository.delete_task_by_id(session, task_id)
             await callback_query.message.answer(
                 text=_('✅ Task with ID <b>{id}</b> successfully deleted!').format(id=task_id),
-                reply_markup=get_admin_panel_codes_kb()
+                reply_markup=get_admin_panel_codes_kb(),
             )
         except Exception as err:
             logger.error(f'Error while deleting a record: {err}', exc_info=True)
             await callback_query.message.answer(
                 text=_('❌ Task with ID <b>{id}</b> not found or could not be deleted.').format(id=task_id),
-                reply_markup=get_cancel_game_code_action_kb()
+                reply_markup=get_cancel_game_code_action_kb(),
             )
         await state.clear()
     except Exception as e:
@@ -277,9 +256,6 @@ async def show_game_selection_menu(callback_query: CallbackQuery) -> None:
     try:
         await callback_query.answer()
         await callback_query.message.delete()
-        await callback_query.message.answer(
-            text=_('<b>📲 Choose a game:</b>'),
-            reply_markup=get_admin_panel_codes_kb()
-        )
+        await callback_query.message.answer(text=_('<b>📲 Choose a game:</b>'), reply_markup=get_admin_panel_codes_kb())
     except Exception as e:
         logger.error(f'Show game selection undefined error for admin{admin_id}: {e}', exc_info=True)

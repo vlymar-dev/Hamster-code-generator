@@ -147,7 +147,7 @@ game_configs = [
         'base_delay': 20,
         'attempts': 45,
         'copies': 0,
-    }
+    },
 ]
 
 # Convert the list of proxies to a list
@@ -169,7 +169,8 @@ for config in game_configs:
         if proxy_index >= len(proxies):
             raise ValueError(
                 f'Not enough proxies for game copies: {config['name']} needs {config['copies']} copies, '
-                f'but only {len(proxies)} proxies are available.')
+                f'but only {len(proxies)} proxies are available.'
+            )
 
         game_copy = {
             'name': config['name'],

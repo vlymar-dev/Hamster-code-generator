@@ -7,4 +7,6 @@ class GameCodeManagement(StatesGroup):
     WaitingForTask = State()
     WaitingForAnswer = State()
     WaitingForIDToDelete = State()
+
+
 # TODO: переименовать

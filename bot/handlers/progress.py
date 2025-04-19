@@ -17,9 +17,7 @@ progress_router = Router()
 
 @progress_router.callback_query(IsBannedFilter(), F.data == 'user_progress')
 async def user_progress_handler(
-        callback_query: CallbackQuery,
-        session: AsyncSession,
-        image_manager: ImageManager
+    callback_query: CallbackQuery, session: AsyncSession, image_manager: ImageManager
 ) -> None:
     """Handle user progress request with achievement status and progress details."""
     user_id = callback_query.from_user.id
@@ -62,13 +60,12 @@ async def user_progress_handler(
             await callback_query.message.answer_photo(
                 photo=image,
                 caption=response_text,
-                reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id)
+                reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id),
             )
         else:
             logger.warning(f'No images available in progress for user {user_id}')
             await callback_query.message.answer(
-                text=response_text,
-                reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id)
+                text=response_text, reply_markup=get_progress_keyboard(user_id=callback_query.from_user.id)
             )
     except Exception as e:
         logger.error(f'Error processing progress request for {user_id}: {e}', exc_info=True)
@@ -84,23 +81,29 @@ class ProgresText:
         """Returns the translated text of the achievement key."""
         achievements = {
             'newcomer': _(
-                '🌱 <b>Level:</b>\n<i>Newcomer</i> — <i>You\'ve just begun your journey! '
-                'Keep going, there are many opportunities ahead!</i> 🚀'),
+                "🌱 <b>Level:</b>\n<i>Newcomer</i> — <i>You've just begun your journey! "
+                'Keep going, there are many opportunities ahead!</i> 🚀'
+            ),
             'adventurer': _(
                 '🎩 <b>Level:</b>\n<i>Adventurer</i> — '
-                '<i>You\'ve unlocked a few doors, but more valuable keys await you.</i> 💎'),
+                "<i>You've unlocked a few doors, but more valuable keys await you.</i> 💎"
+            ),
             'bonus_hunter': _(
                 '🎯 <b>Level:</b>\n<i>Bonus Hunter</i> — '
-                '<i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁'),
+                '<i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁'
+            ),
             'code_expert': _(
                 '🧠 <b>Level:</b>\n<i>Code Expert</i> — '
-                '<i>You already know how the system works. Keep improving!</i> 📈'),
+                '<i>You already know how the system works. Keep improving!</i> 📈'
+            ),
             'game_legend': _(
                 '🌟 <b>Level:</b>\n<i>Game Legend</i> — '
-                '<i>You\'ve achieved almost everything! Stay at the top and collect all the keys!</i> 🏅'),
+                "<i>You've achieved almost everything! Stay at the top and collect all the keys!</i> 🏅"
+            ),
             'absolute_leader': _(
                 '👑 <b>Level:</b>\n<i>Absolute Leader</i> — '
-                '<i>You\'re at the top! All keys are at your disposal, and you\'re a role model for everyone!</i> 🌍')
+                "<i>You're at the top! All keys are at your disposal, and you're a role model for everyone!</i> 🌍"
+            ),
         }
         return achievements.get(self.achievement_key, achievements['newcomer'])
 
@@ -109,8 +112,9 @@ class ProgresText:
         statuses = {
             'free': _('🎮 <b>Regular Player</b> — Get keys and open doors to become stronger. 🚀'),
             'friend': _(
-                '🤝 <b>Friend of the Project</b> — You have access to exclusive features, but there\'s more ahead! 🔥'),
-            'premium': _('👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive content. ✨')
+                "🤝 <b>Friend of the Project</b> — You have access to exclusive features, but there's more ahead! 🔥"
+            ),
+            'premium': _('👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive content. ✨'),
         }
         return statuses.get(self.status_key, statuses['free'])
 
