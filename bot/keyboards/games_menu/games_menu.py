@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.common.static_data import GAME_TASKS_DICT
 from bot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.utils.static_data import GAME_TASKS_DICT
 
 
 def get_games_codes_and_keys_kb() -> InlineKeyboardMarkup:

@@ -6,7 +6,6 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common.static_data import HAMSTER_GAMES_LIST
 from bot.keyboards.admin_panel import (
     admin_panel_kb,
     admin_panel_user_role_kb,
@@ -14,6 +13,7 @@ from bot.keyboards.admin_panel import (
     get_back_to_admin_panel_kb,
 )
 from bot.states import AdminPanelState
+from bot.utils.static_data import HAMSTER_GAMES_LIST
 from infrastructure.db.repositories import PromoCodeRepository, UserRepository
 from infrastructure.services import CacheService, UserCacheService
 

@@ -5,12 +5,12 @@ from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common import ImageManager
-from bot.common.static_data import HAMSTER_GAMES_LIST
 from bot.handlers import PaginationCallbackData
 from bot.keyboards.games_menu.games_menu import get_games_codes_and_keys_kb
 from bot.keyboards.games_menu.pagination_kb import get_pagination_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
+from bot.utils import ImageManager
+from bot.utils.static_data import HAMSTER_GAMES_LIST
 from infrastructure.db.repositories import UserRepository
 from infrastructure.schemas import UserKeyGenerationSchema
 from infrastructure.services import GameTaskService, PromoCodeService, UserService

@@ -3,8 +3,6 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common.static_data import STATUS_LIMITS
-from bot.common.utils import get_current_date, get_current_time
 from infrastructure.db.repositories import ReferralsRepository, UserRepository
 from infrastructure.schemas import (
     RemainingTimeSchema,
@@ -17,6 +15,7 @@ from infrastructure.schemas import (
 from infrastructure.schemas.referral import ReferralAddingSchema
 from infrastructure.services import CacheService
 from infrastructure.services.cache import CacheKeys
+from infrastructure.utils import STATUS_LIMITS, get_current_date, get_current_time
 
 logger = logging.getLogger(__name__)
 

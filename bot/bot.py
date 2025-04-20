@@ -7,9 +7,9 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
-from bot.common import ImageManager
 from bot.handlers import ROUTERS
 from bot.middlewares import CacheServiceMiddleware, CustomI18nMiddleware, DatabaseMiddleware, ImageManagerMiddleware
+from bot.utils import ImageManager
 from infrastructure import BASE_DIR, config, setup_logging
 from infrastructure.services import CacheService
 

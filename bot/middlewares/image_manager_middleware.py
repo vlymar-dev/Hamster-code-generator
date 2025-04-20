@@ -4,7 +4,7 @@ from typing import Any, Callable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from bot.common import ImageManager
+from bot.utils import ImageManager
 
 logger = logging.getLogger(__name__)
 

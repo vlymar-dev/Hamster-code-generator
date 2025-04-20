@@ -2,8 +2,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.common.static_data import ROLES_DICT
 from bot.keyboards.main_menu_kb import back_to_main_menu_button
+from bot.utils.static_data import ROLES_DICT
 
 
 def admin_panel_kb() -> InlineKeyboardMarkup:

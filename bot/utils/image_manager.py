@@ -4,7 +4,7 @@ from random import choice
 
 from aiogram.types import FSInputFile
 
-from bot.common.static_data import SUPPORTED_EXTENSIONS
+from bot.utils.static_data import SUPPORTED_EXTENSIONS
 
 logger = logging.getLogger(__name__)
 

@@ -6,9 +6,9 @@ from aiogram.types import CallbackQuery, Message, Union
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common import ImageManager
 from bot.filters import IsBannedFilter
 from bot.keyboards.main_menu_kb import get_main_menu_kb
+from bot.utils import ImageManager
 from infrastructure import config
 from infrastructure.db.repositories import UserRepository
 

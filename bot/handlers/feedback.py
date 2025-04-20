@@ -5,10 +5,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, ReactionTypeEmoji
 from aiogram.utils.i18n import gettext as _
 
-from bot.common import ImageManager
 from bot.keyboards.feedback_kb import get_admin_feedback_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
 from bot.states import AdminReplyToFeedback, UserLeaveFeedback
+from bot.utils import ImageManager
 from infrastructure import config
 
 logger = logging.getLogger(__name__)

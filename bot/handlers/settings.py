@@ -5,14 +5,14 @@ from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common import ImageManager
-from bot.common.static_data import LANGUAGES_DICT
 from bot.filters import IsBannedFilter
 from bot.handlers.main_menu import send_main_menu
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.keyboards.settings.notifications_kb import notifications_kb
 from bot.keyboards.settings.settings_kb import get_settings_kb
 from bot.middlewares import CustomI18nMiddleware
+from bot.utils import ImageManager
+from bot.utils.static_data import LANGUAGES_DICT
 from infrastructure import config
 from infrastructure.db.repositories import ReferralsRepository, UserRepository
 from infrastructure.services import CacheService, UserCacheService

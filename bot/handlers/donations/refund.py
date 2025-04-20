@@ -7,9 +7,9 @@ from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common import ImageManager
 from bot.handlers.main_menu import send_main_menu
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
+from bot.utils import ImageManager
 
 logger = logging.getLogger(__name__)
 refund_router = Router()

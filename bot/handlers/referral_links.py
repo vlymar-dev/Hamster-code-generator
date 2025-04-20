@@ -4,8 +4,8 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.i18n import gettext as _
 
-from bot.common import ImageManager
 from bot.keyboards.referral_kb import referral_links_kb
+from bot.utils import ImageManager
 
 logger = logging.getLogger(__name__)
 referral_links_router = Router()

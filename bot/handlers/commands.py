@@ -6,11 +6,11 @@ from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common import ImageManager
 from bot.filters import AdminFilter, IsBannedFilter
 from bot.handlers.admin_panel import show_admin_panel
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard, get_main_menu_kb
 from bot.keyboards.settings.change_language_kb import get_change_language_kb
+from bot.utils import ImageManager
 from infrastructure.schemas.user import UserCreateSchema
 from infrastructure.services import CacheService, UserCacheService, UserService
 

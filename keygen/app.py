@@ -1,9 +1,9 @@
 import asyncio
 import logging
 
-from app.game_promo_manager import gen
-from app.games import games
 from infrastructure import setup_logging
+from keygen.game_promo_manager import gen
+from keygen.games import games
 
 setup_logging(app_name='app')
 

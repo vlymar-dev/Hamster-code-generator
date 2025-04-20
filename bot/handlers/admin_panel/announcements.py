@@ -6,7 +6,6 @@ from aiogram.types import CallbackQuery, FSInputFile, Message
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.common.static_data import LANGUAGES_DICT
 from bot.keyboards.admin_panel.announcements_kb import (
     get_announcement_menu_kb,
     get_announcements_kb,
@@ -17,6 +16,7 @@ from bot.keyboards.admin_panel.announcements_kb import (
     get_languages_kb,
 )
 from bot.states import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement
+from bot.utils.static_data import LANGUAGES_DICT
 from infrastructure.db.repositories import AnnouncementRepository
 from infrastructure.schemas import AnnouncementCreateSchema, AnnouncementTranslationCreateSchema
 from infrastructure.services import AdminPanelService
