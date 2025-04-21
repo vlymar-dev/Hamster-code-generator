@@ -28,7 +28,7 @@ class CustomI18nMiddleware(I18nMiddleware):
             logger.warning(f'Localization failed - no user in event. Event type: {type(event).__name__}')
             return self.i18n.default_locale
 
-        session: AsyncSession = data.get('session')
+        session: AsyncSession = data.get('session_without_commit')
         cache_service: CacheService = data.get('cache_service')
         if not session or not cache_service:
             logger.error(

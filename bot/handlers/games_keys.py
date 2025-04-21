@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
@@ -11,8 +12,8 @@ from bot.keyboards.games_menu.pagination_kb import get_pagination_kb
 from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
 from bot.utils import ImageManager
 from bot.utils.static_data import HAMSTER_GAMES_LIST
-from infrastructure.db.repositories import UserRepository
-from infrastructure.schemas import UserKeyGenerationSchema
+from infrastructure.db.dao import UserDAO
+from infrastructure.schemas import UpdateUserKeysSchema, UserKeyGenerationSchema
 from infrastructure.services import GameTaskService, PromoCodeService, UserService
 
 games_keys_router = Router()
@@ -44,17 +45,19 @@ async def get_games_handler(callback_query: CallbackQuery, image_manager: ImageM
 
 
 @games_keys_router.callback_query(F.data.startswith('get_codes_for_'))
-async def get_tasks_handler(callback_query: CallbackQuery, session: AsyncSession):
+async def get_tasks_handler(callback_query: CallbackQuery, session_without_commit: AsyncSession):
     """Initiate tasks pagination for selected game."""
     game_name = callback_query.data.split('_')[-1]
     logger.debug(f'User {callback_query.from_user.id} requested tasks for {game_name}')
 
-    await process_tasks_page(callback_query=callback_query, session=session, game_name=game_name, current_page=1)
+    await process_tasks_page(
+        callback_query=callback_query, session=session_without_commit, game_name=game_name, current_page=1
+    )
 
 
 @games_keys_router.callback_query(PaginationCallbackData.filter())
 async def handle_pagination(
-    callback_query: CallbackQuery, callback_data: PaginationCallbackData, session: AsyncSession
+    callback_query: CallbackQuery, callback_data: PaginationCallbackData, session_without_commit: AsyncSession
 ):
     """Handle pagination navigation for tasks list."""
     game_name = callback_data.game_name
@@ -63,7 +66,7 @@ async def handle_pagination(
 
     await process_tasks_page(
         callback_query=callback_query,
-        session=session,
+        session=session_without_commit,
         game_name=game_name,
         current_page=current_page,
     )
@@ -89,7 +92,8 @@ async def process_tasks_page(callback_query: CallbackQuery, session: AsyncSessio
         )
 
         logger.debug(f'Displaying {len(response.tasks)} tasks for {game_name} to {user_id}')
-        await callback_query.message.edit_text(
+        await callback_query.message.delete()
+        await callback_query.message.answer(
             text=task_text + _('\n\n🔖 (<i>click to copy</i>)'),
             reply_markup=get_pagination_kb(
                 current_page=response.page, total_pages=response.total_pages, game_name=game_name
@@ -107,14 +111,15 @@ async def noop_handler(callback_query: CallbackQuery) -> None:
 
 
 @games_keys_router.callback_query(F.data == 'hamster_keys')
-async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession) -> None:  # noqa C901
+async def get_hamster_keys(callback_query: CallbackQuery, session_with_commit: AsyncSession) -> None:  # noqa C901
     """Generate and display hamster game promo codes."""
     user_id: int = callback_query.from_user.id
     logger.debug(f'Hamster keys request from user {user_id}')
 
     try:
+        user_activity = await UserService.get_user_keys_request_data(session_with_commit, user_id)
         validation_result: UserKeyGenerationSchema = await UserService.get_hamster_keys_request_validation(
-            session, user_id
+            session=session_with_commit, user_activity=user_activity, user_id=user_id
         )
         if not validation_result.can_generate:
             if validation_result.daily_limit_exceeded:
@@ -137,7 +142,7 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
 
         logger.debug(f'Generating promo codes for user {user_id}')
         try:
-            promo_codes = await PromoCodeService.consume_promo_codes(session, HAMSTER_GAMES_LIST)
+            promo_codes = await PromoCodeService.consume_promo_codes(session_with_commit, HAMSTER_GAMES_LIST)
             logger.info(f'Generated {len(promo_codes)} codes for user {user_id}')
         except Exception as e:
             logger.error(f'Promo code error for {user_id}: {e}', exc_info=True)
@@ -159,7 +164,15 @@ async def get_hamster_keys(callback_query: CallbackQuery, session: AsyncSession)
         else:
             formatted_text = '\n'.join(text)
 
-        await UserRepository.update_user_activity(session, user_id)
+        await UserDAO.update(
+            session=session_with_commit,
+            data_id=user_id,
+            values=UpdateUserKeysSchema(
+                total_keys_generated=user_activity.total_keys_generated + 1,
+                daily_requests_count=user_activity.daily_requests_count + 1,
+                last_request_datetime=datetime.now(),
+            ),
+        )
         logger.debug(f'User activity updated for {user_id}')
         await callback_query.answer()
         await callback_query.message.delete()

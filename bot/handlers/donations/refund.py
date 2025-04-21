@@ -16,7 +16,9 @@ refund_router = Router()
 
 
 @refund_router.message(F.text.startswith('/refund_stars'))
-async def refund_stars_command_handler(message: Message, session: AsyncSession, image_manager: ImageManager) -> None:
+async def refund_stars_command_handler(
+    message: Message, session_without_commit: AsyncSession, image_manager: ImageManager
+) -> None:
     """Process star refund requests with transaction validation."""
     user_id = message.from_user.id
     logger.debug(f'Refund request from user {user_id}')
@@ -44,7 +46,7 @@ async def refund_stars_command_handler(message: Message, session: AsyncSession, 
         elif 'CHARGE_ALREADY_REFUNDED' in error.message:
             await message.answer(_('⚠️ <b>This transaction has already been refunded!!</b>'))
             await asyncio.sleep(2)
-            await send_main_menu(message, session, image_manager)
+            await send_main_menu(message, session_without_commit, image_manager)
         else:
             await message.answer(_('❗️ <b>Error:</b> {error}').format(error=error.message))
     except Exception as e:

@@ -17,14 +17,14 @@ progress_router = Router()
 
 @progress_router.callback_query(IsBannedFilter(), F.data == 'user_progress')
 async def user_progress_handler(
-    callback_query: CallbackQuery, session: AsyncSession, image_manager: ImageManager
+    callback_query: CallbackQuery, session_with_commit: AsyncSession, image_manager: ImageManager
 ) -> None:
     """Handle user progress request with achievement status and progress details."""
     user_id = callback_query.from_user.id
     logger.debug(f'Progress request from user {user_id}')
 
     try:
-        user_progress = await progres_service.get_user_progres(session, user_id)
+        user_progress = await progres_service.get_user_progres(session_with_commit, user_id)
 
         if not user_progress:
             await callback_query.answer(text=_('User data not found.'), show_alert=True)

@@ -14,7 +14,9 @@ from bot.middlewares import CustomI18nMiddleware
 from bot.utils import ImageManager
 from bot.utils.static_data import LANGUAGES_DICT
 from infrastructure import config
-from infrastructure.db.repositories import ReferralsRepository, UserRepository
+from infrastructure.db.dao import ReferralDAO, UserDAO
+from infrastructure.db.models import Referral
+from infrastructure.schemas import UserSubscriptionSchema
 from infrastructure.services import CacheService, UserCacheService
 
 logger = logging.getLogger(__name__)
@@ -55,7 +57,7 @@ async def settings_menu_handler(callback_query: CallbackQuery, image_manager: Im
 
 @settings_router.callback_query(F.data == 'change_language')
 async def change_language_handler(
-    callback_query: CallbackQuery, session: AsyncSession, cache_service: CacheService
+    callback_query: CallbackQuery, session_without_commit: AsyncSession, cache_service: CacheService
 ) -> None:
     """Show language selection menu with current language."""
     user_id = callback_query.from_user.id
@@ -63,7 +65,7 @@ async def change_language_handler(
 
     try:
         language_data = await UserCacheService.get_user_language(
-            cache_service=cache_service, session=session, user_id=user_id
+            cache_service=cache_service, session=session_without_commit, user_id=user_id
         )
         current_language = LANGUAGES_DICT.get(language_data.language_code)
         logger.debug(f'User {user_id} current language: {current_language}')
@@ -85,7 +87,7 @@ async def change_language_handler(
 @settings_router.callback_query(IsBannedFilter(), F.data.startswith('set_lang:'))
 async def update_language_handler(
     callback_query: CallbackQuery,
-    session: AsyncSession,
+    session_with_commit: AsyncSession,
     i18n: CustomI18nMiddleware,
     image_manager: ImageManager,
     cache_service: CacheService,
@@ -98,7 +100,7 @@ async def update_language_handler(
     try:
         language_data = await UserCacheService.update_user_language(
             cache_service=cache_service,
-            session=session,
+            session=session_with_commit,
             user_id=callback_query.from_user.id,
             selected_language_code=selected_language_code,
         )
@@ -111,7 +113,7 @@ async def update_language_handler(
         await callback_query.answer(
             text=_('🌐 Language updated to: {}').format(selected_language_name), show_alert=True
         )
-        await send_main_menu(callback_query.message, session, image_manager)
+        await send_main_menu(callback_query.message, session_with_commit, image_manager)
         logger.info(f'Interface refreshed for user {user_id} with new language: {selected_language_name}')
     except Exception as e:
         logger.error(f'Language update failed for user {user_id}: {e}', exc_info=True)
@@ -119,13 +121,15 @@ async def update_language_handler(
 
 
 @settings_router.callback_query(F.data == 'notifications')
-async def notifications_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
+async def notifications_handler(callback_query: CallbackQuery, session_without_commit: AsyncSession) -> None:
     """Display current notification subscription status."""
     user_id = callback_query.from_user.id
     logger.debug(f'User {user_id} checking notifications')
 
     try:
-        is_subscribed = await UserRepository.get_subscription_status(session, callback_query.from_user.id)
+        is_subscribed = await UserDAO.find_field_by_id(
+            session=session_without_commit, data_id=user_id, field='is_subscribed'
+        )
         status = _('Subscribed') if is_subscribed else _('Unsubscribed')
         await callback_query.message.delete()
         await callback_query.answer()
@@ -139,18 +143,18 @@ async def notifications_handler(callback_query: CallbackQuery, session: AsyncSes
 
 @settings_router.callback_query(F.data == 'subscribe_confirm')
 async def subscribe_confirm_handler(
-    callback_query: CallbackQuery, session: AsyncSession, image_manager: ImageManager
+    callback_query: CallbackQuery, session_with_commit: AsyncSession, image_manager: ImageManager
 ) -> None:
     """Confirm and activate notification subscription."""
     user_id = callback_query.from_user.id
     logger.debug(f'User {user_id} confirming subscription')
 
     try:
-        await UserRepository.update_subscription_status(
-            session=session, user_id=callback_query.from_user.id, is_subscribed=True
+        await UserDAO.update(
+            session=session_with_commit, data_id=user_id, values=UserSubscriptionSchema(is_subscribed=True)
         )
         await callback_query.answer(text=_('You have successfully Subscribed for notifications.'), show_alert=True)
-        await send_main_menu(callback_query, session, image_manager)
+        await send_main_menu(callback_query, session_with_commit, image_manager)
     except Exception as e:
         logger.error(f'Subscription error for {user_id}: {e}', exc_info=True)
         raise
@@ -158,16 +162,14 @@ async def subscribe_confirm_handler(
 
 @settings_router.callback_query(F.data == 'unsubscribe')
 async def unsubscribe_handler(
-    callback_query: CallbackQuery, session: AsyncSession, image_manager: ImageManager
+    callback_query: CallbackQuery, session_with_commit: AsyncSession, image_manager: ImageManager
 ) -> None:
     """Handle unsubscribe request with referral requirement check."""
     user_id = callback_query.from_user.id
     logger.debug(f'User {user_id} attempting unsubscribe')
 
     try:
-        referrals_count = await ReferralsRepository.get_count_user_referrals_by_user_id(
-            session, callback_query.from_user.id
-        )
+        referrals_count = await ReferralDAO.count_where(session_with_commit, Referral.referrer_id == user_id)
         required_number_of_referrals = config.telegram.REFERRAL_THRESHOLD
         if referrals_count < required_number_of_referrals:
             logger.warning(f'Unsubscribe denied for {user_id} (referrals: {referrals_count})')
@@ -178,13 +180,13 @@ async def unsubscribe_handler(
                 ).format(required_number_of_referrals),
                 show_alert=True,
             )
-            return await send_main_menu(callback_query, session, image_manager)
+            return await send_main_menu(callback_query, session_with_commit, image_manager)
 
-        await UserRepository.update_subscription_status(
-            session=session, user_id=callback_query.from_user.id, is_subscribed=False
+        await UserDAO.update(
+            session=session_with_commit, data_id=user_id, values=UserSubscriptionSchema(is_subscribed=False)
         )
         await callback_query.answer(text=_('You have successfully unsubscribed from notifications.'), show_alert=True)
-        await send_main_menu(callback_query, session, image_manager)
+        await send_main_menu(callback_query, session_with_commit, image_manager)
     except Exception as e:
         logger.error(f'Unsubscribe error for {user_id}: {e}', exc_info=True)
         raise

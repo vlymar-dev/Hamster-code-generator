@@ -8,7 +8,13 @@ from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
 from bot.handlers import ROUTERS
-from bot.middlewares import CacheServiceMiddleware, CustomI18nMiddleware, DatabaseMiddleware, ImageManagerMiddleware
+from bot.middlewares import (
+    CacheServiceMiddleware,
+    CustomI18nMiddleware,
+    DatabaseMiddlewareWithCommit,
+    DatabaseMiddlewareWithoutCommit,
+    ImageManagerMiddleware,
+)
 from bot.utils import ImageManager
 from infrastructure import BASE_DIR, config, setup_logging
 from infrastructure.services import CacheService
@@ -57,7 +63,8 @@ async def main():
         logger.debug('Setting up middlewares...')
         dp.update.outer_middleware(CacheServiceMiddleware(cache_service))
         dp.update.outer_middleware(ImageManagerMiddleware(image_manager))
-        dp.update.outer_middleware(DatabaseMiddleware())
+        dp.update.middleware.register(DatabaseMiddlewareWithoutCommit())
+        dp.update.middleware.register(DatabaseMiddlewareWithCommit())
         CustomI18nMiddleware(
             path='bot/locales',
             default_locale=config.telegram.DEFAULT_LANGUAGE,

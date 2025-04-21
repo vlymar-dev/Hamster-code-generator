@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 class AdminFilter(BaseFilter):
-    async def __call__(self, message: Message, session: AsyncSession, cache_service: CacheService):
+    async def __call__(self, message: Message, session_without_commit: AsyncSession, cache_service: CacheService):
         user_id = message.from_user.id
         logger.debug(f'Admin check for user {user_id}')
 
         if user_id in config.telegram.ADMIN_ACCESS_IDs:
             logger.info(f'User {user_id} granted admin access via config')
             return True
-        user_data = await UserCacheService.get_user_auth_data(cache_service, session, user_id)
+        user_data = await UserCacheService.get_user_auth_data(cache_service, session_without_commit, user_id)
         user_role = user_data.user_role
         if user_role == 'admin':
             logger.info(f'User {user_id} has admin role in database')

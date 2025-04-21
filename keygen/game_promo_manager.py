@@ -27,7 +27,7 @@ from urllib.parse import urlparse
 import aiohttp
 
 from infrastructure.db.accessor import async_session_maker
-from infrastructure.db.repositories.promo_code_repo import PromoCodeRepository
+from infrastructure.db.dao import PromoCodeDAO
 from infrastructure.schemas.promo_code import PromoCodeCreateSchema
 
 logger = logging.getLogger(__name__)
@@ -183,9 +183,10 @@ class GamePromo:
         try:
             formatted_game_name = game_name.replace(' ', '')
             async with async_session_maker() as session:
-                await PromoCodeRepository.add_promo_code(
+                await PromoCodeDAO.add(
                     session, PromoCodeCreateSchema(game_name=formatted_game_name, promo_code=promo_code)
                 )
+                await session.commit()
                 logger.info(f'🔑 `KEY` | `{promo_code[:12]}` | Saved in `promo_code` for game `{formatted_game_name}`')
         except Exception as e:
             logger.error(f'❌ Failed to save promo code `{promo_code[:12]}` for game `{game_name}`: {e}')

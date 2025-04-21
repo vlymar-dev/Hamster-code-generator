@@ -19,7 +19,9 @@ commands_router = Router()
 
 
 @commands_router.message(CommandStart())
-async def handle_start_command(message: Message, session: AsyncSession, bot: Bot, image_manager: ImageManager) -> None:
+async def handle_start_command(
+    message: Message, session_with_commit: AsyncSession, bot: Bot, image_manager: ImageManager
+) -> None:
     """Handle /start command with referral system and welcome message."""
     logger.info(f'Processing /start command from user {message.from_user.id}')
 
@@ -37,11 +39,15 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
             language_code=message.from_user.language_code,
         )
         logger.debug(f'Registering user {user_id}')
-        new_user = await UserService.user_registration(session=session, user_id=user_id, user_data=user_data)
+        new_user = await UserService.user_registration(
+            session=session_with_commit, user_id=user_id, user_data=user_data
+        )
 
         if new_user and referrer_id:
             logger.info(f'Processing referral for user {user_id} from referrer {referrer_id}')
-            success = await UserService.referral_adding(session=session, referrer_id=referrer_id, referred_id=user_id)
+            success = await UserService.referral_adding(
+                session=session_with_commit, referrer_id=referrer_id, referred_id=user_id
+            )
             if success:
                 logger.debug(f'Sending referral notification to {referrer_id}')
                 await bot.send_message(
@@ -77,7 +83,7 @@ async def handle_start_command(message: Message, session: AsyncSession, bot: Bot
 
 
 @commands_router.message(Command('change_language'))
-async def change_language_command(message: Message, session: AsyncSession, cache_service: CacheService):
+async def change_language_command(message: Message, session_without_commit: AsyncSession, cache_service: CacheService):
     """Handle language change command."""
     logger.debug(f'Language change request from user {message.from_user.id}')
 
@@ -85,7 +91,7 @@ async def change_language_command(message: Message, session: AsyncSession, cache
         user_id = message.from_user.id
         logger.debug(f'Fetching current language for user {user_id}')
         language_data = await UserCacheService.get_user_language(
-            cache_service=cache_service, session=session, user_id=user_id
+            cache_service=cache_service, session=session_without_commit, user_id=user_id
         )
         current_language_code = language_data.language_code
         logger.debug(f'Current language: {current_language_code} for user {user_id}')

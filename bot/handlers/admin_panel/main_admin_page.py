@@ -14,7 +14,7 @@ from bot.keyboards.admin_panel import (
 )
 from bot.states import AdminPanelState
 from bot.utils.static_data import HAMSTER_GAMES_LIST
-from infrastructure.db.repositories import PromoCodeRepository, UserRepository
+from infrastructure.db.dao import PromoCodeDAO, UserDAO
 from infrastructure.services import CacheService, UserCacheService
 
 logger = logging.getLogger(__name__)
@@ -22,14 +22,14 @@ admin_router = Router()
 
 
 @admin_router.callback_query(F.data == 'manage_users')
-async def manage_users_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
+async def manage_users_handler(callback_query: CallbackQuery, session_without_commit: AsyncSession) -> None:
     """Display user management statistics."""
     admin_id = callback_query.from_user.id
     logger.debug(f'Admin {admin_id} accessed user management')
 
     try:
         await callback_query.message.delete()
-        users_count = await UserRepository.get_users_count(session)
+        users_count = await UserDAO.count(session_without_commit)
         await callback_query.answer()
         await callback_query.message.answer(
             text=_('Total users: {users_count}').format(users_count=users_count), reply_markup=admin_panel_users_kb()
@@ -40,7 +40,7 @@ async def manage_users_handler(callback_query: CallbackQuery, session: AsyncSess
 
 
 @admin_router.callback_query(F.data == 'manage_keys')
-async def manage_keys_handler(callback_query: CallbackQuery, session: AsyncSession) -> None:
+async def manage_keys_handler(callback_query: CallbackQuery, session_without_commit: AsyncSession) -> None:
     """Display key usage statistics."""
     admin_id = callback_query.from_user.id
     logger.debug(f'Admin {admin_id} accessed key management')
@@ -48,8 +48,8 @@ async def manage_keys_handler(callback_query: CallbackQuery, session: AsyncSessi
     try:
         await callback_query.answer()
         await callback_query.message.delete()
-        today_keys = await UserRepository.get_today_keys_count(session)
-        db_keys_count = await PromoCodeRepository.get_code_counts_for_games(session, HAMSTER_GAMES_LIST)
+        today_keys = await UserDAO.find_today_keys_count(session_without_commit)
+        db_keys_count = await PromoCodeDAO.find_code_counts_by_game_names(session_without_commit, HAMSTER_GAMES_LIST)
         db_keys_count_formated = '\n'.join(f'{count}.....<b>{game}</b>' for game, count in db_keys_count.items())
         await callback_query.message.answer(
             text=_('<b>Picked up the keys today:</b> {today_keys}\n\n🕹️ <i>All games:</i>\n{db_keys}').format(
@@ -82,7 +82,7 @@ async def add_role_handler(callback_query: CallbackQuery, state: FSMContext) -> 
 
 @admin_router.message(AdminPanelState.target_user_id)
 async def process_change_role_handler(
-    message: Message, state: FSMContext, session: AsyncSession, cache_service: CacheService
+    message: Message, state: FSMContext, session_without_commit: AsyncSession, cache_service: CacheService
 ) -> None:
     """Process user ID input for role change."""
     admin_id = message.from_user.id
@@ -93,7 +93,7 @@ async def process_change_role_handler(
         logger.info(f'Admin {admin_id} attempting to change role for user {target_user_id}')
 
         user_data = await UserCacheService.get_user_auth_data(
-            cache_service=cache_service, session=session, user_id=target_user_id
+            cache_service=cache_service, session=session_without_commit, user_id=target_user_id
         )
         current_user_role = user_data.user_role
         if not current_user_role:
@@ -133,7 +133,7 @@ async def process_change_role_handler(
 
 @admin_router.callback_query(F.data.startswith('change_role_to_'))
 async def select_role_handler(
-    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession, cache_service: CacheService
+    callback_query: CallbackQuery, state: FSMContext, session_with_commit: AsyncSession, cache_service: CacheService
 ) -> None:
     """Apply new user role changes."""
     admin_id = callback_query.from_user.id
@@ -146,7 +146,10 @@ async def select_role_handler(
         logger.info(f'Admin {admin_id} changing role for user {target_user_id} to {new_user_role}')
 
         await UserCacheService.update_user_auth_data(
-            cache_service=cache_service, session=session, user_id=target_user_id, new_user_role=new_user_role
+            cache_service=cache_service,
+            session=session_with_commit,
+            user_id=target_user_id,
+            new_user_role=new_user_role,
         )
         await callback_query.message.delete()
         await callback_query.answer()
