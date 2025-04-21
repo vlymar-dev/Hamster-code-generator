@@ -7,13 +7,18 @@ class AnnouncementCreateSchema(BaseModel):
     created_by: int
 
 
+class AnnouncementTranslationTextSchema(BaseModel):
+    text: str
+
+
 class AnnouncementTranslationCreateSchema(BaseModel):
     announcement_id: int
-    text: str
+    text: AnnouncementTranslationTextSchema
     language_code: str
 
 
 class AnnouncementTranslationSchema(BaseModel):
+    id: int | None = None
     language_code: str | None = None
     text: str | None = None
 

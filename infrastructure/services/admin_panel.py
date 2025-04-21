@@ -8,10 +8,13 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
 from aiogram.types import FSInputFile, PhotoSize
 from PIL import Image, UnidentifiedImageError
+from sqlalchemy import true
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from infrastructure import BASE_DIR, config
-from infrastructure.db.repositories import AnnouncementRepository, UserRepository
+from infrastructure.db.dao import AnnouncementDAO, UserDAO
+from infrastructure.db.models import User
+from infrastructure.schemas import SubscribedUsersSchema
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +61,9 @@ class AdminPanelService:
     async def broadcast_announcement(session: AsyncSession, bot: Bot, announcement_id: int) -> dict[str, int]:
         """Broadcasts an announcement to all subscribed users"""
         logger.info(f'Initiating broadcast for announcement #{announcement_id}')
-        users = await UserRepository.get_subscribed_users(session)
-        announcement = await AnnouncementRepository.get_announcement_by_id(session, announcement_id)
+        users_data = await UserDAO.find_all_where(session, (User.is_subscribed == true()))
+        users = [SubscribedUsersSchema.model_validate(user) for user in users_data]
+        announcement = await AnnouncementDAO.find_by_id_with_languages(session, announcement_id)
 
         if not announcement:
             logger.error(f'Announcement #{announcement_id} not found')

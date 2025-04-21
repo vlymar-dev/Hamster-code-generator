@@ -2,8 +2,9 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.db.repositories import GameTaskRepository
-from infrastructure.schemas import GameTaskResponsePaginateSchema
+from infrastructure.db.dao import GameTaskDAO
+from infrastructure.db.models import GameTask
+from infrastructure.schemas import GameTaskResponsePaginateSchema, GameTaskSchema
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +28,11 @@ class GameTaskService:
         offset = (page - 1) * tasks_per_page
 
         try:
-            total_tasks = await GameTaskRepository.count_tasks_by_game(session, game_name)
-            tasks = await GameTaskRepository.get_tasks_by_game_name(
+            total_tasks = await GameTaskDAO.count_where(session, GameTask.game_name == game_name)
+            list_tasks = await GameTaskDAO.paginate_by_game_name(
                 session=session, game_name=game_name, limit=tasks_per_page, offset=offset
             )
+            tasks = [GameTaskSchema.model_validate(game_task) for game_task in list_tasks]
 
             total_pages = max((total_tasks + tasks_per_page - 1) // tasks_per_page, 1)
 

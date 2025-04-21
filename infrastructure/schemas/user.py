@@ -3,13 +3,24 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class UserLanguageCacheSchema(BaseModel):
+class UserLanguageCodeSchema(BaseModel):
     language_code: str
 
 
-class UserAuthCache(BaseModel):
-    is_banned: bool
+class UserSubscriptionSchema(BaseModel):
+    is_subscribed: bool
+
+
+class UserRoleSchema(BaseModel):
     user_role: str
+
+
+class UserAuthSchema(UserRoleSchema):
+    is_banned: bool
+
+
+class UserDailyRequestsSchema(UserRoleSchema):
+    daily_requests_count: int
 
 
 class UserCreateSchema(BaseModel):
@@ -45,9 +56,13 @@ class UserProgressDataSchema(BaseModel):
     days_progress: str
 
 
-class UserActivitySchema(BaseModel):
+class UpdateUserKeysSchema(BaseModel):
+    total_keys_generated: int
     daily_requests_count: int
     last_request_datetime: datetime | None
+
+
+class UserActivitySchema(UpdateUserKeysSchema):
     user_status: str
 
 

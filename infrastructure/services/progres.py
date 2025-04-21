@@ -4,7 +4,8 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.db.repositories import ReferralsRepository, UserRepository
+from infrastructure.db.dao import ReferralDAO, UserDAO
+from infrastructure.db.models import Referral, User
 from infrastructure.schemas import UserProgressDataSchema, UserProgressSchema
 
 logger = logging.getLogger(__name__)
@@ -22,27 +23,34 @@ ACHIEVEMENTS: dict[str, dict[str, int]] = {
 class ProgressService:
     """Service handling user progress tracking and achievement calculations"""
 
-    async def get_user_progres(self, session: AsyncSession, user_id: int) -> UserProgressDataSchema:
+    async def get_user_progres(self, session_with_commit: AsyncSession, user_id: int) -> UserProgressDataSchema:
         """Get comprehensive progress data for a user"""
         logger.info(f'Generating progress report for user {user_id}')
         try:
-            user_data: UserProgressSchema = await UserRepository.get_user_progress(session, user_id)
-            referrals_count = await ReferralsRepository.get_count_user_referrals_by_user_id(session, user_id)
-            days_in_bot = (datetime.now().date() - user_data.registration_date.date()).days
+            user_data: User = await UserDAO.find_one_or_none_by_id(session=session_with_commit, data_id=user_id)
+            user_progres = UserProgressSchema(
+                registration_date=user_data.registration_date,
+                user_status=user_data.user_status,
+                total_keys_generated=user_data.total_keys_generated,
+            )
+            referrals_count = await ReferralDAO.count_where(session_with_commit, Referral.referrer_id == user_id)
+            days_in_bot = (datetime.now().date() - user_progres.registration_date.date()).days
 
             current_level, next_level = self.calculate_achievement(
-                user_data.total_keys_generated, referrals_count, days_in_bot
+                user_progres.total_keys_generated, referrals_count, days_in_bot
             )
             logger.debug(f'Calculated levels: {current_level} -> {next_level}')
 
             next_thresholds = ACHIEVEMENTS.get(next_level, {})
-            keys_progress = self.generate_progress_bar(user_data.total_keys_generated, next_thresholds.get('keys', 0))
+            keys_progress = self.generate_progress_bar(
+                user_progres.total_keys_generated, next_thresholds.get('keys', 0)
+            )
             referrals_progress = self.generate_progress_bar(referrals_count, next_thresholds.get('referrals', 0))
             days_progress = self.generate_progress_bar(days_in_bot, next_thresholds.get('days', 0))
 
             return UserProgressDataSchema(
-                total_keys=user_data.total_keys_generated,
-                user_status=user_data.user_status,
+                total_keys=user_progres.total_keys_generated,
+                user_status=user_progres.user_status,
                 days_in_bot=days_in_bot,
                 referrals=referrals_count,
                 current_level=current_level,

@@ -2,6 +2,7 @@ from infrastructure.schemas.announcement import (
     AnnouncementCreateSchema,
     AnnouncementTranslationCreateSchema,
     AnnouncementTranslationSchema,
+    AnnouncementTranslationTextSchema,
     AnnouncementWithLanguagesSchema,
 )
 from infrastructure.schemas.game_task import GameTaskResponsePaginateSchema, GameTaskSchema
@@ -10,18 +11,23 @@ from infrastructure.schemas.referral import ReferralAddingSchema
 from infrastructure.schemas.user import (
     RemainingTimeSchema,
     SubscribedUsersSchema,
+    UpdateUserKeysSchema,
     UserActivitySchema,
-    UserAuthCache,
+    UserAuthSchema,
     UserCreateSchema,
+    UserDailyRequestsSchema,
     UserKeyGenerationSchema,
-    UserLanguageCacheSchema,
+    UserLanguageCodeSchema,
     UserProgressDataSchema,
     UserProgressSchema,
+    UserRoleSchema,
+    UserSubscriptionSchema,
 )
 
 __all__ = [
     'AnnouncementCreateSchema',
     'AnnouncementTranslationCreateSchema',
+    'AnnouncementTranslationTextSchema',
     'AnnouncementTranslationSchema',
     'AnnouncementWithLanguagesSchema',
     'GameTaskResponsePaginateSchema',
@@ -29,12 +35,16 @@ __all__ = [
     'PromoCodeReceiveSchema',
     'RemainingTimeSchema',
     'UserActivitySchema',
-    'UserAuthCache',
+    'UserAuthSchema',
     'ReferralAddingSchema',
     'UserCreateSchema',
     'SubscribedUsersSchema',
     'UserKeyGenerationSchema',
     'UserProgressSchema',
-    'UserLanguageCacheSchema',
+    'UserLanguageCodeSchema',
     'UserProgressDataSchema',
+    'UserRoleSchema',
+    'UserSubscriptionSchema',
+    'UpdateUserKeysSchema',
+    'UserDailyRequestsSchema',
 ]

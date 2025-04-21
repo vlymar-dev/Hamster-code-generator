@@ -2,7 +2,7 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from infrastructure.db.repositories import PromoCodeRepository
+from infrastructure.db.dao import PromoCodeDAO
 from infrastructure.schemas import PromoCodeReceiveSchema
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class PromoCodeService:
         """Retrieve and consume promo codes for specified games"""
         try:
             logger.debug(f'Consuming promo codes for games: {game_names}')
-            promo_codes: list[PromoCodeReceiveSchema] = await PromoCodeRepository.get_promo_codes(session, game_names)
+            promo_codes: list[PromoCodeReceiveSchema] = await PromoCodeDAO.find_by_game_names(session, game_names)
             logger.debug(f'Found {len(promo_codes)} promo codes to process')
 
             result = {game_name: None for game_name in game_names}
@@ -29,7 +29,7 @@ class PromoCodeService:
 
             if ids_to_delete:
                 logger.debug(f'Deleting {len(ids_to_delete)} used promo codes')
-                await PromoCodeRepository.delete_promo_codes(session, ids_to_delete)
+                await PromoCodeDAO.delete_by_ids(session, ids_to_delete)
 
             return result
         except Exception as e:
