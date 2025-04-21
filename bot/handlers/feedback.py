@@ -78,7 +78,7 @@ async def process_user_feedback_message(message: Message, bot: Bot, image_manage
                     reply_markup=get_admin_feedback_kb(user_id=message.from_user.id, message_id=message.message_id),
                 )
             except Exception as e:
-                print(f'Failed to notify admin {admin_id}: {e}', exc_info=True)
+                logger.error(f'Failed to notify admin {admin_id}: {e}', exc_info=True)
 
         if hasattr(message, 'react'):
             logger.debug(f'Adding reaction to message {message.message_id}')

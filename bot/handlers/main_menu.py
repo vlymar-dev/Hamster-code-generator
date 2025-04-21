@@ -10,7 +10,7 @@ from bot.filters import IsBannedFilter
 from bot.keyboards.main_menu_kb import get_main_menu_kb
 from bot.utils import ImageManager
 from infrastructure import config
-from infrastructure.db.repositories import UserRepository
+from infrastructure.db.dao import UserDAO
 
 logger = logging.getLogger(__name__)
 main_menu_router = Router()
@@ -18,13 +18,13 @@ main_menu_router = Router()
 
 @main_menu_router.callback_query(IsBannedFilter(), F.data == 'back_to_main_menu')
 async def back_to_main_menu_handler(
-    callback_query: CallbackQuery, session: AsyncSession, state: FSMContext, image_manager: ImageManager
+    callback_query: CallbackQuery, session_without_commit: AsyncSession, state: FSMContext, image_manager: ImageManager
 ) -> None:
     """Handle return to main menu request."""
     try:
         await callback_query.answer()
         await state.clear()
-        await send_main_menu(callback_query, session, image_manager)
+        await send_main_menu(callback_query, session_without_commit, image_manager)
     except Exception as e:
         logger.error(f'Error in main menu handler for user {callback_query.from_user.id}: {str(e)}')
         raise
@@ -48,7 +48,7 @@ async def send_main_menu(
             send_method = event.answer_photo if image else event.answer
             logger.debug(f'Deleted original message for user {user_id}')
 
-        keys_today = await UserRepository.get_today_keys_count(session)
+        keys_today = await UserDAO.find_today_keys_count(session)
         keys_with_coefficient = keys_today * config.telegram.POPULARITY_COEFFICIENT
         logger.debug(f'Calculated keys: {keys_with_coefficient} for user {user_id}')
 

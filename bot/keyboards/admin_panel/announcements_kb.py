@@ -22,7 +22,10 @@ def get_announcement_menu_kb() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text=_('🥏 Create Translation'), callback_data='create_announcement_translation'),
         InlineKeyboardButton(text=_('🔍 View Translation'), callback_data='view_announcement_translation'),
     )
-    builder.row(InlineKeyboardButton(text=_('✏️ Edit'), callback_data='edit_announcement_translation'))
+    builder.row(
+        InlineKeyboardButton(text=_('✏️ Edit'), callback_data='edit_announcement_translation'),
+        InlineKeyboardButton(text=_('❌ Delete'), callback_data='delete_announcement_translation'),
+    )
     builder.row(InlineKeyboardButton(text=_('📤 Broadcast Announcement'), callback_data='broadcast_announcement'))
 
     builder.row(cancel_announcement_action_button(_('🔙 Back to announcements'), 'back_to_announcements'))
@@ -35,6 +38,14 @@ def get_languages_kb(languages_dict: dict, callback_prefix: str) -> InlineKeyboa
     for lang_code, language_name in languages_dict.items():
         builder.button(text=language_name, callback_data=f'{callback_prefix}_{lang_code}')
     builder.adjust(2)
+    builder.row(cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details'))
+    return builder.as_markup()
+
+
+def get_confirmation_translate_deletion() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(InlineKeyboardButton(text=_('❌ Confirm deletion'), callback_data='confirm_translation_deletion'))
     builder.row(cancel_announcement_action_button(_('🔙 Back'), 'back_to_announcement_details'))
     return builder.as_markup()
 

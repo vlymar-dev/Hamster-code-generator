@@ -11,14 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 class IsBannedFilter(BaseFilter):
-    async def __call__(self, obj: TelegramObject, session: AsyncSession, cache_service: CacheService) -> bool:
+    async def __call__(
+        self, obj: TelegramObject, session_with_commit: AsyncSession, cache_service: CacheService
+    ) -> bool:
         user_id = obj.from_user.id if hasattr(obj, 'from_user') else None
         if not user_id:
             logger.error(f'Missing user_id in IsBannedFilter for object: {type(obj).__name__}')
             return False
 
         logger.debug(f'Checking ban status for user {user_id}')
-        user_data = await UserCacheService.get_user_auth_data(cache_service, session, user_id)
+        user_data = await UserCacheService.get_user_auth_data(cache_service, session_with_commit, user_id)
         is_banned = user_data.is_banned
 
         if is_banned:

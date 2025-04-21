@@ -13,7 +13,7 @@ from bot.keyboards.admin_panel.game_codes_kb import (
     get_game_codes_actions_kb,
 )
 from bot.states import GameCodeManagement
-from infrastructure.db.repositories import GameTaskRepository
+from infrastructure.db.dao import GameTaskDAO
 from infrastructure.schemas import GameTaskSchema
 
 logger = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ async def process_task_input_handler(message: Message, state: FSMContext) -> Non
 
 
 @game_codes_router.message(GameCodeManagement.WaitingForAnswer)
-async def process_answer_input_handler(message: Message, state: FSMContext, session: AsyncSession) -> None:
+async def process_answer_input_handler(message: Message, state: FSMContext, session_with_commit: AsyncSession) -> None:
     """Process answer input and save new game code to database."""
     admin_id = message.from_user.id
     logger.debug(f'Admin {admin_id} entered answer input stage')
@@ -118,7 +118,7 @@ async def process_answer_input_handler(message: Message, state: FSMContext, sess
 
         data = await state.get_data()
         game_task = GameTaskSchema(game_name=data['selected_game'], task=data['task'], answer=answer)
-        await GameTaskRepository.add_task(session, game_task)
+        await GameTaskDAO.add(session_with_commit, game_task)
 
         await state.clear()
         await message.answer(
@@ -163,7 +163,7 @@ async def delete_code_handler(callback_query: CallbackQuery, state: FSMContext) 
 
 
 @game_codes_router.message(GameCodeManagement.WaitingForIDToDelete)
-async def process_delete_task_by_id_handler(message: Message, state: FSMContext, session: AsyncSession):
+async def process_delete_task_by_id_handler(message: Message, state: FSMContext, session_without_commit: AsyncSession):
     """Process task ID input for deletion."""
     admin_id = message.from_user.id
     logger.debug(f'Admin {admin_id} entered ID input stage for deletion')
@@ -179,7 +179,7 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
             )
             return
         await state.update_data(task_id=task_id)
-        task: GameTaskSchema = await GameTaskRepository.get_task_by_id(session, task_id)
+        task: GameTaskSchema = await GameTaskDAO.find_one_or_none_by_id(session_without_commit, task_id)
         if not task:
             logger.warning(f'Admin {admin_id} tried to delete non-existing task ID: {task_id}')
             await message.answer(
@@ -203,7 +203,7 @@ async def process_delete_task_by_id_handler(message: Message, state: FSMContext,
 
 @game_codes_router.callback_query(F.data == 'confirm_deletion')
 async def confirmation_deletion_handler(
-    callback_query: CallbackQuery, state: FSMContext, session: AsyncSession
+    callback_query: CallbackQuery, state: FSMContext, session_with_commit: AsyncSession
 ) -> None:
     """Handle final confirmation of task deletion."""
     admin_id = callback_query.from_user.id
@@ -219,13 +219,17 @@ async def confirmation_deletion_handler(
             return
 
         try:
-            await GameTaskRepository.delete_task_by_id(session, task_id)
+            await GameTaskDAO.delete(session_with_commit, task_id)
+            await callback_query.message.delete()
+            await callback_query.answer()
             await callback_query.message.answer(
                 text=_('✅ Task with ID <b>{id}</b> successfully deleted!').format(id=task_id),
                 reply_markup=get_admin_panel_codes_kb(),
             )
         except Exception as err:
             logger.error(f'Error while deleting a record: {err}', exc_info=True)
+            await callback_query.message.delete()
+            await callback_query.answer()
             await callback_query.message.answer(
                 text=_('❌ Task with ID <b>{id}</b> not found or could not be deleted.').format(id=task_id),
                 reply_markup=get_cancel_game_code_action_kb(),
