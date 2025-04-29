@@ -3,7 +3,7 @@ from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.keyboards.main_menu_kb import back_to_main_menu_button
-from bot.utils.static_data import ROLES_DICT
+from bot.utils import static_data
 
 
 def admin_panel_kb() -> InlineKeyboardMarkup:
@@ -30,7 +30,7 @@ def admin_panel_users_kb() -> InlineKeyboardMarkup:
 def admin_panel_user_role_kb(current_user_role: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for role, title in ROLES_DICT.items():
+    for role, title in static_data.ROLES_DICT.items():
         if role == current_user_role:
             continue
 

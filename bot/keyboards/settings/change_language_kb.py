@@ -2,13 +2,13 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.keyboards.main_menu_kb import back_to_main_menu_button
-from bot.utils.static_data import LANGUAGES_DICT
+from bot.utils import static_data
 
 
 def get_change_language_kb(current_language_code: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for lang_code, language_name in LANGUAGES_DICT.items():
+    for lang_code, language_name in static_data.LANGUAGES_DICT.items():
         if lang_code == current_language_code:
             continue
 

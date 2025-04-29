@@ -51,3 +51,4 @@ async def user_info_handler(callback_query: CallbackQuery, image_manager: ImageM
             await callback_query.message.answer(text=response_text, reply_markup=await get_donation_kb())
     except Exception as e:
         logger.error(f'Error processing user info request for {user_id}: {e}', exc_info=True)
+        raise

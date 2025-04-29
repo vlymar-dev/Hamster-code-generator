@@ -2,13 +2,13 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.keyboards.main_menu_kb import back_to_main_menu_button
-from bot.utils.static_data import GAME_TASKS_DICT
+from bot.utils import static_data
 
 
 def get_games_codes_and_keys_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for game_key, game_name in GAME_TASKS_DICT.items():
+    for game_key, game_name in static_data.GAME_TASKS_DICT.items():
         builder.button(
             text=game_name,
             callback_data=f'get_codes_for_{game_key}',

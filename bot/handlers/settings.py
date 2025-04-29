@@ -11,8 +11,7 @@ from bot.keyboards.settings.change_language_kb import get_change_language_kb
 from bot.keyboards.settings.notifications_kb import notifications_kb
 from bot.keyboards.settings.settings_kb import get_settings_kb
 from bot.middlewares import CustomI18nMiddleware
-from bot.utils import ImageManager
-from bot.utils.static_data import LANGUAGES_DICT
+from bot.utils import ImageManager, static_data
 from infrastructure import config
 from infrastructure.db.dao import ReferralDAO, UserDAO
 from infrastructure.db.models import Referral
@@ -67,7 +66,7 @@ async def change_language_handler(
         language_data = await UserCacheService.get_user_language(
             cache_service=cache_service, session=session_without_commit, user_id=user_id
         )
-        current_language = LANGUAGES_DICT.get(language_data.language_code)
+        current_language = static_data.LANGUAGES_DICT.get(language_data.language_code)
         logger.debug(f'User {user_id} current language: {current_language}')
 
         await callback_query.message.delete()
@@ -105,7 +104,7 @@ async def update_language_handler(
             selected_language_code=selected_language_code,
         )
         updated_language_code = language_data.language_code
-        selected_language_name = LANGUAGES_DICT.get(updated_language_code)
+        selected_language_name = static_data.LANGUAGES_DICT.get(updated_language_code)
         logger.debug(f'Updated language for {user_id} to {selected_language_name}')
 
         # Apply changes

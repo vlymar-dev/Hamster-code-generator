@@ -18,7 +18,7 @@ from bot.keyboards.admin_panel.announcements_kb import (
     get_languages_kb,
 )
 from bot.states import AnnouncementDetails, CreateAnnouncement, DeleteAnnouncement
-from bot.utils.static_data import LANGUAGES_DICT
+from bot.utils import static_data
 from infrastructure.db.dao import AnnouncementDAO, AnnouncementTranslationDAO
 from infrastructure.schemas import (
     AnnouncementCreateSchema,
@@ -201,7 +201,9 @@ async def create_translation_handler(callback_query: CallbackQuery, state: FSMCo
             await callback_query.answer(_('⚠️ First select an announcement!'), show_alert=True)
             return
 
-        available_languages = {key: value for key, value in LANGUAGES_DICT.items() if key not in data['languages']}
+        available_languages = {
+            key: value for key, value in static_data.LANGUAGES_DICT.items() if key not in data['languages']
+        }
         await callback_query.message.delete()
         await callback_query.answer()
         if available_languages:
@@ -233,7 +235,7 @@ async def get_add_translation_text_handler(callback_query: CallbackQuery, state:
         await callback_query.answer()
         await callback_query.message.answer(
             text=_('📝 Enter the announcement text for "{language_code}":').format(
-                language_code=LANGUAGES_DICT.get(language_code)
+                language_code=static_data.LANGUAGES_DICT.get(language_code)
             ),
             reply_markup=get_back_to_announcement_details_kb(),
         )
@@ -262,7 +264,9 @@ async def process_translation_text_input(
         )
         logger.info(f'Admin {admin_id} added {language_code} translation')
         await message.answer(
-            text=_("✅ Translation for: '{language}' created").format(language=LANGUAGES_DICT.get(language_code)),
+            text=_("✅ Translation for: '{language}' created").format(
+                language=static_data.LANGUAGES_DICT.get(language_code)
+            ),
             reply_markup=get_back_to_announcement_details_kb(),
         )
         data.pop('language_code', None)
@@ -284,7 +288,9 @@ async def edit_announcement_translation_handler(callback_query: CallbackQuery, s
 
     try:
         data = await state.get_data()
-        available_languages = {key: value for key, value in LANGUAGES_DICT.items() if key in data['languages']}
+        available_languages = {
+            key: value for key, value in static_data.LANGUAGES_DICT.items() if key in data['languages']
+        }
 
         await callback_query.message.delete()
         await callback_query.answer()
@@ -330,7 +336,7 @@ async def get_edit_translation_text_handler(
                 _('📙 <b>Text: </b>\n')
                 + f'{ann_tr.text}\n\n'
                 + _('📝 Enter new announcement text for "{language_code}":').format(
-                    language_code=LANGUAGES_DICT.get(language_code)
+                    language_code=static_data.LANGUAGES_DICT.get(language_code)
                 )
             ),
             reply_markup=get_back_to_announcement_details_kb(),
@@ -361,7 +367,7 @@ async def process_edit_translation_text_input(
 
         await message.answer(
             text=_("✅ Translation updated <b>successfully</b> for: '{language}'.").format(
-                language=LANGUAGES_DICT.get(language_code)
+                language=static_data.LANGUAGES_DICT.get(language_code)
             ),
             reply_markup=get_back_to_announcement_details_kb(),
         )
@@ -448,7 +454,7 @@ async def view_announcement_translation_handler(callback_query: CallbackQuery, s
             await callback_query.answer(_('⚠️ Announcement context lost!'), show_alert=True)
             return
 
-        languages_dict = {key: value for key, value in LANGUAGES_DICT.items() if key in data['languages']}
+        languages_dict = {key: value for key, value in static_data.LANGUAGES_DICT.items() if key in data['languages']}
         await callback_query.message.delete()
         await callback_query.answer()
         if languages_dict:
@@ -500,7 +506,9 @@ async def delete_translation_text_handler(callback_query: CallbackQuery, state: 
 
     try:
         data = await state.get_data()
-        available_languages = {key: value for key, value in LANGUAGES_DICT.items() if key in data['languages']}
+        available_languages = {
+            key: value for key, value in static_data.LANGUAGES_DICT.items() if key in data['languages']
+        }
 
         await callback_query.message.delete()
         await callback_query.answer()
@@ -546,7 +554,7 @@ async def get_delete_translation_text_handler(
                 _('📙 <b>Text: </b>\n')
                 + f'{ann_tr.text}\n\n'
                 + _('❌ Do you want to delete this translation for "{language_code}"?').format(
-                    language_code=LANGUAGES_DICT.get(language_code)
+                    language_code=static_data.LANGUAGES_DICT.get(language_code)
                 )
             ),
             reply_markup=get_confirmation_translate_deletion(),
@@ -573,7 +581,7 @@ async def confirm_translation_deletion_handler(
         await callback_query.message.delete()
         await callback_query.message.answer(
             text=_('✅ Announcement translation with language: <b>{language}</b> has been deleted.').format(
-                language=LANGUAGES_DICT.get(language_code)
+                language=static_data.LANGUAGES_DICT.get(language_code)
             ),
             reply_markup=get_back_to_announcement_details_kb(),
         )

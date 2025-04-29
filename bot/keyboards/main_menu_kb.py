@@ -4,11 +4,11 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.utils.referral import REFERRAL_LINKS
+from bot.utils import referral
 
 
 def get_random_referral_buttons() -> list[InlineKeyboardButton]:
-    selected_buttons = random.sample(list(REFERRAL_LINKS.items()), 1)
+    selected_buttons = random.sample(list(referral.REFERRAL_LINKS.items()), 1)
 
     return [InlineKeyboardButton(text=game_name, url=game_url) for game_name, game_url in selected_buttons]
 

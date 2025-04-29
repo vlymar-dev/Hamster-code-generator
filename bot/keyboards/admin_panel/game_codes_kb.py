@@ -3,13 +3,13 @@ from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.keyboards.admin_panel.admin_panel_kb import back_to_admin_panel_button
-from bot.utils.static_data import GAME_TASKS_DICT
+from bot.utils import static_data
 
 
 def get_admin_panel_codes_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for game_key, game_name in GAME_TASKS_DICT.items():
+    for game_key, game_name in static_data.GAME_TASKS_DICT.items():
         builder.button(
             text=game_name,
             callback_data=f'admin_codes_for_{game_key}',
