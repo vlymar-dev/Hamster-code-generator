@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
@@ -16,10 +15,8 @@ from bot.middlewares import (
     ImageManagerMiddleware,
 )
 from bot.utils import ImageManager
-from infrastructure import BASE_DIR, config, setup_logging
+from infrastructure import BASE_DIR, config
 from infrastructure.services import CacheService
-
-setup_logging(app_name='bot')
 
 logger = logging.getLogger(__name__)
 
@@ -95,5 +92,9 @@ async def main():
         await bot.session.close()
 
 
-if __name__ == '__main__':
-    asyncio.run(main())
+async def start_bot():
+    try:
+        await main()
+    except Exception as e:
+        logger.error(f'Error during bot startup: {e}')
+        raise

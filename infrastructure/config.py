@@ -82,6 +82,7 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore')
 
     PROD_MODE: bool = Field(default=True, validation_alias='PRODUCTION_MODE')
+    STARTUP_METHOD: int = Field(default=2)
 
     telegram: BotConfig = BotConfig()
     database: DatabaseConfig = DatabaseConfig()
