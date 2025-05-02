@@ -12,10 +12,10 @@ class BotConfig(BaseSettings):
         env_prefix='BOT_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
     )
 
-    TOKEN: SecretStr
-    ADMIN_ACCESS_IDs: list[int]
-    SUPPORT_LINK: str
-    NAME: str = Field(min_length=3, pattern=r'^[a-zA-Z0-9_]+$')
+    TOKEN: SecretStr = Field(SecretStr('bot_secret_token'))
+    ADMIN_ACCESS_IDs: list[int] = Field([12345])
+    SUPPORT_LINK: str = Field('support_link')
+    NAME: str = Field('bot_name', min_length=3, pattern=r'^[a-zA-Z0-9_]+$')
     DEFAULT_LANGUAGE: str = Field('en')
     POPULARITY_COEFFICIENT: int = Field(1)
     REFERRAL_THRESHOLD: int = Field(5)
@@ -30,8 +30,8 @@ class WalletsConfig(BaseSettings):
         env_prefix='WALLET_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
     )
 
-    TRC: str
-    TON: str
+    TRC: str = Field('trc_wallet')
+    TON: str = Field('ton_wallet')
 
 
 class DatabaseConfig(BaseSettings):
@@ -39,9 +39,9 @@ class DatabaseConfig(BaseSettings):
         env_prefix='DB_', env_file=BASE_DIR / '.env', env_file_encoding='utf-8', extra='ignore'
     )
 
-    NAME: str = Field(min_length=3)
-    USER: str = Field(min_length=3)
-    PASSWORD: SecretStr = Field(min_length=8)
+    NAME: str = Field('postgres', min_length=3)
+    USER: str = Field('postgres', min_length=3)
+    PASSWORD: SecretStr = Field(SecretStr('password'), min_length=8)
     PORT: int = Field(5432, ge=1024, le=65535)
     HOST: str = Field('postgres')
     DRIVER: str = Field('postgresql+asyncpg')
