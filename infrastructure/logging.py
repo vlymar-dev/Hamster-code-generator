@@ -57,7 +57,7 @@ def setup_logging(
 
     # File handler with daily rotation
     file_handler = TimedRotatingFileHandler(
-        filename=log_dir / f'{app_name}.log', when='midnight', backupCount=30, encoding='utf-8', utc=True
+        filename=log_dir / f'{app_name}.log', when='midnight', backupCount=10, encoding='utf-8', utc=True
     )
     file_handler.setFormatter(formatter)
     file_handler.setLevel(file_log_level)

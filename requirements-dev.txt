@@ -1,2 +1,7 @@
 ruff==0.6.5
 pre-commit==4.2.0
+pytest==8.3.5
+pytest-asyncio==0.26.0
+pytest-twisted==1.14.3
+pytest-cov==6.1.1
+twisted==24.11.0

@@ -70,10 +70,11 @@ class RedisConfig(BaseSettings):
     @property
     def dsn(self) -> str:
         credentials = ''
+        if self.PASSWORD:
+            credentials += f':{quote(self.PASSWORD.get_secret_value())}'
         if self.USERNAME:
             credentials += quote(self.USERNAME)
-            if self.PASSWORD:
-                credentials += f':{quote(self.PASSWORD.get_secret_value())}'
+        if credentials:
             credentials += '@'
         return f'redis://{credentials}{self.HOST}:{self.PORT}/{self.DB}'
 
