@@ -1,36 +1,37 @@
-# Supported languages
-SUPPORTED_LANGUAGES = ['en', 'ru', 'uk', 'sk', 'es', 'fr', 'tr', 'ar', 'de', 'fa', 'ur', 'hi']
-
-ACHIEVEMENTS = [
-    "newcomer", "key_seeker",
-    "bonus_hunter", "code_expert",
-    "key_master", "elite_player",
-    "game_legend", "absolute_leader"
-]
-
-
-GAMES = [
-    'Among Waterr',
-    'Factory World',
-    'Infected Frontier',
-    'Pin Out Master',
-    'Count Masters',
-    'Hide Ball',
-    'Bouncemasters',
-    'Merge Away',
-    'Stone Age',
-    'Train Miner',
-    'Mow and Trim',
-    'Chain Cube 2048',
-    'Fluff Crusade',
-    'Polysphere',
-    'Twerk Race 3D',
-    'Zoopolis',
-    'Tile Trio',
-]
-
-STATUS_LIMITS = {
-    'free': {'daily_limit': 2, 'interval_minutes': 60},
-    'friend': {'daily_limit': 5, 'interval_minutes': 10},
-    'premium': {'daily_limit': 25, 'interval_minutes': 0}
+LANGUAGES_DICT = {
+    'en': 'English',
+    'ru': 'Русский',
 }
+
+ROLES_DICT = {'user': 'User', 'admin': 'Admin'}
+
+GAME_TASKS_DICT = {
+    'cats': '🐈‍⬛ Cats Codes',
+    'blum': '⚫️ BLUM Cinema',
+    'tapswap': '🖐 TapSwap Cinema',
+    'hrum': '🥠 Hrum',
+}
+
+HAMSTER_GAMES_LIST = [
+    'ChainCube2048',
+    'TrainMiner',
+    'MergeAway',
+    'TwerkRace3D',
+    'Polysphere',
+    'MowAndTrim',
+    'CafeDash',
+    'Zoopolis',
+    'GangsWars',
+    'TileTrio',
+    'FluffCrusade',
+    'StoneAge',
+    'Bouncemasters',
+    'HideBall',
+    'PinOutMaster',
+    'CountMasters',
+    'InfectedFrontier',
+    'AmongWater',
+    'FactoryWorld',
+]
+
+SUPPORTED_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif', '.webp')

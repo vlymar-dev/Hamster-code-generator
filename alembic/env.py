@@ -1,20 +1,27 @@
+import asyncio
 from logging.config import fileConfig
-import os
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.models import Base as AppBase
-from bot.db_handler.models import Base as BotBase
+from infrastructure import config
+from infrastructure.db.models import Base
+from infrastructure.db.models import Announcement, AnnouncementTranslation, GameTask, PromoCode, Referral, User  # noqa
 
-from dotenv import load_dotenv
-load_dotenv()
-
+DATABASE_URL = config.database.database_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# NOTE:
+# Alembic uses ConfigParser under the hood, which interprets `%` as interpolation syntax.
+# This breaks database URLs that contain percent-encoded characters (like `%2F`, `%3A`, etc.).
+# To prevent ConfigParser from throwing an error, we need to escape all `%` characters by doubling them.
+# This ensures that the URL is parsed correctly and migrations can run without errors.
+db_url = DATABASE_URL.replace('%', '%%')
+config.set_main_option('sqlalchemy.url', db_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -25,14 +32,12 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [AppBase.metadata, BotBase.metadata]
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-SYNC_DATABASE_URL = f"postgresql+psycopg2://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}"
-config.set_main_option("sqlalchemy.url", SYNC_DATABASE_URL)
 
 
 def run_migrations_offline() -> None:
@@ -48,7 +53,7 @@ def run_migrations_offline() -> None:
 
     """
     context.configure(
-        url=SYNC_DATABASE_URL,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -58,30 +63,28 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
+async def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = create_async_engine(DATABASE_URL, poolclass=pool.NullPool)
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-        )
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_migrations)
 
-        with context.begin_transaction():
-            context.run_migrations()
+    await connectable.dispose()
+
+
+def do_migrations(connection):
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    asyncio.run(run_migrations_online())

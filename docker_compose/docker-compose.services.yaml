@@ -1,0 +1,26 @@
+services:
+  hamster:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: hamster_app
+    env_file:
+      - ../.env
+    entrypoint: ["sh", "./entrypoint.sh"]
+    volumes:
+      - locales_data:/app/bot/locales
+      - hamster_logs:/app/var/logs/hamster
+      - ../proxies.txt:/app/proxies.txt:ro
+      - ../var/storage/uploads:/app/var/storage/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hamster_network
+
+volumes:
+  locales_data:
+  hamster_logs:

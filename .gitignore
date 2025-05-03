@@ -18,7 +18,6 @@ lib/
 lib64/
 parts/
 sdist/
-var/
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -56,7 +55,6 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -125,9 +123,7 @@ celerybeat.pid
 .env
 .env.dev
 .env.prod
-.env.example
 .venv
-.venv-hasmter
 env/
 venv/
 ENV/
@@ -177,6 +173,15 @@ proxies.txt
 # BackUP
 *.sql
 
-# Images (Temporarily)
-images/
-images_data/
+# Ignore all files in var/
+# ...but keep .gitkeep files
+var/**/*
+!var/**/
+!var/**/.gitkeep
+
+# Exclude log files
+logs/
+*.log
+
+# Temporary files
+temp/

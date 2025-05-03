@@ -1,35 +1,31 @@
-import asyncio
+import logging
 
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
+from aiogram.utils.i18n import gettext as _
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.bot_config import bot
-from bot.db_handler.db_service import get_user_role_and_ban_info
-from bot.handlers.handlers import send_menu_handler
-from bot.utils import get_translation
-from db.database import get_session
+from bot.keyboards.main_menu_kb import get_back_to_main_menu_keyboard
+from infrastructure import config
+from infrastructure.services import CacheService, UserCacheService
+
+logger = logging.getLogger(__name__)
 
 
 class AdminFilter(BaseFilter):
-    async def __call__(self, message: Message) -> bool:
-        async with await get_session() as session:
-            user_id: int = message.from_user.id
-            user_info = await get_user_role_and_ban_info(session, user_id)
+    async def __call__(self, message: Message, session_without_commit: AsyncSession, cache_service: CacheService):
+        user_id = message.from_user.id
+        logger.debug(f'Admin check for user {user_id}')
 
-            if user_info.user_role != 'admin':
-                await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-                not_admin_message: str = await get_translation(user_id, "admin", "no_access")
-                message_sent = await bot.send_message(
-                    chat_id=message.chat.id,
-                    text=not_admin_message,
-                )
-                await asyncio.sleep(1)
-                await bot.delete_message(
-                    chat_id=message.chat.id,
-                    message_id=message_sent.message_id,
-                )
-
-                await send_menu_handler(message)
-                return False
-
+        if user_id in config.telegram.ADMIN_ACCESS_IDs:
+            logger.info(f'User {user_id} granted admin access via config')
             return True
+        user_data = await UserCacheService.get_user_auth_data(cache_service, session_without_commit, user_id)
+        user_role = user_data.user_role
+        if user_role == 'admin':
+            logger.info(f'User {user_id} has admin role in database')
+            return True
+
+        logger.warning(f'User {user_id} attempted admin access without permission')
+        await message.answer(text=_('🚫 Access Denied!'), reply_markup=get_back_to_main_menu_keyboard())
+        return False

@@ -1,190 +1,166 @@
 # Hamster Keys Generator
 
-[![Python](https://img.shields.io/badge/Python-3.12.2-3776AB?style=flat&logo=Python&logoColor=yellow)](https://www.python.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.3-336791?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-5.0.8-DC382D?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
+[![Lint and Test](https://github.com/vlymar-dev/Hamster-code-generator/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/vlymar-dev/Hamster-code-generator/actions/workflows/lint-and-test.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.12.5-3776AB?style=flat&logo=Python&logoColor=yellow)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.8-336791?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-5.2.1-DC382D?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-24.0-2496ED?style=flat&logo=Docker&logoColor=white)](https://www.docker.com/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
-[![aiogram](https://img.shields.io/badge/aiogram-3.10.0-3776AB?style=flat&logo=telegram&logoColor=white")](https://aiogram.dev/)
-[![Flake8](https://img.shields.io/badge/flake8-checked-blueviolet?style=flat)](https://flake8.pycqa.org/en/latest/)
+[![aiogram](https://img.shields.io/badge/aiogram-3.10.0-3776AB?style=flat&logo=telegram&logoColor=white)](https://aiogram.dev/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
-![Hamster code](./img/image.png)
+
+![Hamster code](./static/image.png)
 
 ## Table of Contents
-
 - [Project Description](#project-description)
 - [Main Features](#main-features)
-- [Installation](#installation)
-- [Environment Configuration](#environment-configuration)
-- [Running with Docker](#running-with-docker)
-- [Commands](#commands)
-- [Continuous Integration/Continuous Deployment (CI/CD)](#continuous-integrationcontinuous-deployment-cicd)
-- [Project Structure](#project-structure)
+- [Quick Setup and Running](#quick-setup-and-running)
+- [Bot Commands](#bot-commands)
 - [Contributing](#contributing)
+- [Security](#security)
 - [License](#license)
+- **Additional Resources**
+  - [Documentation](#documentation)
 
 
 ## Project Description
-The [Hamster Keys Generator](https://t.me/hamster_keys_xbot) project is a system that automatically generates promo codes for various games.
-User interaction is handled through a Telegram bot, while code generation and management, 
-using proxy servers to send requests to game APIs, ensure seamless integration with game platforms.
-A `PostgresSQL` database is used for storing promo codes, and sessions and requests are processed asynchronously with the `aiohttp` library.
-The system uses a Redis database for session management and caching to improve performance.
 
+**Hamster Keys Generator** is an automated system for generating and managing promo codes for games,
+integrated with a Telegram bot for user interaction. It leverages `PostgreSQL` for storing promo codes,
+`Redis` for session management and caching, and `aiohttp` for asynchronous API requests.
+Proxy support ensures reliable game API access, while a multilingual interface enhances user experience.
 
-#### The project utilizes:
-- `Alembic` for database migrations,
-- `SQLAlchemy` for database interaction,
-- `Aiogram` for working with the Telegram API,
-- `Docker` for containerization.
+*⭐ Star this repository to support the project!*
+> *Note: Multilingual support is currently under refactoring. Only English is available for now. Contributions are welcome!*
 
-## Main Features:
-
-### Farmer
-- **Automatic promo code generation and database storage for games**.
-  - Easily generate promo codes for multiple games and automatically save them in the database.
-- **Detailed logging and error handling**.
-  - All stages of the generation process are logged for transparency, and in case of errors, the farmer automatically restarts on a timed schedule.
-- **Proxy support for API requests**.
-  - Ensures reliable API access even when geographical restrictions or rate limits are in place.
+## Main Features
 
 ### Telegram Bot
-- **Key distribution**.
-  - Quick access for users to claim keys via a multilingual interface.
-- **Admin commands**.
-  - Manage users and bot settings with powerful admin tools.
-- **Request rate-limiting**.
-  - Controls the number of promo code requests per user to prevent abuse.
-- **Boosted key counts (`POPULARITY_COEFFICIENT`)**.
-  - Displays inflated key counts to attract more users.
-- **Multilingual support**.
-  - Easy switching between languages for a global audience.
-  - **Supported languages**: `en`, `ru`, `uk`, `sk`, `es`, `fr`, `tr`, `ar`, `de`, `fa`, `ur`, `hi`
-- **Donation system (XTR stars)**.
-  - Users can donate using fixed or custom amounts of Telegram stars.
-  - Includes payment confirmation, cancellation, and refund options.
-- **Referral links**.
-  - **Add your referral links**: Promote your projects by adding referral links. 
-  Encourage users to invite others and get bonuses in return.
-- **Achievement system**.
-  - **Track user progress**: Users can unlock achievements based on their activity and receive special rewards as they progress.
+- **Promo Code Distribution**: Users claim keys via a user-friendly multilingual interface.
+- **Admin Tools**: Manage users, settings, and multilingual notifications with image support and detailed reports.
+- **Rate-Limiting**: Prevents abuse by limiting promo code requests per user.
+- **Donation System**: Supports Telegram Stars with fixed/custom amounts, payment confirmation, and refund options.
+- **Referral Links**: Users can promote projects and earn bonuses via referral invites.
+- **Achievements**: Tracks user activity and rewards progress with special bonuses.
+- **Boosted Key Counts(`POPULARITY_COEFFICIENT`)**: Increases displayed key counts to enhance user engagement.
 
-### Redis Integration
-- **Session and caching management**.
-  - Redis is used to manage sessions and cache frequently used data, providing faster access and reducing the load on the PostgreSQL database.
 
-## Installation
+### Keygen
+- **Automated Code Generation**: Generates promo codes for multiple games and stores them in PostgreSQL.
+- **Reliable API Access**: Uses proxies to bypass geographical restrictions and rate limits.
+- **Robust Logging**: Logs all generation stages with automatic restarts on errors.
+
+### Flexible Startup
+- Run the Telegram bot, keygen, or both using configurable startup methods.
+
+
+## Quick Setup and Running
+*Follow these steps to set up and run **Hamster Keys Generator** for development or production.*
 
 ### Requirements
-- Python 3.10+
-- PostgreSQL 16.3+
-- Docker (for deployment using Docker Compose)
+- Python 3.12+
+- PostgreSQL 16.8+
+- Redis 5.2.1+
+- Docker (optional for local development, recommended for production)
 
-### Installing Dependencies
-Install the required dependencies with:
-```sh
-pip install -r requirements.txt
-```
+### Steps:
+1. **Clone the Repository**:
+    ```sh
+    git clone https://github.com/vlymar-dev/Hamster-code-generator
+    cd Hamster-code-generator
 
-## Environment Configuration
-Create a `.env` file in the project root directory based on the provided `.env.example` file. 
-Fill it with the following parameters:
-```plaintext
-DATABASE_NAME=your_database_name
-DATABASE_USER=your_database_user
-DATABASE_PASSWORD=your_database_password
-DATABASE_HOST=your_database_host
-DATABASE_PORT=your_database_port
+2. **Set up environment variables**:
+    ```sh
+    cp .env.example .env
 
-BOT_TOKEN=your_telegram_bot_token
-GROUP_CHAT_ID=your_group_chat_id
-POPULARITY_COEFFICIENT=1
+*Edit `.env` to set database, Redis, Telegram bot token, and proxy settings. See [Environment Setup](docs/ENV_SETUP.md) for details.*
 
-REDIS_HOST=your_redis_host
-REDIS_PORT=your_redis_port
-REDIS_DB=0
-```
+3. **Install dependencies**:
+    For production:
+   ```sh
+   pip install -r requirements.txt
+   ```
+   *For development (includes testing and linting tools)*:
+   ```sh
+   pip install -r requirements-dev.txt
+   ```
 
-## Running with Docker
-1. Build and start the containers using Docker Compose:
-```sh
-docker-compose up -d postgres redis
-```
-2. Apply migrations and set up the database:
-```sh
-alembic upgrade head
-```
+4. **Set Up Proxies** (Optional):
 
-### Running the Bot
-After setting up the database and configuration, you can start the bot with Python:
-```sh
-python bot/main.py
-```
+*Add proxy servers to `.proxies.txt` for API requests. See [Proxy Setup](docs/PROXIES.md) for formatting and usage.*
 
-### Running the Farmer
-The farmer can be started as a separate process:
-```sh
-python app/main.py
-```
+5. **Start Services**:
+    ```sh
+    make local-up
+    ```
+
+6. Apply database migrations:
+    ```sh
+    make migrate-apply
+
+7. **Run the Application**:
+Start the bot, keygen, or both:
+    ```sh
+    python main.py
+    ```
+*Configure `STARTUP_METHOD` in `.env`*:
+- `0` (KeygenAndBot): Run both bot and keygen.
+- `1` (OnlyKeygen): Run keygen only.
+- `2` (OnlyBot): Run bot only.
+
+
+### Development Setup
+- **Install pre-commit hooks** for linting and formatting:
+    ```sh
+    pre-commit install
+    ```
+
+- **Run tests** to verify setup:
+  ```sh
+  make tests-run
+  ```
+
+- **Check Makefile** for additional development commands:
+  ```sh
+  make help
+  ```
 
 ### Logging
-Logs are saved in the `logs` directory. 
-Log files are rotated when they reach 10 MB, with up to 5 backup copies retained.
+Logs are saved in `var/logs`, rotated daily, with a 10-day retention period.
 
+### Stopping Services
+- Stop Docker services:
+    ```sh
+    make local-down
+    ```
 
-## Commands
+## Bot Commands
+Configure these commands in [BotFather](https://t.me/BotFather).
 
 ### User Commands
-- `/start` – Start the bot
-- `/change_lang` – Change the language
-- `/paysupport` – Support via donations
+- `/start`: Start the bot.
+- `/change_language`: Switch language (English-only currently).
+- `/paysupport`: Donate via Telegram Stars.
 
 ### Admin Commands
-- `/admin` – Open admin panel
-
-
-## Continuous Integration/Continuous Deployment (CI/CD)
-This project uses **GitHub Actions** for:
-
-- **Linting** with Flake8 on every push,
-- **Building** and deploying when changes are pushed to the main branch,
-- **Auto-release** creation for new tags.
-
-### Configuration
-Make sure to configure the following ***GitHub Secrets*** for deployment:
-
-- ***HOST:*** The remote server host.
-- ***USERNAME:*** The SSH username.
-- ***PORT:*** The SSH port.
-- ***SSHKEY:*** The private SSH key for connecting to the remote server.
+- `/admin`: Access the admin panel.
 
 
 ## Project Structure
-```commandline
-.
-├── app                  # Logic of generating promo codes
-│   ├── main.py
-│   ├── game_promo_manager.py
-│   ├── games.py
-│   ├── database.py
-│   ├── models/
-│   └── proxies.txt
-├── bot                  # Telegram bot
-│   ├── main.py
-│   ├── config.py
-│   ├── redis_client.py
-│   ├── handlers/
-│   ├── translations/
-│   └── keyboards/
-├── alembic              # Database migrations
-│   ├── versions/
-│   └── env.py
-├── backups              # Database backups
-├── redis.conf           # Redis configuration file
-├── docker-compose.yml   # Docker configuration
-├── requirements.txt     # Project dependencies
-├── .env                 # Environment Configuration
-└── README.md            # Project Description
-```
+  ```cmd
+  .
+  ├── bot/            # Telegram bot logic
+  ├── keygen/         # Promo code generation logic
+  ├── infrastructure/ # Config, DB, and utilities
+  ├── tests/          # Unit tests
+  ├── main.py         # Application entry point
+  └── Makefile        # Development commands
+  ```
+*See [Project Structure Documentation](docs/PROJECT_STRUCTURE.md) for details.*
+
 ## Contributing
 We welcome contributions to Hamster-code-generator. To contribute:
 
@@ -200,6 +176,21 @@ We welcome contributions to Hamster-code-generator. To contribute:
 
 We will review your pull request and provide feedback as needed.
 
+## Security
+- **Environment Variables**: Store sensitive data (API keys, tokens) in .env, not in code.
+- **Encryption**: Promo codes and user data are encrypted in transit and at rest.
+- **Access Control**: Admin commands use role-based access.
+- **Proxies**: Secure API requests with proxy support.
+Report security issues via [GitHub Issues](https://github.com/dev-lymar/Hamster-code-generator/issues) or email (add contact).
+
+
 ## License
-This project is licensed under the MIT License. 
-See the LICENSE file for more information.
+This project is licensed under the [MIT License](LICENSE).
+
+## Documentation
+- [Environment Setup](docs/ENV_SETUP.md)
+- [Project Structure](docs/PROJECT_STRUCTURE.md)
+- [Proxy Setup](docs/PROXIES.md)
+- [Testing](docs/TESTING.md)
+- [Makefile Commands](docs/MAKEFILE.md)
+- [CI/CD Configuration](docs/CICD.md)

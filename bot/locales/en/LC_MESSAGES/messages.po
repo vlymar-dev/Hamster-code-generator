@@ -1,0 +1,901 @@
+# English translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-04-22 20:10+0200\n"
+"PO-Revision-Date: 2025-04-22 20:11+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: bot/filters/admin_filter.py:30
+msgid "🚫 Access Denied!"
+msgstr ""
+
+#: bot/filters/is_banned_filter.py:28
+msgid "🚫 You are blocked."
+msgstr ""
+
+#: bot/handlers/commands.py:55
+msgid ""
+"🎉 User {full_name} with ID <b>{user_id}</b> registered using your "
+"referral link!"
+msgstr ""
+
+#: bot/handlers/commands.py:60
+msgid ""
+"👋 Hello, <b>{first_name}</b>!\n"
+"🛳️ <i>Welcome aboard!</i>\n"
+"\n"
+"🌊 Join the adventure with us — pick an action below and start playing! 🚀"
+" \n"
+"🎈 Here you’ll find <i>exclusive growth opportunities</i> and bonuses for "
+"active players.\n"
+"🏆 Play, progress, and unlock new rewards with every step! \n"
+"\n"
+"📖 <i>Terms of use are available in the <b>Info</b> section.</i>"
+msgstr ""
+
+#: bot/handlers/commands.py:99
+msgid "Please choose a language:"
+msgstr ""
+
+#: bot/handlers/commands.py:114
+msgid ""
+"💡 <b>Your donation helps us make the bot better and add exciting new "
+"features!\n"
+"Thank you for supporting us!💪</b>\n"
+"<i>Please note that donations are voluntary and non-refundable.</i>\n"
+"If you have any questions, contact us. 📞"
+msgstr ""
+
+#: bot/handlers/feedback.py:30
+msgid "💬 We’d love to hear your feedback! Please type your message below:"
+msgstr ""
+
+#: bot/handlers/feedback.py:59
+msgid ""
+"💖 Thank you for your feedback!\n"
+"We really appreciate you taking the time to share your thoughts with us. 💕"
+msgstr ""
+
+#: bot/handlers/feedback.py:75
+msgid ""
+"📨 New feedback received!\n"
+"\n"
+msgstr ""
+
+#: bot/handlers/feedback.py:104
+msgid "✍️ Please type your reply to the user. It will be sent immediately."
+msgstr ""
+
+#: bot/handlers/feedback.py:124
+msgid ""
+"👋 The admin has responded to your feedback:\n"
+"\n"
+"{text}\n"
+"\n"
+"Thanks again for reaching out to us! 💖"
+msgstr ""
+
+#: bot/handlers/feedback.py:137
+msgid "✅ Your reply has been sent to the user!"
+msgstr ""
+
+#: bot/handlers/feedback.py:141
+msgid ""
+"❌ Failed to send your message. The user may have blocked the bot or "
+"cannot be reached:\n"
+"\n"
+"{e}"
+msgstr ""
+
+#: bot/handlers/games_keys.py:34
+msgid "📱 Select the game for which you want to get codes:"
+msgstr ""
+
+#: bot/handlers/games_keys.py:84
+msgid "No tasks/keys/codes available for this game."
+msgstr ""
+
+#: bot/handlers/games_keys.py:97
+msgid ""
+"\n"
+"\n"
+"🔖 (<i>click to copy</i>)"
+msgstr ""
+
+#: bot/handlers/games_keys.py:134
+msgid "⏱️ Wait for {minutes} min {seconds} sec before getting the next key."
+msgstr ""
+
+#: bot/handlers/games_keys.py:138
+msgid "⏱️ Wait for {seconds} sec before getting the next key."
+msgstr ""
+
+#: bot/handlers/games_keys.py:150
+msgid "An error occurred while retrieving promo codes. Please try again later."
+msgstr ""
+
+#: bot/handlers/games_keys.py:163
+msgid "<i>No promo codes available 🥹</i>"
+msgstr ""
+
+#: bot/handlers/games_keys.py:180
+msgid ""
+"{text}\n"
+"\n"
+"🔖 (click to copy)"
+msgstr ""
+
+#: bot/handlers/info.py:26
+msgid ""
+"<b>ℹ️ Info</b>\n"
+"\n"
+"<i>Explore crypto games and bonuses with our bot — stay ahead and earn "
+"more! </i>💪\n"
+"\n"
+"👤 <b>PROFILE:</b>\n"
+"• Track your achievements. 🎯\n"
+"• Raise your status and unlock new privileges! 🚀\n"
+"\n"
+"🎮 <b>GAMES CATALOG</b>:\n"
+"• Earn and grow with exclusive opportunities! 🎗️\n"
+"\n"
+"💡 <i>Enjoy the bot?</i> <b>Support us!</b> Payment info — "
+"<i>/paysupport</i>\n"
+"\n"
+"<b>USDT/Ton (TON):</b> <code>{ton_wallet}</code>\n"
+"<b>USDT (TRC20):</b> <code>{trc_wallet}</code>\n"
+"<i>(Tap to copy)</i> 📋\n"
+"\n"
+"📬 <i>Got questions or suggestions?</i> \n"
+"🖊️ <b><i>Message us:</i></b>  <a href=\"{support}\">•Tap to connect•</a>\n"
+"🔥 <b>Together we will make this service even better and bigger!</b>"
+msgstr ""
+
+#: bot/handlers/main_menu.py:55
+msgid ""
+"What’s next? 🤔\n"
+"\n"
+"🎮 <b>Play and earn!</b> — Discover new combos, exciting games, and "
+"exclusive giveaways.  \n"
+"💥 <b>Stay tuned</b> for the latest news and events.\n"
+"📱 <b>Get your chance</b> for exclusive rewards!\n"
+"\n"
+"<b>Today users received:</b>\n"
+"🔹 <b>{keys_today}</b> <i>keys</i> 🔑\n"
+"\n"
+"🔥 <b>Choose an action below to keep climbing the leaderboard and join the"
+" elite players!</b>"
+msgstr ""
+
+#: bot/handlers/progress.py:30
+msgid "User data not found."
+msgstr ""
+
+#: bot/handlers/progress.py:39
+msgid ""
+"👤 <b>Profile:</b>\n"
+"\n"
+"{achievement_name}\n"
+"\n"
+"🔝 <b>To the next level:</b>\n"
+"🔑 <i>Keys:</i> {keys_progress}\n"
+"📨 <i>Referrals:</i> {referrals_progress}\n"
+"⏳ <i>Days in Bot:</i> {days_progress}\n"
+"\n"
+"🥇 <b>Your status:</b>\n"
+"{user_status}\n"
+"\n"
+"🎳 Invite friends, earn keys, and reach new heights with us! 🌍"
+msgstr ""
+
+#: bot/handlers/progress.py:83
+msgid ""
+"🌱 <b>Level:</b>\n"
+"<i>Newcomer</i> — <i>You've just begun your journey! Keep going, there "
+"are many opportunities ahead!</i> 🚀"
+msgstr ""
+
+#: bot/handlers/progress.py:87
+msgid ""
+"🎩 <b>Level:</b>\n"
+"<i>Adventurer</i> — <i>You've unlocked a few doors, but more valuable "
+"keys await you.</i> 💎"
+msgstr ""
+
+#: bot/handlers/progress.py:91
+msgid ""
+"🎯 <b>Level:</b>\n"
+"<i>Bonus Hunter</i> — <i>With each new key, you grow stronger. Unlock "
+"bonuses!</i> 🎁"
+msgstr ""
+
+#: bot/handlers/progress.py:95
+msgid ""
+"🧠 <b>Level:</b>\n"
+"<i>Code Expert</i> — <i>You already know how the system works. Keep "
+"improving!</i> 📈"
+msgstr ""
+
+#: bot/handlers/progress.py:99
+msgid ""
+"🌟 <b>Level:</b>\n"
+"<i>Game Legend</i> — <i>You've achieved almost everything! Stay at the "
+"top and collect all the keys!</i> 🏅"
+msgstr ""
+
+#: bot/handlers/progress.py:103
+msgid ""
+"👑 <b>Level:</b>\n"
+"<i>Absolute Leader</i> — <i>You're at the top! All keys are at your "
+"disposal, and you're a role model for everyone!</i> 🌍"
+msgstr ""
+
+#: bot/handlers/progress.py:113
+msgid "🎮 <b>Regular Player</b> — Get keys and open doors to become stronger. 🚀"
+msgstr ""
+
+#: bot/handlers/progress.py:114
+msgid ""
+"🤝 <b>Friend of the Project</b> — You have access to exclusive features, "
+"but there's more ahead! 🔥"
+msgstr ""
+
+#: bot/handlers/progress.py:117
+msgid ""
+"👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive "
+"content. ✨"
+msgstr ""
+
+#: bot/handlers/progress.py:123
+msgid "Max level achieved ✔️"
+msgstr ""
+
+#: bot/handlers/referral_links.py:25
+msgid ""
+"💎 <b>Join now and unlock exclusive bonuses!</b> Be among the first to "
+"explore new projects and opportunities.\n"
+"🚀 <i>These platforms are trusted and tested</i> — I’m already using them "
+"successfully to earn, and now it’s your turn!\n"
+"\n"
+"🏁 <b>Ready to start?</b> Tap the links below to seize these early-bird "
+"advantages.\n"
+"🗓️ <i>The sooner you join, the sooner you can start earning!</i>\n"
+"\n"
+"🌐 <i><b>Projects that inspire! Open to everyone:</b></i>"
+msgstr ""
+
+#: bot/handlers/settings.py:37
+msgid ""
+"⚙️ <b>Settings</b>\n"
+"\n"
+"🎮 <i>Adjust the bot to fit your preferences! Choose an option below to "
+"customize your experience:</i>\n"
+"\n"
+"🌐 <b>Change Language</b> — Switch to your preferred language for a "
+"smoother experience.\n"
+"🔕 <b>Unsubscribe from Notifications</b> — Manage your subscriptions and "
+"stay in control of what you receive.\n"
+"\n"
+"🎨 Personalize to make your time here more enjoyable and tailored just for"
+" you!"
+msgstr ""
+
+#: bot/handlers/settings.py:76
+msgid ""
+"Current language: <b>{}</b>\n"
+"\n"
+"🌐 Select a language from the available languages:"
+msgstr ""
+
+#: bot/handlers/settings.py:114
+msgid "🌐 Language updated to: {}"
+msgstr ""
+
+#: bot/handlers/settings.py:133
+msgid "Subscribed"
+msgstr ""
+
+#: bot/handlers/settings.py:133
+msgid "Unsubscribed"
+msgstr ""
+
+#: bot/handlers/settings.py:137
+msgid "Your subscription status: {}"
+msgstr ""
+
+#: bot/handlers/settings.py:156
+msgid "You have successfully Subscribed for notifications."
+msgstr ""
+
+#: bot/handlers/settings.py:177
+msgid ""
+"You do not meet the requirements to unsubscribe from notifications. 🚫\n"
+"You must have at least {} referrals to unsubscribe from notifications 🫂"
+msgstr ""
+
+#: bot/handlers/settings.py:188
+msgid "You have successfully unsubscribed from notifications."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:61
+msgid "📝 Enter the announcement title:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:80
+msgid ""
+"📝 <b>Title:</b>\n"
+"{title}\n"
+"\n"
+"Send an image or type <code>no_image</code> to skip."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:111
+msgid "✅ Announcement \"{title}\" with image created."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:118
+msgid "🚫 Unsupported image format. Please send a correct image."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:124
+msgid "⚠️ Error processing image. Please try again."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:133
+msgid "✅ Announcement \"{title}\" without image created."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:139
+msgid "Please submit an image or enter <code>no_image</code> to skip."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:158
+msgid "📝 Enter the announcement id:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:184
+#: bot/handlers/admin_panel/announcements.py:741
+msgid "⚠️ {error}"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:201
+msgid "⚠️ First select an announcement!"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:210
+msgid "🌏 Select a language from the available languages:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:216
+msgid "⚠️ No available languages."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:235
+msgid "📝 Enter the announcement text for \"{language_code}\":"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:265
+msgid "✅ Translation for: '{language}' created"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:272
+#: bot/handlers/admin_panel/announcements.py:375
+#: bot/handlers/admin_panel/announcements.py:420
+msgid "❌ {error}"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:293
+msgid "🌏 Select the language available for editing:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:299
+msgid "⚠️ No available translations for editing."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:319
+#: bot/handlers/admin_panel/announcements.py:448
+#: bot/handlers/admin_panel/announcements.py:482
+#: bot/handlers/admin_panel/announcements.py:535
+msgid "⚠️ Announcement context lost!"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:330
+#: bot/handlers/admin_panel/announcements.py:546
+msgid "📙 <b>Text: </b>\n"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:332
+msgid "📝 Enter new announcement text for \"{language_code}\":"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:363
+msgid "✅ Translation updated <b>successfully</b> for: '{language}'."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:393
+msgid "📝 Enter the announcement id to delete:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:415
+msgid "✅ Announcement with ID: <b>{id}</b> has been deleted."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:424
+msgid "⚠️ You can't delete an ad if there are translations for it."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:431
+#: bot/handlers/admin_panel/announcements.py:695
+#: bot/handlers/admin_panel/announcements.py:745
+msgid "⚠️ An unexpected error occurred. Please try again later."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:457
+msgid "🌏 Select a language from the list of available languages:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:462
+msgid "⚠️ No available translations to view."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:509
+msgid "🌏 Select the language available for deleting:"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:515
+msgid "⚠️ No available translations for deleting."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:548
+msgid "❌ Do you want to delete this translation for \"{language_code}\"?"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:575
+msgid ""
+"✅ Announcement translation with language: <b>{language}</b> has been "
+"deleted."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:599
+msgid "🫔 Are you sure you want to broadcast this announcement?"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:622
+msgid "⚠️ Announcement not found!"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:632
+msgid ""
+"📤 Broadcast completed:\n"
+"\n"
+"✅ Delivered: <b>{success}</b>\n"
+"❌ Failed: <b>{failed}</b>"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:682
+msgid "⚠️ Announcement ID not found. Please select it again."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:716
+msgid ""
+"🔅 <b>ID: {announcement_id}</b>\n"
+"🔖 <b>Title:</b> {title}\n"
+"\n"
+"🌏 <b>Languages:</b> {languages}\n"
+"\n"
+"📙 <b>Text:</b> {text}"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:725
+msgid "No text available."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:757
+msgid "No announcements yet."
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:763
+msgid "No translations available"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:766
+msgid ""
+"🔅 <b>ID:</b> <code>{id}</code>\n"
+"🔖 <b>Title:</b> {title}\n"
+"🌏 <b>Languages:</b> {languages}"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:771
+msgid ""
+"📌 <b><i>All announcements:</i></b>\n"
+"\n"
+msgstr ""
+
+#: bot/handlers/admin_panel/announcements.py:774
+msgid "⚠️ Error loading announcements. Please try again later."
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:32
+msgid "<b>Choose a game:</b>"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:51
+msgid ""
+"You have selected a game: <b>{game_name}</b>\n"
+"\n"
+"Select an action:"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:68
+#: bot/handlers/admin_panel/game_codes.py:148
+msgid "⚠️ First, choose a game!"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:75
+msgid "🐥 Enter the task for the selected game:"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:92
+msgid "⚠️ The length of a task must be longer than one character!"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:98
+msgid "⛱️ Enter an answer for the game:"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:114
+msgid "⚠️ The length of a answer must be longer than one character!"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:125
+msgid ""
+"✅ <i>Code for the game <b>{game}</b> successfully added!</i>\n"
+"\n"
+"🐥 <i>Task: <b>{task}</b></i>\n"
+"⛱️ <i>Answer: <b>{answer}</b></i>\n"
+"\n"
+"Select a game to add a new code or go back to the main menu:"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:155
+msgid ""
+"📲 You chose a game: <b>{game}</b>\n"
+"\n"
+"📋 <b>Enter the ID to be deleted:</b>"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:177
+msgid "⚠️ Invalid <b>ID</b> format. Please enter a valid number!"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:186
+msgid ""
+"⚠️ Task with ID <b>{task_id}</b> not found.\n"
+"\n"
+"Repeat input:"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:191
+msgid ""
+"⚠️ <b>Confirm the deletion of the task:</b>\n"
+"\n"
+"📋 <b>ID:</b> {id}\n"
+"<b>Task:</b> {task}\n"
+"<b>Answer:</b> {answer}"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:218
+msgid "⚠️ Task ID not found!"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:226
+msgid "✅ Task with ID <b>{id}</b> successfully deleted!"
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:234
+msgid "❌ Task with ID <b>{id}</b> not found or could not be deleted."
+msgstr ""
+
+#: bot/handlers/admin_panel/game_codes.py:263
+msgid "<b>📲 Choose a game:</b>"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:35
+msgid "Total users: {users_count}"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:55
+msgid ""
+"<b>Picked up the keys today:</b> {today_keys}\n"
+"\n"
+"🕹️ <i>All games:</i>\n"
+"{db_keys}"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:73
+msgid "🆔 <b>Enter user ID:</b>"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:103
+msgid ""
+"❗️ <b>Error changing user role.</b>\n"
+"\n"
+"User <b><i>{target_user_id}</i></b> not found in DB.\n"
+"\n"
+"<i>Retry entering the ID or return to the main menu</i>"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:114
+msgid ""
+"👤\n"
+"\n"
+"<i>Current role:\n"
+"• <b>{current_role}</b></i>\n"
+"\n"
+"<i>Select a new role for user ID:\n"
+"• <b>{target_user_id}</b></i>"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:125
+msgid "⚠️ <b>Oops!</b> Looks like it's not a number"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:157
+msgid ""
+"🤩 <b>User role <i>updated!</i></b>\n"
+"\n"
+"New role for user ID: <b>{target_user_id}</b> — "
+"<b><i>'{new_user_role}'</i></b>"
+msgstr ""
+
+#: bot/handlers/admin_panel/main_admin_page.py:189
+msgid "👨‍💼💼 Admin Panel. Time to wield the power! (But shh... keep it secret!)"
+msgstr ""
+
+#: bot/handlers/donations/donations.py:27
+msgid "💫 Enter Your Amount"
+msgstr ""
+
+#: bot/handlers/donations/donations.py:46
+msgid ""
+"❗️ Enter an amount from <b>1</b> to <b>2500</b>. We appreciate your "
+"support!"
+msgstr ""
+
+#: bot/handlers/donations/donations.py:54
+msgid ""
+"⚠️ Oops! That doesn’t seem to be a valid number. Please try again to "
+"support us."
+msgstr ""
+
+#: bot/handlers/donations/donations.py:64 bot/handlers/donations/refund.py:51
+msgid "❗️ <b>Error:</b> {error}"
+msgstr ""
+
+#: bot/handlers/donations/donations.py:101
+msgid "🥳 <b>Thank you! Your support helps us improve!</b> 🤗"
+msgstr ""
+
+#: bot/handlers/donations/donations.py:116
+msgid "Support Our Community 🚀"
+msgstr ""
+
+#: bot/handlers/donations/donations.py:117
+msgid "Your contribution of {amount} 🌟 helps us"
+msgstr ""
+
+#: bot/handlers/donations/refund.py:29
+msgid ""
+"To refund ⭐️ use the command <code><b>/refund_stars "
+"<i>transaction_id</i></b></code>"
+msgstr ""
+
+#: bot/handlers/donations/refund.py:38
+msgid "Return transaction completed ⏎"
+msgstr ""
+
+#: bot/handlers/donations/refund.py:45
+msgid "❌ <b>Transaction with this number not found. Please check your input!</b>"
+msgstr ""
+
+#: bot/handlers/donations/refund.py:47
+msgid "⚠️ <b>This transaction has already been refunded!!</b>"
+msgstr ""
+
+#: bot/keyboards/feedback_kb.py:11
+msgid "↩️ Reply to user"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:24
+msgid "── 🎮 GAMES CATALOG ──"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:25
+msgid "🔑 Keys & Video Codes 🕹️"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:26
+msgid "─── 👤 PROFILE ───"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:28
+msgid "⚙️ Settings"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:29
+msgid "💬 Feedback"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:30
+msgid "ℹ Info"
+msgstr ""
+
+#: bot/keyboards/main_menu_kb.py:40
+msgid "🔙 Back to main menu"
+msgstr ""
+
+#: bot/keyboards/progress_kb.py:15
+msgid "📤 Share your referral link"
+msgstr ""
+
+#: bot/keyboards/progress_kb.py:16
+msgid ""
+" 📌\n"
+"Hi! 🌟 Join me in this awesome bot! 🚀\n"
+"🎮 Unlock achievements\n"
+"🎁 Collect rewards\n"
+"👉 Start now: {ref_link}"
+msgstr ""
+
+#: bot/keyboards/admin_panel/admin_panel_kb.py:13
+msgid "🔑 Keys"
+msgstr ""
+
+#: bot/keyboards/admin_panel/admin_panel_kb.py:14
+msgid "🕹️ Codes"
+msgstr ""
+
+#: bot/keyboards/admin_panel/admin_panel_kb.py:15
+msgid "🧑‍💻 Users"
+msgstr ""
+
+#: bot/keyboards/admin_panel/admin_panel_kb.py:17
+msgid "📣 Announcements"
+msgstr ""
+
+#: bot/keyboards/admin_panel/admin_panel_kb.py:25
+msgid "👑 Change Role"
+msgstr ""
+
+#: bot/keyboards/admin_panel/admin_panel_kb.py:49
+msgid "🔙 Back to admin panel"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:11
+msgid "➕ Create Announcement"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:12
+msgid "🔍 View Detail"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:13
+msgid "❌ Delete Announcement"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:22
+msgid "🥏 Create Translation"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:23
+msgid "🔍 View Translation"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:26
+msgid "✏️ Edit"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:27
+msgid "❌ Delete"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:29
+msgid "📤 Broadcast Announcement"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:31
+#: bot/keyboards/admin_panel/announcements_kb.py:67
+msgid "🔙 Back to announcements"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:41
+#: bot/keyboards/admin_panel/announcements_kb.py:49
+#: bot/keyboards/admin_panel/announcements_kb.py:61
+msgid "🔙 Back"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:48
+msgid "❌ Confirm deletion"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:55
+#: bot/keyboards/admin_panel/game_codes_kb.py:35
+msgid "🔙 Cancel"
+msgstr ""
+
+#: bot/keyboards/admin_panel/announcements_kb.py:74
+msgid "✅ Yes"
+msgstr ""
+
+#: bot/keyboards/admin_panel/game_codes_kb.py:26
+msgid "➕ Add Code"
+msgstr ""
+
+#: bot/keyboards/admin_panel/game_codes_kb.py:27
+msgid "❌ Delete Code"
+msgstr ""
+
+#: bot/keyboards/admin_panel/game_codes_kb.py:42
+msgid "✅ Confirm"
+msgstr ""
+
+#: bot/keyboards/admin_panel/game_codes_kb.py:43
+msgid "❌ Cancel"
+msgstr ""
+
+#: bot/keyboards/donation/donation_kb.py:16
+msgid "💫 Enter a Different Amount"
+msgstr ""
+
+#: bot/keyboards/donation/donation_kb.py:24
+msgid "Give money"
+msgstr ""
+
+#: bot/keyboards/donation/donation_kb.py:25
+msgid "No it's scam"
+msgstr ""
+
+#: bot/keyboards/donation/donation_kb.py:34
+msgid "Cancel payment"
+msgstr ""
+
+#: bot/keyboards/games_menu/pagination_kb.py:15
+msgid "⬅️ Back"
+msgstr ""
+
+#: bot/keyboards/games_menu/pagination_kb.py:22
+msgid "Page {current_page} of {total_pages}"
+msgstr ""
+
+#: bot/keyboards/games_menu/pagination_kb.py:30
+msgid "➡️ Forward"
+msgstr ""
+
+#: bot/keyboards/settings/notifications_kb.py:11
+msgid "🔕 Stop Notifications"
+msgstr ""
+
+#: bot/keyboards/settings/notifications_kb.py:13
+msgid "🔔 On Notifications"
+msgstr ""
+
+#: bot/keyboards/settings/settings_kb.py:11
+msgid "🌍 Change language"
+msgstr ""
+
+#: bot/keyboards/settings/settings_kb.py:12
+msgid "📣 Manage Notifications"
+msgstr ""

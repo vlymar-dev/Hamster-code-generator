@@ -1,17 +1,16 @@
-FROM python:3.12.2-slim
+FROM python:3.12.5-slim
 
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-WORKDIR /hamster
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
 RUN pip install --upgrade pip \
- && pip install -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt
 
-COPY app app
-COPY bot bot
-COPY alembic alembic
-COPY alembic.ini alembic.ini
-COPY db db
-COPY config config
+COPY . .
+
+RUN chmod +x entrypoint.sh

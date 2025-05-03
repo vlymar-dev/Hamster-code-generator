@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16.8-alpine
+    restart: unless-stopped
+    container_name: hamster_postgres
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_HOST: "${DB_HOST}"
+    ports:
+      - "127.0.0.1:${DB_LOCAL_PORT}:${DB_OUT_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - hamster_postgres_data:/var/lib/postgresql/data
+    networks:
+      - hamster_network
+
+  redis:
+    image: redis:7.4.2-alpine
+    restart: unless-stopped
+    container_name: hamster_redis
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    env_file:
+      - ../.env
+    environment:
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - ../redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+    networks:
+      - hamster_network
+
+volumes:
+  hamster_postgres_data:
+  redis_data:
+
+networks:
+  hamster_network:
+    name: hamster_network
+    driver: bridge
