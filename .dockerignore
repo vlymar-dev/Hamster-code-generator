@@ -1,53 +1,64 @@
-# Exclude cache folders and temporary files
+# Byte-compiled / cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.log
+*.py[cod]
 
-# Exclude local configurations and development data
-.env
-.env.dev
-.env.prod
-.env.example
-.gitignore
-.venv
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Editors & IDEs
 .vscode/
 .idea/
-.pytest_cache/
+*.swp
 
-# Eliminate database backups
-backups/*.sql
+# Git
+.git/
+.gitignore
+.gitattributes
+.gitkeep
 
-# Exclude log files
-logs/
-*.log
 
-# Excluding the pip cache
-pip-wheel-metadata/
+# Python tooling
 *.egg-info/
 .eggs/
+pip-wheel-metadata/
+.pytest_cache/
+.ruff_cache/
+.python-version
+tests/
 
-# Exclude Docker Compose files (if not needed inside the container)
-docker_compose/local.yaml
-docker_compose/docker-compose.services.yaml
-docker_compose/docker-compose.storages.yaml
+# Logs and temp files
+logs/
+temp/
+*.log
+*.bak
+*.tmp
 
+# Environment files
+.env*
 
-# Exclude various images and pictures if they are not required for assembly
+# Docker Compose files (not needed in container)
+docker_compose/
+
+# Static/media files (unless needed)
 static/
 var/
-*.jpeg
-*.webp
 *.png
+*.jpeg
+*.jpg
+*.webp
 
 # Exclude other files
-.DS_Store
-.python-version
-.ruff_cache
-.git
-proxies.txt
 docs/
-temp/
-pyproject.toml
 .github/
+.DS_Store
+proxies.txt
+pyproject.toml
+README.md
+LICENSE
+.pre-commit-config.yaml
+requirements-dev.txt
+.coverage
+hamster_cov/
+redis.conf

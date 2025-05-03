@@ -123,9 +123,7 @@ celerybeat.pid
 .env
 .env.dev
 .env.prod
-.env.example1
 .venv
-.venv-hasmter
 env/
 venv/
 ENV/

@@ -16,6 +16,8 @@ services:
       interval: 5s
       timeout: 1s
       retries: 2
+    networks:
+      - hamster_local
 
   local_redis:
     image: redis:7.4.2-alpine
@@ -30,3 +32,10 @@ services:
           interval: 5s
           timeout: 3s
           retries: 2
+    networks:
+      - hamster_local
+
+networks:
+  hamster_local:
+    name: hamster_local
+    driver: bridge
