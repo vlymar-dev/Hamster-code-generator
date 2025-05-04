@@ -1,8 +1,6 @@
 services:
   hamster:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: ghcr.io/vlymar-dev/hamster-code-generator:${IMAGE_TAG}
     restart: unless-stopped
     container_name: hamster_app
     env_file:
